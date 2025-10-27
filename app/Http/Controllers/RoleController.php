@@ -39,9 +39,7 @@ class RoleController extends Controller
                 'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
                 'alias' => $request->alias,
-                'created_by' => Auth::user()->name,
-                // 'created_by_uuid' => Auth::user()->uuid,
-                // 'is_active' => $request->has('is_active'),
+                'created_by' => Auth::user()->id,
             ]);
 
             return redirect()->route('roles.index')->with('success', 'Role created successfully!');
@@ -67,11 +65,9 @@ class RoleController extends Controller
 
     public function update(Request $request, Role $role)
     {
-        $request['is_active'] = $request->has('is_active') ? 1 : 0;
-
         $request->validate([
             'title' => 'required|string',
-            // 'is_active' => 'nullable|boolean',
+            'status' => 'required|boolean',
         ]);
 
         try {
@@ -79,9 +75,8 @@ class RoleController extends Controller
                 'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
                 'alias' => $request->alias,
-                'created_by' => Auth::user()->name,
-                // 'created_by_uuid' => Auth::user()->uuid,
-                // 'is_active' => $request->has('is_active'),
+                'updated_by' => Auth::user()->id,
+                'status' =>  $request->input('status') == '1' ? 'active' : 'inactive'
             ]);
 
             return redirect()->route('roles.index')->with('success', 'Role updated successfully!');

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
             <h2 class="text-2xl font-semibold">
-                {{ __('Create Role') }}
+                {{ __('Edit Country: ') }} {{ $country->title }}
             </h2>
         </div>
     </x-slot>
@@ -18,19 +18,19 @@
             </div>
         @endif
 
-        <form action="{{ route('roles.update', $role->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('countries.update', $country->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
             <div class="mb-4">
                 <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                <input type="text" name="title" id="title" value="{{ old('title', $role->title) }}" required
+                <input type="text" name="title" id="title" value="{{ old('title', $country->title) }}" required
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div class="mb-4">
-                <label for="alias" class="block text-sm font-medium text-gray-700">Alias</label>
-                <input type="text" name="alias" id="alias" value="{{ old('alias', $role->alias) }}" readonly
+                <label for="country_code" class="block text-sm font-medium text-gray-700">Country Code</label>
+                <input type="text" name="country_code" id="country_code" value="{{ old('country_code', $country->country_code) }}"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
@@ -46,18 +46,18 @@
 
                 <!-- Status text -->
                 <span id="statusText" class="text-xs font-medium text-gray-700">
-                    {{ $role->status === 'active' ? 'Active' : 'Inactive' }}
+                    {{ $country->status === 'active' ? 'Active' : 'Inactive' }}
                 </span>
 
                 <!-- Hidden input for form -->
                 <input type="hidden" name="status" id="status"
-                    value="{{ $role->status === 'active' ? '1' : '0' }}">
+                    value="{{ $country->status === 'active' ? '1' : '0' }}">
             </div>
 
             <div class="mt-6">
                 <button type="submit"
                     class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md bg-primary border border-gray-300 dark:bg-white dark:border-gray-200 hover:bg-primary-dark focus:outline-none focus:ring focus:ring-primary-dark focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark">
-                    Update Role
+                    Update Country
                 </button>
             </div>
         </form>
@@ -65,15 +65,6 @@
 
     @push('js')
         <script>
-            document.getElementById('title').addEventListener('input', function() {
-                const title = this.value;
-                const alias = title
-                    .toLowerCase()
-                    .replace(/\s+/g, '_') // Replace spaces with underscores
-                    .replace(/[^\w_]/g, ''); // Remove non-word characters
-                document.getElementById('alias').value = alias;
-            });
-
             const toggle = document.getElementById('statusToggle');
             const knob = document.getElementById('toggleKnob');
             const statusInput = document.getElementById('status');

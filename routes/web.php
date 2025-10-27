@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CountryController;
 use App\Http\Controllers\NavigationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
@@ -10,6 +11,10 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/roles/list', [RoleController::class, 'getData'])->name('roles.getData');
+Route::get('/countries/list', [CountryController::class, 'getData'])->name('countries.getData');
+Route::get('/countries/trash', [CountryController::class, 'trash'])->name('countries.trash');
+
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -22,11 +27,18 @@ Route::middleware('auth')->group(function () {
 
     Route::resources([
         // admin panel er jonno
-        'roles' => RoleController::class,
+        'countries' => CountryController::class,
         'navigations' => NavigationController::class,
+        'roles' => RoleController::class,
 
     ]);
 
+    // Country
+    // Route::get('/countries/list', [CountryController::class, 'getData'])->name('countries.getData');
+    Route::get('/countries/download/pdf', [CountryController::class, 'downloadPdf'])->name('countries.download.pdf');
+    // Route::get('/countries/trash', [CountryController::class, 'trash'])->name('countries.trash');
+    Route::post('/countries/{id}/restore', [CountryController::class, 'restore'])->name('countries.restore');
+    Route::delete('/countries/{id}/force-delete', [CountryController::class, 'forceDelete'])->name('countries.forceDelete');
     // Navigation
     Route::get('/navigations/sidebar', [NavigationController::class, 'getSidebarNavigation'])->name('navigations.getSidebarNavigation');
     Route::get('/navigations/list', [NavigationController::class, 'getData'])->name('navigations.getData');

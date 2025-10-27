@@ -57,4 +57,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Role::class, 'role_id');
     }
+
+    public function countries()
+    {
+        return $this->hasOne(Role::class, 'role_id');
+    }
 }
