@@ -42,7 +42,7 @@
                         @forelse ($country->cities as $city)
                             <tr>
                                 <td class="py-2">{{ $loop->iteration }}</td>
-                                <td>{{ $city->title }}</td>
+                                <td><a href="{{ route('cities.show', ['city' => $city->uuid]) }}">{{ $city->title }}</a></td>
                                 <td>
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $city->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                         {{ $city->status == 'active' ? 'Active' : 'Inactive' }}

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\HotelController;
 use App\Http\Controllers\NavigationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
@@ -17,6 +18,9 @@ Route::get('/cities/trash', [CountryController::class, 'trash'])->name('cities.t
 // Country
 Route::get('/countries/list', [CountryController::class, 'getData'])->name('countries.getData');
 Route::get('/countries/trash', [CountryController::class, 'trash'])->name('countries.trash');
+// Hotel
+Route::get('/hotels/list', [HotelController::class, 'getData'])->name('hotels.getData');
+Route::get('/hotels/trash', [HotelController::class, 'trash'])->name('hotels.trash');
 
 Route::get('/roles/list', [RoleController::class, 'getData'])->name('roles.getData');
 
@@ -35,6 +39,7 @@ Route::middleware('auth')->group(function () {
         // admin panel er jonno
         'cities' => CityController::class,
         'countries' => CountryController::class,
+        'hotels' => HotelController::class,
         'navigations' => NavigationController::class,
         'roles' => RoleController::class,
 
@@ -48,6 +53,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/countries/download/pdf', [CountryController::class, 'downloadPdf'])->name('countries.download.pdf');
     Route::post('/countries/{id}/restore', [CountryController::class, 'restore'])->name('countries.restore');
     Route::delete('/countries/{id}/force-delete', [CountryController::class, 'forceDelete'])->name('countries.forceDelete');
+    // Country
+    Route::get('/hotels/download/pdf', [HotelController::class, 'downloadPdf'])->name('hotels.download.pdf');
+    Route::post('/hotels/{id}/restore', [HotelController::class, 'restore'])->name('hotels.restore');
+    Route::delete('/hotels/{id}/force-delete', [HotelController::class, 'forceDelete'])->name('hotels.forceDelete');
     // Navigation
     Route::get('/navigations/sidebar', [NavigationController::class, 'getSidebarNavigation'])->name('navigations.getSidebarNavigation');
     Route::get('/navigations/list', [NavigationController::class, 'getData'])->name('navigations.getData');

@@ -140,7 +140,7 @@ class CityController extends Controller
             $cities = $query->orderBy('created_at', 'asc')->paginate(10);
             return response()->json($cities);
         } catch (\Throwable $e) {
-            \Log::error('Countrise getData error: ' . $e->getMessage());
+            \Log::error('Cities getData error: ' . $e->getMessage());
             return response()->json(['error' => 'Server error'], 500);
         }
     }
