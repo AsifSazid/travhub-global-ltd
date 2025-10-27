@@ -38,8 +38,10 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'Asif M.',
             'last_name' => 'Sazid',
             'title' => 'AsifMSazid',
+            'role_id' => '3',
+            'role_title' => 'Client',
             'email' => 'asif@gmail.com',
-            'password' => Hash::make("12341234"),
+            'password' => Hash::make("1q2w3e4r"),
         ]);
     }
 }

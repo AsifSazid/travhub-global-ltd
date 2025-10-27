@@ -20,9 +20,19 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+
+            // Foreign Key
+            $table->unsignedBigInteger('role_id');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
+
+            // Extra reference fields (not foreign keys)
+            $table->uuid('role_uuid')->nullable();
+            $table->string('role_title', 255)->nullable();
+
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
 

@@ -11,13 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('hotels', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->uuid('uuid');
+            $table->uuid('uuid')->unique();
             $table->string('title', 255);
             $table->char('description')->nullable();
-            $table->string('alias')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
+
+            // Foreign Key
+            $table->unsignedBigInteger('city_id');
+            $table->foreign('city_id')->references('id')->on('cities')->onDelete('cascade');
+
+            // Reference Fields
+            $table->uuid('city_uuid')->nullable();
+            $table->string('city_title', 255)->nullable();
+
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();
             $table->softDeletes();
@@ -30,6 +38,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::table('hotels', function (Blueprint $table) {
+            $table->dropForeign(['city_id']);
+        });
+        Schema::dropIfExists('hotels');
     }
 };

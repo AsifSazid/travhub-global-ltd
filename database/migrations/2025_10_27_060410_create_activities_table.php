@@ -12,16 +12,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('activities', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
+            $table->uuid('uuid')->unique();
+            $table->string('title', 255);
+            $table->char('description')->nullable();
+            $table->enum('status', ['active', 'inactive'])->default('active');
+
+            // Foreign key -> activity_categories
+            $table->unsignedBigInteger('activity_category_id');
+            $table->foreign('activity_category_id')->references('id')->on('activity_categories')->cascadeOnDelete();
+
+            // Reference fields
+            $table->uuid('activity_category_uuid')->nullable();
+            $table->string('activity_category_title', 255)->nullable();
+
+            $table->string('created_by', 255)->nullable();
+            $table->string('updated_by', 255)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
+        Schema::table('activities', function (Blueprint $table) {
+            $table->dropForeign(['activity_category_id']);
+        });
         Schema::dropIfExists('activities');
     }
 };

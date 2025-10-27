@@ -12,16 +12,43 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('currencies', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
+            $table->uuid('uuid')->unique();
+            $table->string('title', 255);
+            $table->char('description')->nullable();
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('icon', 255)->nullable();
+            $table->string('currency_code', 255)->nullable();
+
+            // Foreign Key: country_id
+            $table->unsignedBigInteger('country_id')->nullable();
+            $table->foreign('country_id')->references('id')->on('countries')->onDelete('set null');
+
+            // Extra reference fields
+            $table->uuid('country_uuid')->nullable();
+            $table->string('country_title', 255)->nullable();
+
+            // Foreign Key: currency_rate_id
+            $table->unsignedBigInteger('currency_rate_id')->nullable();
+            $table->foreign('currency_rate_id')->references('id')->on('currency_rate')->onDelete('set null');
+
+            // Extra reference fields
+            $table->uuid('currency_rate_uuid')->nullable();
+            $table->string('currency_rate_title', 255)->nullable();
+
+            $table->string('created_by', 255)->nullable();
+            $table->string('updated_by', 255)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
+        Schema::table('currencies', function (Blueprint $table) {
+            $table->dropForeign(['country_id']);
+            $table->dropForeign(['currency_rate_id']);
+        });
         Schema::dropIfExists('currencies');
     }
 };

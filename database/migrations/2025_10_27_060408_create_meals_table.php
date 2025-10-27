@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('meals', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
+            $table->uuid('uuid')->unique();
+            $table->string('title', 255);
+            $table->char('description')->nullable();
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('created_by', 255)->nullable();
+            $table->string('updated_by', 255)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

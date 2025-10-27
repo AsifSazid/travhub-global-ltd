@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('currency_rate', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->uuid('uuid');
+            $table->uuid('uuid')->unique();
             $table->string('title', 255);
             $table->char('description')->nullable();
-            $table->string('alias')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->decimal('rate_value', 10, 4); // e.g. usd_to_bdt
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();
             $table->softDeletes();
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('currency_rates');
     }
 };
