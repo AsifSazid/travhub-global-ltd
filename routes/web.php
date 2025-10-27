@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CityController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\NavigationController;
 use App\Http\Controllers\ProfileController;
@@ -10,9 +11,14 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('/roles/list', [RoleController::class, 'getData'])->name('roles.getData');
+// City
+Route::get('/cities/list', [CityController::class, 'getData'])->name('cities.getData');
+Route::get('/cities/trash', [CountryController::class, 'trash'])->name('cities.trash');
+// Country
 Route::get('/countries/list', [CountryController::class, 'getData'])->name('countries.getData');
 Route::get('/countries/trash', [CountryController::class, 'trash'])->name('countries.trash');
+
+Route::get('/roles/list', [RoleController::class, 'getData'])->name('roles.getData');
 
 
 
@@ -27,16 +33,19 @@ Route::middleware('auth')->group(function () {
 
     Route::resources([
         // admin panel er jonno
+        'cities' => CityController::class,
         'countries' => CountryController::class,
         'navigations' => NavigationController::class,
         'roles' => RoleController::class,
 
     ]);
 
+    // City
+    Route::get('/cities/download/pdf', [CityController::class, 'downloadPdf'])->name('cities.download.pdf');
+    Route::post('/cities/{id}/restore', [CityController::class, 'restore'])->name('cities.restore');
+    Route::delete('/cities/{id}/force-delete', [CityController::class, 'forceDelete'])->name('cities.forceDelete');
     // Country
-    // Route::get('/countries/list', [CountryController::class, 'getData'])->name('countries.getData');
     Route::get('/countries/download/pdf', [CountryController::class, 'downloadPdf'])->name('countries.download.pdf');
-    // Route::get('/countries/trash', [CountryController::class, 'trash'])->name('countries.trash');
     Route::post('/countries/{id}/restore', [CountryController::class, 'restore'])->name('countries.restore');
     Route::delete('/countries/{id}/force-delete', [CountryController::class, 'forceDelete'])->name('countries.forceDelete');
     // Navigation

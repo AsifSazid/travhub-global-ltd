@@ -15,4 +15,9 @@ class Country extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function cities()
+    {
+        return $this->hasMany(City::class, 'country_id');
+    }
 }

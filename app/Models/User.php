@@ -60,6 +60,16 @@ class User extends Authenticatable
 
     public function countries()
     {
-        return $this->hasOne(Role::class, 'role_id');
+        return $this->hasMany(Country::class, 'created_by', 'updated_by');
+    }
+
+    public function cities()
+    {
+        return $this->hasMany(Country::class, 'created_by', 'updated_by');
+    }
+
+    public function hotels()
+    {
+        return $this->hasMany(Hotel::class, 'created_by', 'updated_by');
     }
 }

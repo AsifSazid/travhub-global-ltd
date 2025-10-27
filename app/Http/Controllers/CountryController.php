@@ -54,7 +54,7 @@ class CountryController extends Controller
      */
     public function show($country)
     {
-        $country = Country::where('uuid', $country)->first();
+        $country = Country::where('uuid', $country)->withCount('cities')->first();
         return view('backend.countries.show', compact('country'));
     }
 
