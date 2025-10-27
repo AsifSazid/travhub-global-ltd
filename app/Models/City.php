@@ -18,7 +18,7 @@ class City extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by', 'updated_by');
     }
 
     public function hotels()

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Country extends Model
+class CurrentRate extends Model
 {
     use SoftDeletes;
 
@@ -14,10 +14,5 @@ class Country extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'created_by', 'updated_by');
-    }
-
-    public function cities()
-    {
-        return $this->hasMany(City::class, 'country_id');
     }
 }

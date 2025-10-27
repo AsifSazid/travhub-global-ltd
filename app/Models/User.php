@@ -72,4 +72,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Hotel::class, 'created_by', 'updated_by');
     }
+
+    public function currentRates()
+    {
+        return $this->hasMany(CurrentRate::class, 'created_by', 'updated_by');
+    }
 }
