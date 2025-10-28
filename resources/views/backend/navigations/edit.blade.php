@@ -5,99 +5,126 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <div class="overflow-x-auto">
-                        @if ($errors->any())
-                            <div class="mb-4 text-red-600">
-                                <ul class="list-disc pl-5">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
+    <div class="overflow-x-auto">
+        @if ($errors->any())
+            <div class="mb-4 text-red-600">
+                <ul class="list-disc pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('navigations.update', $navigation->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+
+            <div class="mb-4">
+                <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                <input type="text" name="title" id="title" value="{{ old('title', $navigation->title) }}"
+                    required
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label for="nav_icon" class="block text-sm font-medium text-gray-700">Navigation
+                    Icon</label>
+                <input type="text" name="nav_icon" id="nav_icon"
+                    value="{{ old('nav_icon', $navigation->nav_icon) }}"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label for="url" class="block text-sm font-medium text-gray-700">Navigation
+                    URL</label>
+                <input type="text" name="url" id="url" value="{{ old('url', $navigation->url) }}"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label for="route" class="block text-sm font-medium text-gray-700">Navigation
+                    Route</label>
+                <input type="text" name="route" id="route" value="{{ old('route', $navigation->route) }}"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div class="mb-4">
+                <label for="parent_id" class="block text-sm font-medium text-gray-700">Parent
+                    Navigation</label>
+                <select name="parent_id" id="parent_id"
+                    class="mt-1 px-3 py-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="" {{ is_null($navigation->parent_id) ? 'selected' : '' }}>
+                        Select (If Any)</option>
+                    @foreach ($navigations as $parent)
+                        @if ($parent->id !== $navigation->id)
+                            <option value="{{ $parent->id }}"
+                                {{ $navigation->parent_id == $parent->id ? 'selected' : '' }}>
+                                {{ $parent->title }}
+                            </option>
                         @endif
+                    @endforeach
+                </select>
+            </div>
 
-                        <form action="{{ route('admin.navigations.update', $navigation->id) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-
-                            <div class="mb-4">
-                                <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                                <input type="text" name="title" id="title" value="{{ old('title', $navigation->title) }}" required
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="navigation_for" class="block text-sm font-medium text-gray-700">Navigation For</label>
-                                <select name="navigation_for" id="navigation_for"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="" disabled {{ is_null($navigation->navigation_for) ? 'selected' : '' }}>Select Any One</option>
-                                    <option value="" {{ $navigation->navigation_for == null ? 'selected' : '' }}>Main Website</option>
-                                    @foreach ($wings as $wing)
-                                        <option value="{{ $wing->id }}" {{ $navigation->navigation_for == $wing->id ? 'selected' : '' }}>
-                                            {{ $wing->title }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="nav_icon" class="block text-sm font-medium text-gray-700">Navigation Icon</label>
-                                <input type="text" name="nav_icon" id="nav_icon" value="{{ old('nav_icon', $navigation->nav_icon) }}" 
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="url" class="block text-sm font-medium text-gray-700">Navigation URL</label>
-                                <input type="text" name="url" id="url" value="{{ old('url', $navigation->url) }}" 
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="route" class="block text-sm font-medium text-gray-700">Navigation Route</label>
-                                <input type="text" name="route" id="route" value="{{ old('route', $navigation->route) }}" 
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="parent_id" class="block text-sm font-medium text-gray-700">Parent Navigation</label>
-                                <select name="parent_id" id="parent_id"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="" {{ is_null($navigation->parent_id) ? 'selected' : '' }}>Select (If Any)</option>
-                                    @foreach ($navigations as $parent)
-                                        @if ($parent->id !== $navigation->id)
-                                            <option value="{{ $parent->id }}" {{ $navigation->parent_id == $parent->id ? 'selected' : '' }}>
-                                                {{ $parent->title }}
-                                            </option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="mb-4 flex items-center">
-                                <input type="checkbox" name="is_active" id="is_active" value="1"
-                                    {{ $navigation->is_active ? 'checked' : '' }}
-                                    class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                <label for="is_active" class="ml-2 block text-sm text-gray-900">Active</label>
-                            </div>
-
-                            <div class="mt-6">
-                                <button type="submit"
-                                    class="inline-flex items-center px-4 py-2 bg-indigo-600 border rounded-md font-semibold text-sm hover:bg-indigo-700 transition ease-in-out duration-150">
-                                    Update Navigation
-                                </button>
-                            </div>
-                        </form>
+            <div class="mb-4 flex items-center gap-2">
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <div id="statusToggle"
+                    class="relative w-10 h-5 rounded-full bg-gray-300 cursor-pointer transition-colors">
+                    <div id="toggleKnob"
+                        class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all">
                     </div>
                 </div>
+
+                <span id="statusText" class="text-xs font-medium text-gray-700">
+                    {{ $navigation->status === 'active' ? 'Active' : 'Inactive' }}
+                </span>
+
+                <input type="hidden" name="status" id="status"
+                    value="{{ $navigation->status === 'active' ? '1' : '0' }}">
             </div>
-        </div>
+
+            <div class="mt-6">
+                <button type="submit"
+                    class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md bg-primary border border-gray-300 dark:bg-white dark:border-gray-200 hover:bg-primary-dark focus:outline-none focus:ring focus:ring-primary-dark focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark">
+                    Update Navigation
+                </button>
+            </div>
+        </form>
     </div>
 
     @push('js')
-        <script></script>
+        <script>
+            const toggle = document.getElementById('statusToggle');
+            const knob = document.getElementById('toggleKnob');
+            const statusInput = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+
+            // Initialize position
+            if (statusInput.value === '1') {
+                knob.style.transform = 'translateX(24px)';
+                toggle.style.backgroundColor = '#22c55e'; // Green
+            } else {
+                knob.style.transform = 'translateX(0px)';
+                toggle.style.backgroundColor = '#6b7280'; // Gray
+            }
+
+            // Click event
+            toggle.addEventListener('click', () => {
+                if (statusInput.value === '1') {
+                    // Switch to inactive
+                    statusInput.value = '0';
+                    statusText.textContent = 'Inactive';
+                    knob.style.transform = 'translateX(0px)';
+                    toggle.style.backgroundColor = '#6b7280';
+                } else {
+                    // Switch to active
+                    statusInput.value = '1';
+                    statusText.textContent = 'Active';
+                    knob.style.transform = 'translateX(24px)';
+                    toggle.style.backgroundColor = '#22c55e';
+                }
+            });
+        </script>
     @endpush
 </x-backend.layouts.master>

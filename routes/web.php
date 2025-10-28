@@ -27,7 +27,10 @@ Route::get('/current_rates/trash', [CurrentRateController::class, 'trash'])->nam
 // Hotel
 Route::get('/hotels/list', [HotelController::class, 'getData'])->name('hotels.getData');
 Route::get('/hotels/trash', [HotelController::class, 'trash'])->name('hotels.trash');
-
+// Navigation
+Route::get('/navigations/list', [NavigationController::class, 'getData'])->name('navigations.getData');
+Route::get('/navigations/trash', [NavigationController::class, 'trash'])->name('navigations.trash');
+// Role
 Route::get('/roles/list', [RoleController::class, 'getData'])->name('roles.getData');
 
 
@@ -70,9 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/hotels/{id}/force-delete', [HotelController::class, 'forceDelete'])->name('hotels.forceDelete');
     // Navigation
     Route::get('/navigations/sidebar', [NavigationController::class, 'getSidebarNavigation'])->name('navigations.getSidebarNavigation');
-    Route::get('/navigations/list', [NavigationController::class, 'getData'])->name('navigations.getData');
     Route::get('/navigations/download/pdf', [NavigationController::class, 'downloadPdf'])->name('navigations.download.pdf');
-    Route::get('/navigations/trash', [NavigationController::class, 'trash'])->name('navigations.trash');
     Route::post('/navigations/{id}/restore', [NavigationController::class, 'restore'])->name('navigations.restore');
     Route::delete('/navigations/{id}/force-delete', [NavigationController::class, 'forceDelete'])->name('navigations.forceDelete');
     Route::get('/navigations/sync-routes', [NavigationController::class, 'syncRoutes'])

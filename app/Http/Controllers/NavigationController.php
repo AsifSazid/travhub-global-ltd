@@ -21,28 +21,20 @@ class NavigationController extends Controller
 
     public function create()
     {
-        $wings = Wing::get();
         $navigations = Navigation::get();
-        return view('backend.navigations.create', compact('wings', 'navigations'));
+        return view('backend.navigations.create', compact('navigations'));
     }
 
     public function store(Request $request)
     {
-        $request['is_active'] = $request->has('is_active') ? 1 : 0;
-
         $request->validate([
             'title' => 'required|string',
             'nav_icon' => 'string',
             'url' => 'string',
             'route' => 'string',
-            'is_active' => 'nullable|boolean',
         ]);
 
         try {
-            $wing = $request->navigation_for
-                ? Wing::find($request->navigation_for)
-                : null;
-
             $navigation = Navigation::create([
                 'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
@@ -50,16 +42,11 @@ class NavigationController extends Controller
                 'url' => $request->url,
                 'route' => $request->route,
                 'parent_id' => $request->parent_id ?? null,
-                'navigation_for' => $wing->id ?? null,
-                'navigation_for_title' => $wing->title ?? null,
-                'navigation_for_uuid' => $wing->uuid ?? null,
-                'subdomain' => $wing->subdomain ?? null,
                 'created_by' => Auth::user()->id,
                 'created_by_uuid' => Auth::user()->uuid,
-                'is_active' => $request->has('is_active'),
             ]);
 
-            return redirect()->route('admin.navigations.index')->with('success', 'Navigation created successfully!');
+            return redirect()->route('navigations.index')->with('success', 'Navigation created successfully!');
         } catch (\Throwable $th) {
             dd($th);
         }
@@ -75,8 +62,7 @@ class NavigationController extends Controller
     {
         $navigation = Navigation::where('uuid', $navigation)->first();
         $navigations = Navigation::where('uuid', '!=', $navigation)->get();
-        $wings = Wing::get();
-        return view('backend.navigations.edit', compact('navigation', 'navigations', 'wings'));
+        return view('backend.navigations.edit', compact('navigation', 'navigations'));
     }
 
     public function update(Request $request, Navigation $navigation)
@@ -102,7 +88,7 @@ class NavigationController extends Controller
                 'is_active' => $request->has('is_active'),
             ]);
 
-            return redirect()->route('admin.navigations.index')->with('success', 'Navigation updated successfully!');
+            return redirect()->route('navigations.index')->with('success', 'Navigation updated successfully!');
         } catch (\Throwable $th) {
             dd($th);
         }
@@ -114,7 +100,7 @@ class NavigationController extends Controller
         $navigation = Navigation::where('uuid', $uuid);
         $navigation->delete(); // this is soft delete
 
-        return redirect()->route('admin.navigations.index')->with('success', 'Navigation moved to trash.');
+        return redirect()->route('navigations.index')->with('success', 'Navigation moved to trash.');
     }
 
     public function trash()
@@ -129,7 +115,7 @@ class NavigationController extends Controller
         $navigation = Navigation::onlyTrashed()->where('uuid', $uuid);
         $navigation->restore();
 
-        return redirect()->route('admin.navigations.trash')->with('success', 'Navigation restored successfully.');
+        return redirect()->route('navigations.trash')->with('success', 'Navigation restored successfully.');
     }
 
     public function forceDelete($uuid)
@@ -137,21 +123,26 @@ class NavigationController extends Controller
         $navigation = Navigation::onlyTrashed()->where('uuid', $uuid);
         $navigation->forceDelete();
 
-        return redirect()->route('admin.navigations.trash')->with('success', 'Navigation permanently deleted.');
+        return redirect()->route('navigations.trash')->with('success', 'Navigation permanently deleted.');
     }
 
     public function getData(Request $request)
     {
-        $query = Navigation::with('user');
+        try {
+            $query = Navigation::query();
 
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
-            $query->where('title', 'like', "%{$search}%");
+            if ($request->has('search') && !empty($request->search)) {
+                $search = $request->search;
+                $query->where('title', 'like', "%{$search}%");
+            }
+
+            $navigations = $query->orderBy('created_at', 'desc')->paginate(10);
+
+            return response()->json($navigations);
+        } catch (\Throwable $e) {
+            \Log::error('Navigations getData error: ' . $e->getMessage());
+            return response()->json(['error' => 'Server error'], 500);
         }
-
-        $navigations = $query->orderBy('created_at', 'desc')->paginate(10);
-
-        return response()->json($navigations);
     }
 
     public function downloadPdf(Request $request)
@@ -167,7 +158,7 @@ class NavigationController extends Controller
         $navigations = $query->get();
 
         $mpdf = new \Mpdf\Mpdf();
-        $mpdf->SetHeader("<div style='text-align:center'>Navigation List!</div>");
+        $mpdf->SetHeader("<div style='text-align:center'>".companyName()."</div>");
         $mpdf->SetFooter("This is a system generated document(s). So no need to show external signature or seal!");
         $view = view('backend.navigations.pdf', compact('navigations'));
         $mpdf->WriteHTML($view);

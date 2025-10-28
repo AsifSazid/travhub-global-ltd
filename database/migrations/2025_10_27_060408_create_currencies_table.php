@@ -29,12 +29,12 @@ return new class extends Migration
             $table->string('country_title', 255)->nullable();
 
             // Foreign Key: currency_rate_id
-            $table->unsignedBigInteger('currency_rate_id')->nullable();
-            $table->foreign('currency_rate_id')->references('id')->on('currency_rate')->onDelete('set null');
+            $table->unsignedBigInteger('current_rate_id')->nullable();
+            $table->foreign('current_rate_id')->references('id')->on('current_rates')->onDelete('set null');
 
             // Extra reference fields
-            $table->uuid('currency_rate_uuid')->nullable();
-            $table->string('currency_rate_title', 255)->nullable();
+            $table->uuid('current_rate_uuid')->nullable();
+            $table->string('current_rate_title', 255)->nullable();
 
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();
@@ -47,7 +47,7 @@ return new class extends Migration
     {
         Schema::table('currencies', function (Blueprint $table) {
             $table->dropForeign(['country_id']);
-            $table->dropForeign(['currency_rate_id']);
+            $table->dropForeign(['current_rate_id']);
         });
         Schema::dropIfExists('currencies');
     }

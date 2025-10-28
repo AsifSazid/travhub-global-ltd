@@ -16,12 +16,13 @@ return new class extends Migration
             $table->string('uuid', '36')->unique();
             $table->string('title');
             $table->foreignId('parent_id')->nullable()->constrained('navigations')->onDelete('cascade');
-            $table->string('nav_icon')->nullable();
+            $table->text('nav_icon')->nullable();
             $table->unsignedBigInteger('created_by'); // Better to use user ID (foreign key)
             $table->string('created_by_uuid')->nullable();
             $table->string('url')->nullable();
             $table->string('route')->nullable();
-            $table->boolean('is_active')->default(true); // Quick toggle for visibility
+            $table->enum('navigation_for', ['1', '2', '3'])->nullable(); // Role Id diyeo kora jete pare
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->softDeletes();
             $table->timestamps();
         });
