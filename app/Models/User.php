@@ -142,4 +142,30 @@ class User extends Authenticatable
     {
         return $this->hasMany(Navigation::class, 'updated_by', 'id');
     }
+
+    // -------------------
+    // Inclusions Relations
+    // -------------------
+    public function createdActivities()
+    {
+        return $this->hasMany(Activity::class, 'created_by', 'id');
+    }
+
+    public function updatedActivities()
+    {
+        return $this->hasMany(Activity::class, 'updated_by', 'id');
+    }
+
+    // -------------------
+    // Inclusions Relations
+    // -------------------
+    public function createdInclusions()
+    {
+        return $this->hasMany(Inclusion::class, 'created_by', 'id');
+    }
+
+    public function updatedInclusions()
+    {
+        return $this->hasMany(Inclusion::class, 'updated_by', 'id');
+    }
 }

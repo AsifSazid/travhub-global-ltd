@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\ActivityCategoryController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CurrencyRateController;
 use App\Http\Controllers\CurrentRateController;
 use App\Http\Controllers\HotelController;
+use App\Http\Controllers\InclusionController;
 use App\Http\Controllers\NavigationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
@@ -20,6 +22,9 @@ Route::get('/', function () {
 // Activity Category
 Route::get('/activity-categories/list', [ActivityCategoryController::class, 'getData'])->name('activity-categories.getData');
 Route::get('/activity-categories/trash', [ActivityCategoryController::class, 'trash'])->name('activity-categories.trash');
+// Activity Category
+Route::get('/activities/list', [ActivityController::class, 'getData'])->name('activities.getData');
+Route::get('/activities/trash', [ActivityController::class, 'trash'])->name('activities.trash');
 // City
 Route::get('/cities/list', [CityController::class, 'getData'])->name('cities.getData');
 Route::get('/cities/trash', [CountryController::class, 'trash'])->name('cities.trash');
@@ -35,6 +40,9 @@ Route::get('/current_rates/trash', [CurrentRateController::class, 'trash'])->nam
 // Hotel
 Route::get('/hotels/list', [HotelController::class, 'getData'])->name('hotels.getData');
 Route::get('/hotels/trash', [HotelController::class, 'trash'])->name('hotels.trash');
+// Inclusion
+Route::get('/inclusions/list', [InclusionController::class, 'getData'])->name('inclusions.getData');
+Route::get('/inclusions/trash', [InclusionController::class, 'trash'])->name('inclusions.trash');
 // Navigation
 Route::get('/navigations/list', [NavigationController::class, 'getData'])->name('navigations.getData');
 Route::get('/navigations/trash', [NavigationController::class, 'trash'])->name('navigations.trash');
@@ -61,20 +69,26 @@ Route::middleware('auth')->group(function () {
     Route::resources([
         // admin panel er jonno
         'activity-categories' => ActivityCategoryController::class,
+        'activities' => ActivityController::class,
         'cities' => CityController::class,
         'countries' => CountryController::class,
         'currencies' => CurrencyController::class,
         'current_rates' => CurrentRateController::class,
         'hotels' => HotelController::class,
+        'inclusions' => InclusionController::class,
         'navigations' => NavigationController::class,
         'roles' => RoleController::class,
 
     ]);
 
-    // City
+    // Activity Category
     Route::get('/activity-categories/download/pdf', [ActivityCategoryController::class, 'downloadPdf'])->name('activity-categories.download.pdf');
     Route::post('/activity-categories/{id}/restore', [ActivityCategoryController::class, 'restore'])->name('activity-categories.restore');
     Route::delete('/activity-categories/{id}/force-delete', [ActivityCategoryController::class, 'forceDelete'])->name('activity-categories.forceDelete');
+    // Activity
+    Route::get('/activities/download/pdf', [ActivityController::class, 'downloadPdf'])->name('activities.download.pdf');
+    Route::post('/activities/{id}/restore', [ActivityController::class, 'restore'])->name('activities.restore');
+    Route::delete('/activities/{id}/force-delete', [ActivityController::class, 'forceDelete'])->name('activities.forceDelete');
     // City
     Route::get('/cities/download/pdf', [CityController::class, 'downloadPdf'])->name('cities.download.pdf');
     Route::post('/cities/{id}/restore', [CityController::class, 'restore'])->name('cities.restore');
@@ -95,6 +109,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/hotels/download/pdf', [HotelController::class, 'downloadPdf'])->name('hotels.download.pdf');
     Route::post('/hotels/{id}/restore', [HotelController::class, 'restore'])->name('hotels.restore');
     Route::delete('/hotels/{id}/force-delete', [HotelController::class, 'forceDelete'])->name('hotels.forceDelete');
+    // Inclusion
+    Route::get('/inclusions/download/pdf', [InclusionController::class, 'downloadPdf'])->name('inclusions.download.pdf');
+    Route::post('/inclusions/{id}/restore', [InclusionController::class, 'restore'])->name('inclusions.restore');
+    Route::delete('/inclusions/{id}/force-delete', [InclusionController::class, 'forceDelete'])->name('inclusions.forceDelete');
     // Navigation
     Route::get('/navigations/sidebar', [NavigationController::class, 'getSidebarNavigation'])->name('navigations.getSidebarNavigation');
     Route::get('/navigations/download/pdf', [NavigationController::class, 'downloadPdf'])->name('navigations.download.pdf');

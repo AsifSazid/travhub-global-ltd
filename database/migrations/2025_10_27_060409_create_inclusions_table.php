@@ -17,6 +17,15 @@ return new class extends Migration
             $table->string('title', 255);
             $table->char('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
+
+            // Foreign Key
+            $table->unsignedBigInteger('activity_id');
+            $table->foreign('activity_id')->references('id')->on('activities')->onDelete('cascade');
+
+            // Extra reference fields (not foreign keys)
+            $table->uuid('activity_uuid')->nullable();
+            $table->string('activity_title', 255)->nullable();
+
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();
             $table->softDeletes();

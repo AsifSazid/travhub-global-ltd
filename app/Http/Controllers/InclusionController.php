@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Inclusion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InclusionController extends Controller
 {
@@ -12,7 +14,8 @@ class InclusionController extends Controller
      */
     public function index()
     {
-        //
+        $inclusions = Inclusion::orderBy('id', 'asc')->paginate(10);
+        return view('backend.inclusions.index', compact('inclusions'));
     }
 
     /**
@@ -20,7 +23,8 @@ class InclusionController extends Controller
      */
     public function create()
     {
-        //
+        $activities = Activity::get();
+        return view('backend.inclusions.create', compact('activities'));
     }
 
     /**
@@ -28,38 +32,126 @@ class InclusionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required|string',
+            'country_code' => 'required|string'
+        ]);
+
+        try {
+            $inclusion = Inclusion::create([
+                'uuid' => (string) \Str::uuid(),
+                'title' => $request->title,
+                'country_code' => $request->country_code,
+                'created_by' => Auth::user()->id,
+            ]);
+
+            return redirect()->route('inclusions.index')->with('success', 'Inclusion created successfully!');
+        } catch (\Throwable $th) {
+            dd($th);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Inclusion $inclusion)
+    public function show($inclusion)
     {
-        //
+        $inclusion = Inclusion::where('uuid', $inclusion)->withCount('cities')->first();
+        return view('backend.inclusions.show', compact('inclusion'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Inclusion $inclusion)
+    public function edit($inclusion)
     {
-        //
+        $inclusion = Inclusion::where('uuid', $inclusion)->first();
+        return view('backend.inclusions.edit', compact('inclusion'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Inclusion $inclusion)
     {
-        //
+        $request->validate([
+            'title' => 'required|string',
+            'status' => 'nullable|boolean',
+        ]);
+
+        try {
+            $inclusion->update([
+                'title' => $request->title,
+                'country_code' => $request->country_code,
+                'updated_by' => Auth::user()->id,
+                'status' =>  $request->input('status') == '1' ? 'active' : 'inactive'
+            ]);
+
+            return redirect()->route('inclusions.index')->with('success', 'Inclusion updated successfully!');
+        } catch (\Throwable $th) {
+            dd($th);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Inclusion $inclusion)
+    public function destroy($uuid)
     {
-        //
+        $inclusion = Inclusion::where('uuid', $uuid);
+        $inclusion->delete(); // this is soft delete
+
+        return redirect()->route('inclusions.index')->with('success', 'Inclusion moved to trash.');
+    }
+
+    public function trash()
+    {
+        $trashedCollection = Inclusion::onlyTrashed()->latest();
+        $trashed = $trashedCollection->paginate(10);
+        return view('backend.inclusions.trash', compact('trashed'));
+    }
+
+    public function restore($uuid)
+    {
+        $inclusion = Inclusion::onlyTrashed()->where('uuid', $uuid);
+        $inclusion->restore();
+
+        return redirect()->route('inclusions.trash')->with('success', 'Inclusion restored successfully.');
+    }
+
+    public function forceDelete($uuid)
+    {
+        $inclusion = Inclusion::onlyTrashed()->where('uuid', $uuid);
+        $inclusion->forceDelete();
+
+        return redirect()->route('inclusions.trash')->with('success', 'Inclusion permanently deleted.');
+    }
+
+    public function getData(Request $request)
+    {
+        try {
+            $query = Inclusion::query();
+
+            if ($request->filled('search')) {
+                $query->where('title', 'like', "%{$request->search}%");
+            }
+
+            $inclusions = $query->orderBy('created_at', 'asc')->paginate(10);
+            return response()->json($inclusions);
+        } catch (\Throwable $e) {
+            \Log::error('Countrise getData error: ' . $e->getMessage());
+            return response()->json(['error' => 'Server error'], 500);
+        }
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        $search = $request->get('search');
+
+        $query = Inclusion::with('user');
+
+        if ($search) {
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        $inclusions = $query->get();
+
+        $mpdf = new \Mpdf\Mpdf();
+        $mpdf->SetHeader("<div style='text-align:center'>".companyName()."</div>");
+        $mpdf->SetFooter("This is a system generated document(s). So no need to show external signature or seal!");
+        $view = view('backend.inclusions.pdf', compact('inclusions'));
+        $mpdf->WriteHTML($view);
+        $mpdf->Output();
     }
 }
