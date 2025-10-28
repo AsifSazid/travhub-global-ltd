@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title', 255);
             $table->char('description')->nullable();
             $table->string('phone_no', 32)->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->enum('status', ['active', 'inactive'])->default('inactive');
 
             // Foreign Key
             $table->unsignedBigInteger('user_id');
@@ -29,7 +29,9 @@ return new class extends Migration
 
             // Extra fields
             $table->text('positions')->nullable();
+            $table->text('bio')->nullable();
             $table->json('professional_infos')->nullable();
+            $table->json('social_links')->nullable();
 
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();

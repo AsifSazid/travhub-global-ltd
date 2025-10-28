@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -32,17 +33,27 @@ class RegisteredUserController extends Controller
         $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'title' => ['required', 'string', 'max:255', 'unique:'.User::class],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'title' => ['required', 'string', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
+            'uuid' => (string) \Str::uuid(),
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'title' => $request->title,
             'email' => $request->email,
+            'role_id' => 3,
             'password' => Hash::make($request->password),
+        ]);
+
+        $profile = Profile::create([
+            'uuid' => (string) \Str::uuid(),
+            'title' => $user->first_name . ' ' . $user->last_name,
+            'user_id' => $user->id,
+            'user_uuid' => $user->uuid,
+            'user_title' => $user->title
         ]);
 
         event(new Registered($user));

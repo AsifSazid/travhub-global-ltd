@@ -1,5 +1,5 @@
 <?php
-    $navigations = getNavigations(); 
+$navigations = getNavigations();
 ?>
 <aside class="flex-shrink-0 hidden w-64 bg-white border-r dark:border-primary-darker dark:bg-darker md:block">
     <div class="flex flex-col h-full">
@@ -70,9 +70,17 @@
                     @endif
                 @endif
             @endforeach
-
-
         </nav>
+
+        
+        <!-- Sidebar footer -->
+        <div class="flex-shrink-0 px-2 py-4 space-y-2">
+            <p>Logged In As: {{ Auth::user()->first_name }}</p>
+            <a href="{{ route('home') }}"
+                class="flex items-center justify-center w-full px-4 py-2 text-sm text-white rounded-md bg-primary hover:bg-primary-dark focus:outline-none focus:ring focus:ring-primary-dark focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark">
+                <span>Home Page</span>
+            </a>
+        </div>
     </div>
 </aside>
 
