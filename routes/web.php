@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CurrencyRateController;
 use App\Http\Controllers\CurrentRateController;
 use App\Http\Controllers\HotelController;
@@ -21,7 +22,10 @@ Route::get('/cities/trash', [CountryController::class, 'trash'])->name('cities.t
 // Country
 Route::get('/countries/list', [CountryController::class, 'getData'])->name('countries.getData');
 Route::get('/countries/trash', [CountryController::class, 'trash'])->name('countries.trash');
-// Currency Rate
+// Currency
+Route::get('/currencies/list', [CurrencyController::class, 'getData'])->name('currencies.getData');
+Route::get('/currencies/trash', [CurrencyController::class, 'trash'])->name('currencies.trash');
+// Current Rate
 Route::get('/current_rates/list', [CurrentRateController::class, 'getData'])->name('current_rates.getData');
 Route::get('/current_rates/trash', [CurrentRateController::class, 'trash'])->name('current_rates.trash');
 // Hotel
@@ -52,6 +56,7 @@ Route::middleware('auth')->group(function () {
         // admin panel er jonno
         'cities' => CityController::class,
         'countries' => CountryController::class,
+        'currencies' => CurrencyController::class,
         'current_rates' => CurrentRateController::class,
         'hotels' => HotelController::class,
         'navigations' => NavigationController::class,
@@ -67,7 +72,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/countries/download/pdf', [CountryController::class, 'downloadPdf'])->name('countries.download.pdf');
     Route::post('/countries/{id}/restore', [CountryController::class, 'restore'])->name('countries.restore');
     Route::delete('/countries/{id}/force-delete', [CountryController::class, 'forceDelete'])->name('countries.forceDelete');
-    // Currency Rate
+    // Currency
+    Route::get('/currencies/download/pdf', [CurrencyController::class, 'downloadPdf'])->name('currencies.download.pdf');
+    Route::post('/currencies/{id}/restore', [CurrencyController::class, 'restore'])->name('currencies.restore');
+    Route::delete('/currencies/{id}/force-delete', [CurrencyController::class, 'forceDelete'])->name('currencies.forceDelete');
+    // Current Rate
     Route::get('/current_rates/download/pdf', [CurrentRateController::class, 'downloadPdf'])->name('current_rates.download.pdf');
     Route::post('/current_rates/{id}/restore', [CurrentRateController::class, 'restore'])->name('current_rates.restore');
     Route::delete('/current_rates/{id}/force-delete', [CurrentRateController::class, 'forceDelete'])->name('current_rates.forceDelete');

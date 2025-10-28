@@ -48,33 +48,86 @@ class User extends Authenticatable
         ];
     }
 
-    public function navigations()
+    public function role()
     {
-        return $this->hasMany(Navigation::class, 'created_by');
+        return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    public function roles()
+    // -------------------
+    // Countries Relations
+    // -------------------
+    public function createdCountries()
     {
-        return $this->hasOne(Role::class, 'role_id');
+        return $this->hasMany(Country::class, 'created_by', 'id');
     }
 
-    public function countries()
+    public function updatedCountries()
     {
-        return $this->hasMany(Country::class, 'created_by', 'updated_by');
+        return $this->hasMany(Country::class, 'updated_by', 'id');
     }
 
-    public function cities()
+    // -------------------
+    // Cities Relations
+    // -------------------
+    public function createdCities()
     {
-        return $this->hasMany(Country::class, 'created_by', 'updated_by');
+        return $this->hasMany(City::class, 'created_by', 'id');
     }
 
-    public function hotels()
+    public function updatedCities()
     {
-        return $this->hasMany(Hotel::class, 'created_by', 'updated_by');
+        return $this->hasMany(City::class, 'updated_by', 'id');
     }
 
-    public function currentRates()
+    // -------------------
+    // Hotels Relations
+    // -------------------
+    public function createdHotels()
     {
-        return $this->hasMany(CurrentRate::class, 'created_by', 'updated_by');
+        return $this->hasMany(Hotel::class, 'created_by', 'id');
+    }
+
+    public function updatedHotels()
+    {
+        return $this->hasMany(Hotel::class, 'updated_by', 'id');
+    }
+
+    // -------------------
+    // Current Rates Relations
+    // -------------------
+    public function createdCurrentRates()
+    {
+        return $this->hasMany(CurrentRate::class, 'created_by', 'id');
+    }
+
+    public function updatedCurrentRates()
+    {
+        return $this->hasMany(CurrentRate::class, 'updated_by', 'id');
+    }
+
+    // -------------------
+    // Currencies Relations
+    // -------------------
+    public function createdCurrencies()
+    {
+        return $this->hasMany(Currency::class, 'created_by', 'id');
+    }
+
+    public function updatedCurrencies()
+    {
+        return $this->hasMany(Currency::class, 'updated_by', 'id');
+    }
+
+    // -------------------
+    // Navigations Relations
+    // -------------------
+    public function createdNavigations()
+    {
+        return $this->hasMany(Navigation::class, 'created_by', 'id');
+    }
+
+    public function updatedNavigations()
+    {
+        return $this->hasMany(Navigation::class, 'updated_by', 'id');
     }
 }

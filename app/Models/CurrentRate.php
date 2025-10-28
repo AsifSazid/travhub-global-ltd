@@ -11,8 +11,13 @@ class CurrentRate extends Model
 
     protected $guarded = [];
 
-    public function user()
+    public function createdBy()
     {
-        return $this->belongsTo(User::class, 'created_by', 'updated_by');
+        return $this->belongsTo(User::class, 'created_by', 'id');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 }

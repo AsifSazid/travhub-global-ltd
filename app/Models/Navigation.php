@@ -15,9 +15,14 @@ class Navigation extends Model
         'is_active' => 'boolean',
     ];
 
-    public function user()
+    public function createdBy()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by', 'id');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 
     public function children()

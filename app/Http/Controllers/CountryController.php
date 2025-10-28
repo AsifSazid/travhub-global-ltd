@@ -120,7 +120,7 @@ class CountryController extends Controller
     public function getData(Request $request)
     {
         try {
-            $query = Country::with('user');
+            $query = Country::query();
 
             if ($request->filled('search')) {
                 $query->where('title', 'like', "%{$request->search}%");

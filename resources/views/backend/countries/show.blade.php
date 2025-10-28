@@ -12,7 +12,7 @@
             <div class="px-4 py-2 bg-gray-100 border-t text-sm text-gray-500 flex justify-between items-center">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ $country->title }}</h3>
-                    <p class="px-4"><strong><a href="#">[Cretaed By: {{ $country->user->title ?? ' ' }}]</strong></a></p>
+                    <p class="px-4"><strong><a href="#">[Created By: {{ $country->createdBy->title ?? ' ' }}]</strong></a></p>
                 </div>
                 <p><strong>Status:</strong>
                     @if ($country->status === 'active')
@@ -51,7 +51,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3">
+                                <td colspan="3" class="py-2">
                                     No cities found for this country.
                                 </td>
                             </tr>

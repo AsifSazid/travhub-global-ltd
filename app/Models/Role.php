@@ -11,8 +11,20 @@ class Role extends Model
 
     protected $guarded = [];
 
-    public function user()
+    public function users()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->hasMany(User::class, 'role_id', 'id');
+    }
+
+    // Created By Relation
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
+    }
+
+    // Updated By Relation
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 }
