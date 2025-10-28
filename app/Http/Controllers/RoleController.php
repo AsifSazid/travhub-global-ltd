@@ -72,7 +72,6 @@ class RoleController extends Controller
 
         try {
             $role->update([
-                'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
                 'alias' => $request->alias,
                 'updated_by' => Auth::user()->id,

@@ -89,7 +89,6 @@ class CurrencyController extends Controller
 
         try {
             $currency->update([
-                'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
                 'currency_code' => $request->currency_code,
                 'icon' => $request->icon,

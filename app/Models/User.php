@@ -54,6 +54,19 @@ class User extends Authenticatable
     }
 
     // -------------------
+    // Activity Category Relations
+    // -------------------
+    public function createdActCategories()
+    {
+        return $this->hasMany(ActivityCategory::class, 'created_by', 'id');
+    }
+
+    public function updatedActCategories()
+    {
+        return $this->hasMany(ActivityCategory::class, 'updated_by', 'id');
+    }
+
+    // -------------------
     // Countries Relations
     // -------------------
     public function createdCountries()

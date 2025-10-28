@@ -73,7 +73,6 @@ class CountryController extends Controller
 
         try {
             $country->update([
-                'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
                 'country_code' => $request->country_code,
                 'updated_by' => Auth::user()->id,

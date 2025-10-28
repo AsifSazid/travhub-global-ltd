@@ -77,7 +77,6 @@ class CurrentRateController extends Controller
 
         try {
             $current_rate->update([
-                'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
                 'rate_value' => $request->rate_value,
                 'updated_by' => Auth::user()->id,

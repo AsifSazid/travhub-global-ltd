@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityCategoryController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\CurrencyController;
@@ -16,6 +17,9 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Activity Category
+Route::get('/activity-categories/list', [ActivityCategoryController::class, 'getData'])->name('activity-categories.getData');
+Route::get('/activity-categories/trash', [ActivityCategoryController::class, 'trash'])->name('activity-categories.trash');
 // City
 Route::get('/cities/list', [CityController::class, 'getData'])->name('cities.getData');
 Route::get('/cities/trash', [CountryController::class, 'trash'])->name('cities.trash');
@@ -54,6 +58,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resources([
         // admin panel er jonno
+        'activity-categories' => ActivityCategoryController::class,
         'cities' => CityController::class,
         'countries' => CountryController::class,
         'currencies' => CurrencyController::class,
@@ -64,6 +69,10 @@ Route::middleware('auth')->group(function () {
 
     ]);
 
+    // City
+    Route::get('/activity-categories/download/pdf', [ActivityCategoryController::class, 'downloadPdf'])->name('activity-categories.download.pdf');
+    Route::post('/activity-categories/{id}/restore', [ActivityCategoryController::class, 'restore'])->name('activity-categories.restore');
+    Route::delete('/activity-categories/{id}/force-delete', [ActivityCategoryController::class, 'forceDelete'])->name('activity-categories.forceDelete');
     // City
     Route::get('/cities/download/pdf', [CityController::class, 'downloadPdf'])->name('cities.download.pdf');
     Route::post('/cities/{id}/restore', [CityController::class, 'restore'])->name('cities.restore');
