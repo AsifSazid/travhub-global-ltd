@@ -29,9 +29,9 @@ class NavigationController extends Controller
     {
         $request->validate([
             'title' => 'required|string',
-            'nav_icon' => 'string',
-            'url' => 'string',
-            'route' => 'string',
+            'nav_icon' => 'nullable|string',
+            'url' => 'nullable|string',
+            'route' => 'nullable|string',
         ]);
 
         try {
@@ -70,22 +70,19 @@ class NavigationController extends Controller
         try {
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
-                'navigation_for' => 'nullable|exists:wings,id',
-                'nav_icon' => 'max:255',
-                'url' => 'max:255',
-                'route' => 'max:255',
+                'nav_icon' => 'nullable|string',
+                'url' => 'nullable|string',
+                'route' => 'nullable|string',
                 'parent_id' => 'nullable|exists:navigations,id|not_in:' . $navigation, // নিজেকে parent বানানো যাবে না
-                'is_active' => 'nullable|boolean',
             ]);
 
             $navigation->update([
                 'title' => $validated['title'],
-                'navigation_for' => $validated['navigation_for'] ?? null,
                 'nav_icon' => $validated['nav_icon'],
                 'url' => $validated['url'],
                 'route' => $validated['route'],
                 'parent_id' => $validated['parent_id'] ?? null,
-                'is_active' => $request->has('is_active'),
+                'status' =>  $request->input('status') == '1' ? 'active' : 'inactive'
             ]);
 
             return redirect()->route('navigations.index')->with('success', 'Navigation updated successfully!');

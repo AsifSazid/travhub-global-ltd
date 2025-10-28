@@ -28,21 +28,21 @@
             <div class="mb-4">
                 <label for="nav_icon" class="block text-sm font-medium text-gray-700">Navigation
                     Icon</label>
-                <input type="text" name="nav_icon" id="nav_icon" required
+                <input type="text" name="nav_icon" id="nav_icon"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div class="mb-4">
                 <label for="url" class="block text-sm font-medium text-gray-700">Navigation
                     URL</label>
-                <input type="text" name="url" id="url" required
+                <input type="text" name="url" id="url"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div class="mb-4">
                 <label for="route" class="block text-sm font-medium text-gray-700">Navigation
                     Route</label>
-                <input type="text" name="route" id="route" required
+                <input type="text" name="route" id="route"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 

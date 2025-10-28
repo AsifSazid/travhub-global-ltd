@@ -11,11 +11,12 @@ function getNavigations()
 {
     $query = Navigation::query()
         ->whereNull('parent_id')
-        ->where('is_active', true);
+        ->where('status', 'active');
 
     $navigations = $query->with(['children' => function ($q) {
-        $q->where('is_active', true);
+        $q->where('status', 'active');
     }])->get();
 
-    dd($navigations);
+    return $navigations;
+    // return [];
 }

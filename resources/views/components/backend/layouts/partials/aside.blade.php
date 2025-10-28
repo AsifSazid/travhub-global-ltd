@@ -1,4 +1,7 @@
-{{-- <aside class="flex-shrink-0 hidden w-64 bg-white border-r dark:border-primary-darker dark:bg-darker md:block">
+<?php
+    $navigations = getNavigations(); 
+?>
+<aside class="flex-shrink-0 hidden w-64 bg-white border-r dark:border-primary-darker dark:bg-darker md:block">
     <div class="flex flex-col h-full">
         <nav aria-label="Main" class="flex-1 px-2 py-4 space-y-2 overflow-y-hidden hover:overflow-y-auto">
             @foreach ($navigations as $nav)
@@ -12,7 +15,7 @@
 
                             <!-- Icon -->
                             @if ($nav->nav_icon)
-                                <i class="{{ $nav->nav_icon }} w-5 h-5"></i>
+                                {!! $nav->nav_icon !!}
                             @else
                                 <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor">
@@ -56,7 +59,7 @@
                             class="flex items-center p-2 text-sm text-gray-500 rounded-md dark:text-light hover:bg-primary-100 dark:hover:bg-primary
                                 {{ request()->routeIs($nav->route) ? 'bg-primary-100 dark:bg-primary font-semibold' : '' }}">
                             @if ($nav->nav_icon)
-                                <i class="{{ $nav->nav_icon }} w-5 h-5"></i>
+                                {!! $nav->nav_icon !!}
                             @endif
                             <span class="ml-2">{{ $nav->title }}</span>
                         </a>
@@ -71,12 +74,10 @@
 
         </nav>
     </div>
-</aside> --}}
-
-{{-- {{ getNavigations() }} --}}
+</aside>
 
 
-<aside class="flex-shrink-0 hidden w-64 bg-white border-r dark:border-primary-darker dark:bg-darker md:block">
+{{-- <aside class="flex-shrink-0 hidden w-64 bg-white border-r dark:border-primary-darker dark:bg-darker md:block">
     <div class="flex flex-col h-full">
         <!-- Sidebar links -->
         <nav aria-label="Main" class="flex-1 px-2 py-4 space-y-2 overflow-y-hidden hover:overflow-y-auto">
@@ -337,4 +338,4 @@
             </a>
         </div>
     </div>
-</aside>
+</aside> --}}
