@@ -12,16 +12,37 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pack_accomo_details', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
+            $table->uuid('uuid')->unique();
+            $table->string('title', 255);
+            $table->char('description')->nullable();
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('icon', 255)->nullable();
+
+            // Foreign key: packages
+            $table->unsignedBigInteger('package_id');
+            $table->foreign('package_id')->references('id')->on('packages')->cascadeOnDelete();
+
+            // Reference fields
+            $table->uuid('package_uuid')->nullable();
+            $table->string('package_title', 255)->nullable();
+
+            // JSON fields
+            $table->json('cities')->nullable();
+            $table->json('hotels')->nullable();
+
+            $table->string('created_by', 255)->nullable();
+            $table->string('updated_by', 255)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
+        Schema::table('pack_accomo_details', function (Blueprint $table) {
+            $table->dropForeign(['package_id']);
+        });
         Schema::dropIfExists('pack_accomo_details');
     }
 };
