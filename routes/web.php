@@ -16,7 +16,7 @@ use App\Models\CurrencyRate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('frontend.welcome');
 })->name('home');
 
 // Activity Category
