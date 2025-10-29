@@ -24,40 +24,11 @@
             </div>
             <div class="p-4">
                 <p class="text-gray-600 mt-2 mb-4">
-                    <label for="country_code" class="font-semibold">Inclusion Code: </label> {{ $inclusion->country_code }}
+                    <label for="activity" class="font-semibold">Activity: </label>
+                    <a href="{{ route('activities.show', ['activity' => $inclusion->activity_uuid]) }}">
+                        {{ $inclusion->activity_title }}
+                    </a>
                 </p>
-            </div>
-            <div class="p-6">
-                <label for="" class="block text-sm font-medium text-gray-700">City Lists
-                    [Total City: <strong>{{ $inclusion->cities_count }}</strong>]</label>
-                <table id="roleTable" class="w-full table-striped table-bordered text-sm mt-4">
-                    <thead class="bg-gray-100 text-gray-700 uppercase">
-                        <tr>
-                            <th class="px-6 py-4">Sl No.</th>
-                            <th class="px-6 py-4">City Name</th>
-                            <th class="px-6 py-4">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-center">
-                        @forelse ($inclusion->cities as $city)
-                            <tr>
-                                <td class="py-2">{{ $loop->iteration }}</td>
-                                <td><a href="{{ route('cities.show', ['city' => $city->uuid]) }}">{{ $city->title }}</a></td>
-                                <td>
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $city->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ $city->status == 'active' ? 'Active' : 'Inactive' }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="3" class="py-2">
-                                    No cities found for this inclusion.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
             </div>
             <div class="px-4 py-2 bg-gray-100 border-t text-sm text-gray-500 flex justify-between items-center">
                 <div>

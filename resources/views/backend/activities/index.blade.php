@@ -20,7 +20,7 @@
                 <tr>
                     <th class="px-6 py-4">Sl No.</th>
                     <th class="px-6 py-4">Activity Name</th>
-                    <th class="px-6 py-4">Country</th>
+                    <th class="px-6 py-4">Category</th>
                     <th class="px-6 py-4">Created By</th>
                     <th class="px-6 py-4">Action</th>
                 </tr>
@@ -83,7 +83,7 @@
                                     <td class="px-6 py-4">${index + 1}</td>
                                     <td class="px-6 py-4">${activity.title}</td>
                                     <td class="px-6 py-4">
-                                        <a href="/countries/${activity.country?.uuid}">${activity.country?.title ?? 'N/A'}</a>
+                                        <a href="/activity-categories/${activity.activity_category?.uuid}">${activity.activity_category?.title ?? 'N/A'}</a>
                                     </td>
                                     <td class="px-6 py-4">${activity.user?.title ?? 'N/A'}</td>
                                     <td class="px-6 py-4">

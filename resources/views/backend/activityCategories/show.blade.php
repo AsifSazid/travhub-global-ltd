@@ -24,8 +24,36 @@
                 </p>
             </div>
             <div class="p-4">
-                <p class="text-gray-600 mt-2 mb-4">
-                </p>
+                <label for="" class="block text-sm font-medium text-gray-700">City Lists
+                    [Total City: <strong>{{ $activityCategory->activities_count }}</strong>]</label>
+                <table id="roleTable" class="w-full table-striped table-bordered text-sm mt-4">
+                    <thead class="bg-gray-100 text-gray-700 uppercase">
+                        <tr>
+                            <th class="px-6 py-4">Sl No.</th>
+                            <th class="px-6 py-4">Activity Title</th>
+                            <th class="px-6 py-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @forelse ($activityCategory->activities as $activity)
+                            <tr>
+                                <td class="py-2">{{ $loop->iteration }}</td>
+                                <td><a href="{{ route('activities.show', ['activity' => $activity->uuid]) }}">{{ $activity->title }}</a></td>
+                                <td>
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $activity->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ $activity->status == 'active' ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="py-2">
+                                    No activity found for this country.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
             <div class="px-4 py-2 bg-gray-100 border-t text-sm text-gray-500 flex justify-between items-center">
                 <div>

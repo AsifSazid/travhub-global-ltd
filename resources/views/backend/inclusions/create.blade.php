@@ -28,8 +28,8 @@
             </div>
 
             <div class="mb-4">
-                <label for="country_uuid" class="block text-sm font-medium text-gray-700">Country</label>
-                <select name="country_uuid" id="country_uuid"
+                <label for="activity_uuid" class="block text-sm font-medium text-gray-700">Activity</label>
+                <select name="activity_uuid" id="activity_uuid"
                     class="mt-1 block w-full px-2 py-2 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
 
                     <option value="" selected disabled>Select Any One</option>

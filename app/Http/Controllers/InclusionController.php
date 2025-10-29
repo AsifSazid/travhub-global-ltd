@@ -34,14 +34,18 @@ class InclusionController extends Controller
     {
         $request->validate([
             'title' => 'required|string',
-            'country_code' => 'required|string'
+            'activity_uuid' => 'required|string'
         ]);
+
+        $activity = Activity::where('uuid', $request->activity_uuid)->first();
 
         try {
             $inclusion = Inclusion::create([
                 'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
-                'country_code' => $request->country_code,
+                'activity_uuid' => $request->activity_uuid,
+                'activity_id' => $activity->id,
+                'activity_title' => $activity->title,
                 'created_by' => Auth::user()->id,
             ]);
 
@@ -56,7 +60,7 @@ class InclusionController extends Controller
      */
     public function show($inclusion)
     {
-        $inclusion = Inclusion::where('uuid', $inclusion)->withCount('cities')->first();
+        $inclusion = Inclusion::where('uuid', $inclusion)->first();
         return view('backend.inclusions.show', compact('inclusion'));
     }
 

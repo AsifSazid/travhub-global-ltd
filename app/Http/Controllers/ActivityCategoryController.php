@@ -52,7 +52,7 @@ class ActivityCategoryController extends Controller
      */
     public function show($activityCategory)
     {
-        $activityCategory = ActivityCategory::where('uuid', $activityCategory)->first();
+        $activityCategory = ActivityCategory::where('uuid', $activityCategory)->withCount('activities')->first();
         return view('backend.activityCategories.show', compact('activityCategory'));
     }
 
