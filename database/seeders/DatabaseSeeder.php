@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ActivityCategory;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Hotel;
@@ -85,6 +86,21 @@ class DatabaseSeeder extends Seeder
             'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'title' => 'Hotel Intercontinental Ltd',
             'city_id' => 1
+        ]);
+
+        ActivityCategory::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'Activity to be include in Pack Destination',
+        ]);
+
+        ActivityCategory::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'Activity to be include in Itenaries',
+        ]);
+
+        ActivityCategory::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'Activity to be include in Inclusion',
         ]);
     }
 }
