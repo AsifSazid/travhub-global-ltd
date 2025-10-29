@@ -131,7 +131,7 @@ class CityController extends Controller
     public function getData(Request $request)
     {
         try {
-            $query = City::with('country', 'user');
+            $query = City::with('country');
 
             if ($request->filled('search')) {
                 $query->where('title', 'like', "%{$request->search}%");

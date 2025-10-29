@@ -61,7 +61,7 @@ class NavigationController extends Controller
     public function edit($navigation)
     {
         $navigation = Navigation::where('uuid', $navigation)->first();
-        $navigations = Navigation::where('uuid', '!=', $navigation)->get();
+        $navigations = Navigation::where('uuid', '!=', $navigation)->where('url', null)->where('route', null)->get();
         return view('backend.navigations.edit', compact('navigation', 'navigations'));
     }
 

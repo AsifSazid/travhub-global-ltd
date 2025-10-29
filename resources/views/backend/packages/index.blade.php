@@ -1,8 +1,8 @@
 <x-backend.layouts.master>
     <x-slot name="header">
         <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
-            <h2 class="text-2xl font-semibold">{{ __('Hotels') }}</h2>
-            <a href="{{ route('hotels.create') }}" class="text-green-500 hover:text-green-700 mx-1" title="Create">
+            <h2 class="text-2xl font-semibold">{{ __('Packages') }}</h2>
+            <a href="{{ route('packages.create') }}" class="text-green-500 hover:text-green-700 mx-1" title="Create">
                 <i class="fas fa-plus"></i> Create New
             </a>
         </div>
@@ -19,8 +19,7 @@
             <thead class="bg-gray-100 text-gray-700 uppercase">
                 <tr>
                     <th class="px-6 py-4">Sl No.</th>
-                    <th class="px-6 py-4">Hotel Name</th>
-                    <th class="px-6 py-4">City</th>
+                    <th class="px-6 py-4">Package Name</th>
                     <th class="px-6 py-4">Created By</th>
                     <th class="px-6 py-4">Action</th>
                 </tr>
@@ -35,7 +34,7 @@
             <div id="paginationLinks" class="flex justify-center mb-4"></div>
 
             <div class="px-4 py-2 bg-gray-100 border-t text-sm text-gray-500 flex justify-between items-center">
-                <a href="{{ route('hotels.trash') }}" class="text-red-500 hover:text-red-700 mx-1"
+                <a href="{{ route('packages.trash') }}" class="text-red-500 hover:text-red-700 mx-1"
                     title="Trash Lists">
                     <i class="fas fa-trash-alt"></i> Trash Lists
                 </a>
@@ -58,39 +57,36 @@
                 const fetchRoles = async (search = '', page = 1) => {
                     try {
                         const response = await fetch(
-                            `{{ route('hotels.getData') }}?search=${search}&page=${page}`, {
+                            `{{ route('packages.getData') }}?search=${search}&page=${page}`, {
                                 credentials: 'same-origin'
                             });
                         const result = await response.json();
                         renderTable(result.data);
                         renderPagination(result, search);
                     } catch (error) {
-                        console.error("Error fetching hotels:", error);
+                        console.error("Error fetching packages:", error);
                     }
                 };
 
-                const renderTable = (hotels) => {
+                const renderTable = (packages) => {
                     tableBody.innerHTML = "";
-                    if (!hotels || hotels.length === 0) {
+                    if (!packages || packages.length === 0) {
                         tableBody.innerHTML =
-                            `<tr><td colspan="5" class="py-4 text-center text-gray-500">No hotels found</td></tr>`;
+                            `<tr><td colspan="5" class="py-4 text-center text-gray-500">No packages found</td></tr>`;
                         return;
                     }
 
-                    hotels.forEach((hotel, index) => {
+                    packages.forEach((package, index) => {
                         const row = `
                                 <tr>
                                     <td class="px-6 py-4">${index + 1}</td>
-                                    <td class="px-6 py-4">${hotel.title}</td>
-                                    <td class="px-6 py-4">
-                                        <a href="/cities/${hotel.city?.uuid}">${hotel.city?.title ?? 'N/A'}</a>
-                                    </td>
-                                    <td class="px-6 py-4">${hotel.user?.title ?? 'N/A'}</td>
+                                    <td class="px-6 py-4">${package.title}</td>
+                                    <td class="px-6 py-4">${package.user?.title ?? 'N/A'}</td>
                                     <td class="px-6 py-4">
                                         <div class="flex justify-center">
-                                            <a href="/hotels/${hotel.uuid}" class="px-1 text-blue-500 hover:text-blue-700" title="View"><i class="fas fa-eye"></i></a>
-                                            <a href="/hotels/${hotel.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit"><i class="fas fa-edit"></i></a>
-                                            <form action="/hotels/${hotel.uuid}" method="POST" onsubmit="return confirm('Move to trash?')">
+                                            <a href="/packages/${package.uuid}" class="px-1 text-blue-500 hover:text-blue-700" title="View"><i class="fas fa-eye"></i></a>
+                                            <a href="/packages/${package.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit"><i class="fas fa-edit"></i></a>
+                                            <form action="/packages/${package.uuid}" method="POST" onsubmit="return confirm('Move to trash?')">
                                                 <input type="hidden" name="_token" value="${csrfToken}">
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 <button type="submit" class="px-1 text-red-500 hover:text-red-700" title="Destroy">
@@ -133,7 +129,7 @@
                 // PDF download
                 document.getElementById("downloadPdfBtn").addEventListener("click", () => {
                     const search = document.getElementById("searchInput").value.trim();
-                    let url = `{{ route('hotels.download.pdf') }}`;
+                    let url = `{{ route('packages.download.pdf') }}`;
                     if (search) {
                         url += `?search=${encodeURIComponent(search)}`;
                     }

@@ -24,7 +24,7 @@
             </div>
             <div class="p-4">
                 <p class="text-gray-600 mt-2 mb-4">
-                    <label for="country_title" class="font-semibold">Country: </label> <a href="{{ route('countries.show', ['country' => $city->country_uuid]) }}">{{ $city->country_title }}</a>
+                    <label for="country_title" class="font-semibold">Country: </label> <a href="{{ route('countries.show', ['country' => $city->country->uuid]) }}">{{ $city->country->title }}</a>
                 </p>
             </div>
             <div class="p-6">

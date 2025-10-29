@@ -168,4 +168,17 @@ class User extends Authenticatable
     {
         return $this->hasMany(Inclusion::class, 'updated_by', 'id');
     }
+
+    // -------------------
+    // Inclusions Relations
+    // -------------------
+    public function createdPackages()
+    {
+        return $this->hasMany(Package::class, 'created_by', 'id');
+    }
+
+    public function updatedPackages()
+    {
+        return $this->hasMany(Package::class, 'updated_by', 'id');
+    }
 }

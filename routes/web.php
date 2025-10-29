@@ -5,14 +5,13 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\CurrencyController;
-use App\Http\Controllers\CurrencyRateController;
 use App\Http\Controllers\CurrentRateController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\InclusionController;
 use App\Http\Controllers\NavigationController;
+use App\Http\Controllers\PackageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
-use App\Models\CurrencyRate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,7 +21,7 @@ Route::get('/', function () {
 // Activity Category
 Route::get('/activity-categories/list', [ActivityCategoryController::class, 'getData'])->name('activity-categories.getData');
 Route::get('/activity-categories/trash', [ActivityCategoryController::class, 'trash'])->name('activity-categories.trash');
-// Activity Category
+// Activity
 Route::get('/activities/list', [ActivityController::class, 'getData'])->name('activities.getData');
 Route::get('/activities/trash', [ActivityController::class, 'trash'])->name('activities.trash');
 // City
@@ -46,6 +45,9 @@ Route::get('/inclusions/trash', [InclusionController::class, 'trash'])->name('in
 // Navigation
 Route::get('/navigations/list', [NavigationController::class, 'getData'])->name('navigations.getData');
 Route::get('/navigations/trash', [NavigationController::class, 'trash'])->name('navigations.trash');
+// Package
+Route::get('/packages/list', [PackageController::class, 'getData'])->name('packages.getData');
+Route::get('/packages/trash', [PackageController::class, 'trash'])->name('packages.trash');
 // Role
 Route::get('/roles/list', [RoleController::class, 'getData'])->name('roles.getData');
 
@@ -77,6 +79,7 @@ Route::middleware('auth')->group(function () {
         'hotels' => HotelController::class,
         'inclusions' => InclusionController::class,
         'navigations' => NavigationController::class,
+        'packages' => PackageController::class,
         'roles' => RoleController::class,
 
     ]);
@@ -120,6 +123,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/navigations/{id}/force-delete', [NavigationController::class, 'forceDelete'])->name('navigations.forceDelete');
     Route::get('/navigations/sync-routes', [NavigationController::class, 'syncRoutes'])
         ->name('navigations.syncRoutes');
+    // Package
+    Route::get('/packages/download/pdf', [PackageController::class, 'downloadPdf'])->name('packages.download.pdf');
+    Route::post('/packages/{id}/restore', [PackageController::class, 'restore'])->name('packages.restore');
+    Route::delete('/packages/{id}/force-delete', [PackageController::class, 'forceDelete'])->name('packages.forceDelete');
     // Role
     // Route::get('/roles/list', [RoleController::class, 'getData'])->name('roles.getData');
     Route::get('/roles/download/pdf', [RoleController::class, 'downloadPdf'])->name('roles.download.pdf');

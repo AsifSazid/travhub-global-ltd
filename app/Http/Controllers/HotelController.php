@@ -131,7 +131,7 @@ class HotelController extends Controller
     public function getData(Request $request)
     {
         try {
-            $query = Hotel::with('city', 'user');
+            $query = Hotel::with('city');
 
             if ($request->filled('search')) {
                 $query->where('title', 'like', "%{$request->search}%");
