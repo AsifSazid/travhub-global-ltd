@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('title', 255);
             $table->char('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->boolean('is_complete')->default(false);
+            $table->tinyInteger('progress_step')->nullable();
+            $table->enum('completion_status', ['incomplete', 'completed'])->default('incomplete');
 
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();

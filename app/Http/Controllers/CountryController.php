@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\City;
 use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -146,10 +147,19 @@ class CountryController extends Controller
         $countries = $query->get();
 
         $mpdf = new \Mpdf\Mpdf();
-        $mpdf->SetHeader("<div style='text-align:center'>".companyName()."</div>");
+        $mpdf->SetHeader("<div style='text-align:center'>" . companyName() . "</div>");
         $mpdf->SetFooter("This is a system generated document(s). So no need to show external signature or seal!");
         $view = view('backend.countries.pdf', compact('countries'));
         $mpdf->WriteHTML($view);
         $mpdf->Output();
+    }
+
+    public function getCities($id)
+    {
+        $cities = \App\Models\City::where('country_id', $id)
+            ->where('status', 'active')
+            ->get(['id', 'uuid', 'title']);
+
+        return response()->json($cities);
     }
 }

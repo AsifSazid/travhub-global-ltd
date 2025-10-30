@@ -131,5 +131,44 @@
             updateDoughnutChart,
             updateLineChart,
         }
+        return { // <--- Eita Alpine Data Object-er shuru
+            loading: true,
+            isDark: getTheme(),
+
+            // 🟢 FIX 1: init() method ke return block-er modhye rakhte hobe
+            init() {
+                // init() AlpineJS lifecycle hook. Eta shob theke age chole.
+                // Ami ager bar je Alpine Store logic diyechilam, seta ekhane rakhun.
+                window.Alpine.store('masterState', {
+                    isSettingsPanelOpen: this.isSettingsPanelOpen // true/false
+                });
+
+                this.$watch('isSettingsPanelOpen', (value) => {
+                    window.Alpine.store('masterState').isSettingsPanelOpen = value;
+                });
+
+                // onnanyo init logic jeta x-init="setColors(color);" er age chole
+            },
+
+            // ... onnanyo properties...
+            color: getColor(),
+            selectedColor: 'cyan',
+            setColors,
+
+            // 🟢 FIX 2: isSettingsPanelOpen property-ta ekhane aage thekei chilo, shudhu check kore nin
+            isSettingsPanelOpen: false,
+
+            // ... onnanyo methods (openSettingsPanel, toggleTheme, etc.)...
+
+            openSettingsPanel() {
+                this.isSettingsPanelOpen = true
+                this.$nextTick(() => {
+                    this.$refs.settingsPanel.focus()
+                })
+            },
+
+            // ... onnanyo methods...
+
+        }
     }
 </script>

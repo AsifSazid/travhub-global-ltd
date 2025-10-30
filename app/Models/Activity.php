@@ -30,4 +30,9 @@ class Activity extends Model
     {
         return $this->hasMany(Inclusion::class, 'activity_id', 'id');
     }
+
+    public function packDestinationInfos()
+    {
+        return $this->hasMany(PackDestinationInfo::class, 'activity_id', 'id');
+    }
 }
