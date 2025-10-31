@@ -23,15 +23,10 @@ return new class extends Migration
             $table->unsignedBigInteger('package_id')->index();
             $table->foreign('package_id')->references('id')->on('packages')->cascadeOnDelete();
 
-            // Foreign key: inclusion
-            $table->unsignedBigInteger('inclusion_id')->index();
-            $table->foreign('inclusion_id')->references('id')->on('inclusions')->cascadeOnDelete();
-
             // Reference fields
             $table->uuid('package_uuid')->nullable();
             $table->string('package_title', 255)->nullable();
-            $table->uuid('inclusion_uuid')->nullable();
-            $table->string('inclusion_title', 255)->nullable();
+            $table->json('inclusions')->nullable();
 
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();
@@ -44,7 +39,6 @@ return new class extends Migration
     {
         Schema::table('pack_inclusions', function (Blueprint $table) {
             $table->dropForeign(['package_id']);
-            $table->dropForeign(['inclusion_id']);
         });
         Schema::dropIfExists('pack_inclusions');
     }

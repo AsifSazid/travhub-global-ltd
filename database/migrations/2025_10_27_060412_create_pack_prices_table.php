@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pack_price', function (Blueprint $table) {
+        Schema::create('pack_prices', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid('uuid')->unique();
             $table->string('title', 255);
@@ -36,6 +36,7 @@ return new class extends Migration
             $table->string('currency_title', 255)->nullable();
 
             // JSON field
+            $table->json('pack_price')->nullable();
             $table->json('air_ticket_details')->nullable();
 
             $table->string('created_by', 255)->nullable();

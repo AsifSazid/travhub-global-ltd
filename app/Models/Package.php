@@ -23,12 +23,22 @@ class Package extends Model
 
     public function packDestinationInfos()
     {
-        return $this->hasMany(PackDestinationInfo::class, 'package_id');
+        return $this->hasOne(PackDestinationInfo::class, 'package_id');
     }
 
-    public function packInclusions()
+    public function PackQuatDetails()
     {
-        return $this->hasMany(PackInclusion::class, 'package_id');
+        return $this->hasOne(PackQuatDetail::class, 'package_id');
+    }
+
+    public function PackAccomoDetails()
+    {
+        return $this->hasOne(PackAccomoDetail::class, 'package_id');
+    }
+
+    public function PackPrices()
+    {
+        return $this->hasOne(PackPrice::class, 'package_id');
     }
 
     public function packItenaries()
@@ -36,18 +46,8 @@ class Package extends Model
         return $this->hasMany(PackItenaries::class, 'package_id');
     }
 
-    public function PackPrices()
+    public function packInclusions()
     {
-        return $this->hasMany(PackPrice::class, 'package_id');
-    }
-
-    public function PackQuatDetails()
-    {
-        return $this->hasMany(PackQuatDetail::class, 'package_id');
-    }
-
-    public function PackAccomoDetails()
-    {
-        return $this->hasMany(PackAccomoDetail::class, 'package_id');
+        return $this->hasMany(PackInclusion::class, 'package_id');
     }
 }

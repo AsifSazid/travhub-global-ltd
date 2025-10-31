@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -19,6 +18,7 @@ use App\Models\{
     PackInclusion,
     Country,
     ActivityCategory,
+    City,
     Currency
 };
 
@@ -47,360 +47,331 @@ class PackageController extends Controller
         }
     }
 
-    public function create(Request $request)
+    public function create()
     {
-        $uuid = $request->query('uuid');
-        $step = $request->query('step', 1);
-
-        $package = null;
-        if ($uuid) {
-            $package = Package::where('uuid', $uuid)->first();
-            if ($package && !$package->is_complete && $package->progress_step) {
-                $step = $package->progress_step;
-            }
-        }
-
-        $countries = Country::where('status', 'active')->get();
-        $activities = Activity::where('status', 'active')->where('activity_category_id', 1)->get();
-
-        return view('backend.packages.create-multistep', compact('package', 'uuid', 'step', 'countries', 'activities'));
+        return view('backend.packages.create');
     }
 
-    /**
-     * Handle step submission dynamically
-     */
-    public function step(Request $request, $step)
-    {
-        switch ((int)$step) {
-            case 1:
-                $response = $this->stepOne($request);
-                break;
-            case 2:
-                $response = $this->stepTwo($request);
-                break;
-            case 3:
-                $response = $this->stepThree($request);
-                break;
-            case 4:
-                $response = $this->stepFour($request);
-                break;
-            case 5:
-                $response = $this->stepFive($request);
-                break;
-            case 6:
-                $response = $this->stepSix($request);
-                break;
-            case 7:
-                $response = $this->stepSeven($request);
-                break;
-            default:
-                return redirect()->back()->withErrors(['Invalid step']);
-        }
-
-        // If everything ok, redirect to next step (POST/Redirect/GET pattern)
-        if ($response->status() === 200) {
-            $nextStep = $step < 7 ? $step + 1 : 7;
-            return redirect()->route('packages.create', ['uuid' => $request->uuid, 'step' => $nextStep])
-                ->with('success', $response->getData()->message ?? 'Saved successfully');
-        }
-
-        return $response;
-    }
-
-    /**
-     * Step 1: Basic package info
-     */
-    protected function stepOne(Request $request)
-    {
-        $v = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'in:active,inactive'
-        ]);
-
-        if ($v->fails()) return redirect()->back()->withErrors($v)->withInput();
-
-        $data = $v->validated();
-
-        $pkg = Package::updateOrCreate(
-            ['uuid' => $request->uuid],
-            [
-                'uuid' => $request->uuid ?? Str::uuid(),
-                'title' => $data['title'],
-                'description' => $data['description'] ?? null,
-                'status' => $data['status'] ?? 'active',
-                'created_by' => Auth::id()
-            ]
-        );
-
-        $pkg->update(['progress_step' => 1]);
-
-        return redirect()->route('packages.create', ['uuid' => $pkg->uuid, 'step' => 2])
-            ->with('success', 'Step 1 saved.');
-    }
-
-    /**
-     * Step 2: Destination info
-     */
-    protected function stepTwo(Request $request)
+    public function store(Request $request)
     {
         try {
-            $v = Validator::make($request->all(), [
-                'uuid' => 'required|exists:packages,uuid',
-                'country_id' => 'required|exists:countries,id',
-                'activity_id' => 'required|exists:activities,id',
-                'cities' => 'nullable|string'
+            $request->validate([
+                'title' => 'required|string',
             ]);
 
-            dd($v);
-            if ($v->fails()) return redirect()->back()->withErrors($v)->withInput();
+            $pkg = Package::create([
+                'uuid' => (string) \Str::uuid(),
+                'title' => $request->title,
+                'created_by' => Auth::user()->id,
+            ]);
 
-            $d = $v->validated();
-            $pkg = Package::where('uuid', $d['uuid'])->firstOrFail();
-
-            PackDestinationInfo::updateOrCreate(
-                ['package_uuid' => $pkg->uuid],
-                [
-                    'uuid' => Str::uuid(),
-                    'package_id' => $pkg->id,
-                    'package_uuid' => $pkg->uuid,
-                    'package_title' => $pkg->title,
-                    'country_id' => $d['country_id'],
-                    'country_uuid' => optional(Country::find($d['country_id']))->uuid,
-                    'country_title' => optional(Country::find($d['country_id']))->title,
-                    'activity_id' => $d['activity_id'],
-                    'activity_uuid' => optional(Activity::find($d['activity_id']))->uuid,
-                    'activity_title' => optional(Activity::find($d['activity_id']))->title,
-                    'cities' => $d['cities'] ?? null,
-                    'status' => 'active',
-                    'created_by' => Auth::id()
-                ]
-            );
-
-            $pkg->update(['progress_step' => 2]);
-
-            return redirect()->route('packages.create', ['uuid' => $pkg->uuid, 'step' => 3])
-                ->with('success', 'Step 2 saved.');
+            return redirect()->route('packages.step', ['uuid' => $pkg->uuid, 'step' => 1])->with('success', 'Package creatation started successfully!');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
     }
 
-    /**
-     * Step 3: Quotation details
-     */
-    protected function stepThree(Request $request)
+    public function step($uuid, $step)
     {
-        $v = Validator::make($request->all(), [
-            'uuid' => 'required|exists:packages,uuid',
-            'duration' => 'nullable|integer|min:1',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'no_of_pax' => 'nullable|string'
-        ]);
-
-        if ($v->fails()) return redirect()->back()->withErrors($v)->withInput();
-
-        $d = $v->validated();
-        $pkg = Package::where('uuid', $d['uuid'])->firstOrFail();
-
-        PackQuatDetail::updateOrCreate(
-            ['package_uuid' => $pkg->uuid],
-            [
-                'uuid' => Str::uuid(),
-                'package_id' => $pkg->id,
-                'package_uuid' => $pkg->uuid,
-                'package_title' => $pkg->title,
-                'duration' => $d['duration'] ?? null,
-                'start_date' => $d['start_date'] ?? null,
-                'end_date' => $d['end_date'] ?? null,
-                'no_of_pax' => $d['no_of_pax'] ?? null,
-                'status' => 'active',
-                'created_by' => Auth::id()
-            ]
-        );
-
-        $pkg->update(['progress_step' => 3]);
-
-        return redirect()->route('packages.create', ['uuid' => $pkg->uuid, 'step' => 4])
-            ->with('success', 'Step 3 saved.');
+        // dd($uuid, $step);
+        switch ((int)$step) {
+            case 1:
+                return $this->stepOne($uuid, $step);
+            case 2:
+                return $this->stepTwo($uuid, $step);
+            case 3:
+                return $this->stepThree($uuid, $step);
+            case 4:
+                return $this->stepFour($uuid, $step);
+            case 5:
+                return $this->stepFive($uuid, $step);
+            case 6:
+                return $this->stepSix($uuid, $step);
+            case 7:
+                return $this->stepSeven($uuid, $step);
+            default:
+                return redirect()->back()->withErrors(['Invalid step']);
+        }
     }
 
-    /**
-     * Step 4: Accommodation details
-     */
-    protected function stepFour(Request $request)
+    public function stepOne($uuid, $step)
     {
-        $v = Validator::make($request->all(), [
-            'uuid' => 'required|exists:packages,uuid',
-            'accomo_cities' => 'nullable|string',
-            'hotels' => 'nullable|string'
-        ]);
+        $countries = Country::where('status', 'active')->get();
+        $activities = Activity::where('status', 'active')->where('activity_category_id', 1)->get();
 
-        if ($v->fails()) return redirect()->back()->withErrors($v)->withInput();
-
-        $d = $v->validated();
-        $pkg = Package::where('uuid', $d['uuid'])->firstOrFail();
-
-        PackAccomoDetail::updateOrCreate(
-            ['package_uuid' => $pkg->uuid],
-            [
-                'uuid' => Str::uuid(),
-                'package_id' => $pkg->id,
-                'package_uuid' => $pkg->uuid,
-                'package_title' => $pkg->title,
-                'cities' => $d['accomo_cities'] ?? null,
-                'hotels' => $d['hotels'] ?? null,
-                'status' => 'active',
-                'created_by' => Auth::id()
-            ]
-        );
-
-        $pkg->update(['progress_step' => 4]);
-
-        return redirect()->route('packages.create', ['uuid' => $pkg->uuid, 'step' => 5])
-            ->with('success', 'Step 4 saved.');
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'countries', 'activities'));
     }
 
-    /**
-     * Step 5: Pricing info
-     */
-    protected function stepFive(Request $request)
+    public function stepTwo($uuid, $step)
     {
-        $v = Validator::make($request->all(), [
-            'uuid' => 'required|exists:packages,uuid',
-            'currency_id' => 'nullable|exists:currencies,id',
-            'air_ticket_details' => 'nullable|string',
-            'price_options' => 'nullable|string'
-        ]);
+        // dd($uuid, $step);
+        return view('backend.packages.create-multistep', compact('uuid', 'step'));
+    }
 
-        if ($v->fails()) return redirect()->back()->withErrors($v)->withInput();
+    public function stepThree($uuid, $step)
+    {
+        $packDestinationCities = PackDestinationInfo::where('package_uuid', $uuid)->first();
 
-        $d = $v->validated();
-        $pkg = Package::where('uuid', $d['uuid'])->firstOrFail();
+        $cityIds = $packDestinationCities?->cities;
 
-        // Convert CSV to JSON
-        $price_json = null;
-        if (!empty($d['price_options'])) {
-            $lines = preg_split("/\r\n|\n|\r/", trim($d['price_options']));
-            $out = [];
-            foreach ($lines as $ln) {
-                $parts = array_map('trim', explode('|', $ln));
-                if (count($parts) >= 2) {
-                    $out[] = ['option' => $parts[0], 'price_per_person' => $parts[1]];
-                }
+        if (is_string($cityIds)) {
+            $decoded = json_decode($cityIds, true);
+            // If still string after decode, decode again
+            if (is_string($decoded)) {
+                $decoded = json_decode($decoded, true);
             }
-            $price_json = json_encode($out);
+            $cityIds = $decoded;
         }
 
-        PackPrice::updateOrCreate(
-            ['package_uuid' => $pkg->uuid],
-            [
-                'uuid' => Str::uuid(),
-                'package_id' => $pkg->id,
-                'package_uuid' => $pkg->uuid,
-                'package_title' => $pkg->title,
-                'currency_id' => $d['currency_id'] ?? null,
-                'currency_uuid' => optional(Currency::find($d['currency_id']))->uuid,
-                'currency_title' => optional(Currency::find($d['currency_id']))->title,
-                'air_ticket_details' => $d['air_ticket_details'] ?? null,
-                'price_options' => $price_json,
-                'status' => 'active',
-                'created_by' => Auth::id()
-            ]
-        );
+        if (is_array($cityIds) && count($cityIds)) {
+            $cities = City::whereIn('id', $cityIds)->get(['id', 'uuid', 'title']);
+        } else {
+            $cities = collect();
+        }
 
-        $pkg->update(['progress_step' => 5]);
-
-        return redirect()->route('packages.create', ['uuid' => $pkg->uuid, 'step' => 6])
-            ->with('success', 'Step 5 saved.');
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'cities'));
     }
 
-    /**
-     * Step 6: Itineraries & inclusions
-     */
-    protected function stepSix(Request $request)
+    public function stepFour($uuid, $step)
     {
-        $v = Validator::make($request->all(), [
-            'uuid' => 'required|exists:packages,uuid',
-            'itenaries' => 'nullable|string',
-            'inclusions' => 'nullable|string'
-        ]);
+        $currencies = Currency::where('status', 'active')->get();
+        $packQuatDetails = PackQuatDetail::where('package_uuid', $uuid)->first();
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'currencies', 'packQuatDetails'));
+    }
 
-        if ($v->fails()) return redirect()->back()->withErrors($v)->withInput();
+    public function stepFive($uuid, $step)
+    {
+        $activites = Activity::where('activity_category_id', 2)->get();
+        $packQuatDetails = PackQuatDetail::where('package_uuid', $uuid)->first();
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activites', 'packQuatDetails'));
+    }
 
-        $d = $v->validated();
-        $pkg = Package::where('uuid', $d['uuid'])->firstOrFail();
+    public function stepSix($uuid, $step)
+    {
+        dd($uuid, $step);
+    }
 
-        DB::beginTransaction();
+    public function stepForStore(Request $request, $uuid, $step)
+    {
+        // dd('asche', $uuid, $step, $request->all());
+        switch ((int)$step) {
+            case 1:
+                return $this->stepOneStore($request, $uuid, $step);
+            case 2:
+                return $this->stepTwoStore($request, $uuid, $step);
+            case 3:
+                return $this->stepThreeStore($request, $uuid, $step);
+            case 4:
+                return $this->stepFourStore($request, $uuid, $step);
+            case 5:
+                return $this->stepFiveStore($request, $uuid, $step);
+            case 6:
+                return $this->stepSix($uuid, $step);
+            case 7:
+                return $this->stepSeven($uuid, $step);
+            default:
+                return redirect()->back()->withErrors(['Invalid step']);
+        }
+    }
+
+    public function stepOneStore($request, $uuid, $step)
+    {
         try {
-            // Itineraries
-            if (!empty($d['itenaries'])) {
-                $items = json_decode($d['itenaries'], true);
-                if (is_array($items)) {
-                    foreach ($items as $it) {
-                        PackItenaries::updateOrCreate(
-                            ['package_uuid' => $pkg->uuid, 'title' => $it['title']],
-                            [
-                                'uuid' => Str::uuid(),
-                                'package_id' => $pkg->id,
-                                'package_uuid' => $pkg->uuid,
-                                'package_title' => $pkg->title,
-                                'description' => $it['description'] ?? null,
-                                'status' => 'active',
-                                'created_by' => Auth::id()
-                            ]
-                        );
-                    }
-                }
-            }
+            $validated  = $request->validate([
+                'country_id' => 'required|exists:countries,id',
+                'activity_id' => 'required|exists:activities,id',
+                'cities' => 'required'
+            ]);
 
-            // Inclusions
-            if (!empty($d['inclusions'])) {
-                $incs = array_map('trim', explode(',', $d['inclusions']));
-                foreach ($incs as $title) {
-                    PackInclusion::updateOrCreate(
-                        ['package_uuid' => $pkg->uuid, 'title' => $title],
-                        [
-                            'uuid' => Str::uuid(),
-                            'package_id' => $pkg->id,
-                            'package_uuid' => $pkg->uuid,
-                            'package_title' => $pkg->title,
-                            'status' => 'active',
-                            'created_by' => Auth::id()
-                        ]
-                    );
-                }
-            }
+            $pkg = Package::where('uuid', $uuid)->firstOrFail();
 
-            DB::commit();
-            $pkg->update(['progress_step' => 6]);
+            $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
 
-            return redirect()->route('packages.create', ['uuid' => $pkg->uuid, 'step' => 7])
-                ->with('success', 'Step 6 saved.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Failed to save: ' . $e->getMessage())->withInput();
+            $pkgDesInfo = PackDestinationInfo::updateOrCreate(
+                ['package_id' => $pkg->id],
+                [
+                    'uuid' => Str::uuid(),
+                    'title' => $formatted_title,
+                    'package_id' => $pkg->id,
+                    'package_uuid' => $pkg->uuid,
+                    'package_title' => $pkg->title,
+                    'country_id' => $validated['country_id'],
+                    'country_uuid' => optional(Country::find($validated['country_id']))->uuid,
+                    'country_title' => optional(Country::find($validated['country_id']))->title,
+                    'activity_id' => $validated['activity_id'],
+                    'activity_uuid' => optional(Activity::find($validated['activity_id']))->uuid,
+                    'activity_title' => optional(Activity::find($validated['activity_id']))->title,
+                    'cities' => json_encode($validated['cities']),
+                    'status' => 'active',
+                    'created_by' => Auth::id()
+                ]
+            );
+
+            $pkg->update(['progress_step' => $step]);
+
+            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
         }
     }
 
-    /**
-     * Step 7: Finalize package
-     */
-    protected function stepSeven(Request $request)
+    public function stepTwoStore($request, $uuid, $step)
     {
-        $request->validate([
-            'uuid' => 'required|exists:packages,uuid'
-        ]);
+        try {
+            $validated  = $request->validate([
+                'duration' => 'nullable|integer|min:1',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'no_of_pax' => 'nullable|string'
+            ]);
 
-        $pkg = Package::where('uuid', $request->uuid)->firstOrFail();
-        $pkg->update([
-            'is_complete' => true,
-            'completion_status' => 'completed',
-            'progress_step' => 7,
-            'updated_by' => Auth::id()
-        ]);
+            $pkg = Package::where('uuid', $uuid)->firstOrFail();
 
-        return redirect()->route('packages.index')->with('success', 'Package completed successfully.');
+            $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
+
+            PackQuatDetail::updateOrCreate(
+                ['package_uuid' => $pkg->uuid],
+                [
+                    'uuid' => Str::uuid(),
+                    'title' => $formatted_title,
+                    'package_id' => $pkg->id,
+                    'package_uuid' => $pkg->uuid,
+                    'package_title' => $pkg->title,
+                    'duration' => $validated['duration'] ?? null,
+                    'start_date' => $validated['start_date'] ?? null,
+                    'end_date' => $validated['end_date'] ?? null,
+                    'no_of_pax' => $validated['no_of_pax'] ?? null,
+                    'status' => 'active',
+                    'created_by' => Auth::id()
+                ]
+            );
+
+            $pkg->update(['progress_step' => $step]);
+
+            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function stepThreeStore($request, $uuid, $step)
+    {
+        try {
+            // dd($request->all());
+            $validated = $request->validate([
+                'accomo_cities' => 'nullable|string',
+                'hotels' => 'required'
+            ]);
+
+            $pkg = Package::where('uuid', $uuid)->firstOrFail();
+
+            $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
+
+            $packAccomo = PackAccomoDetail::updateOrCreate(
+                ['package_uuid' => $pkg->uuid],
+                [
+                    'uuid' => Str::uuid(),
+                    'title' => $formatted_title,
+                    'package_id' => $pkg->id,
+                    'package_uuid' => $pkg->uuid,
+                    'package_title' => $pkg->title,
+                    'hotels' => json_encode($validated['hotels']) ?? null,
+                    'status' => 'active',
+                    'created_by' => Auth::id()
+                ]
+            );
+
+            $pkg->update(['progress_step' => $step]);
+
+            // dd($packAccomo, $pkg);
+
+            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function stepFourStore($request, $uuid, $step)
+    {
+        try {
+            // dd($request->all());
+            $validated = $request->validate([
+                'currency_id' => 'required|exists:currencies,id',
+                'air_ticket_details' => 'nullable|string',
+                'price_options' => 'nullable|string'
+            ]);
+
+            $pkg = Package::where('uuid', $uuid)->firstOrFail();
+
+            $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
+
+            $packPrice = PackPrice::updateOrCreate(
+                ['package_uuid' => $pkg->uuid],
+                [
+                    'uuid' => Str::uuid(),
+                    'title' => $formatted_title,
+                    'package_id' => $pkg->id,
+                    'package_uuid' => $pkg->uuid,
+                    'package_title' => $pkg->title,
+                    'currency_id' => $validated['currency_id'] ?? null,
+                    'currency_uuid' => optional(Currency::find($validated['currency_id']))->uuid,
+                    'currency_title' => optional(Currency::find($validated['currency_id']))->title,
+                    'air_ticket_details' => json_encode($validated['air_ticket_details']) ?? null,
+                    'pack_price' => json_encode($validated['price_options']),
+                    'status' => 'active',
+                    'created_by' => Auth::id()
+                ]
+            );
+
+            $pkg->update(['progress_step' => $step]);
+
+            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function stepFiveStore($request, $uuid, $step)
+    {
+        try {
+            // dd($request->input('itenary'));
+            $itenaries = json_decode($request->input('itenary'), true);
+
+            $pkg = Package::where('uuid', $uuid)->firstOrFail();
+
+            foreach ($itenaries as $item) {
+                PackItenaries::create([
+                    'uuid' => Str::uuid(),
+                    'title' => $item['title'] ?? null,
+                    'description' => $item['title'] ?? null, // চাইলে অন্য description ফিল্ড দিতে পারো
+                    'status' => 'active',
+                    'icon' => null,
+
+                    // Foreign key info
+                    'package_id' => $pkg['id'] ?? null,
+                    'package_uuid' => $pkg['uuid'] ?? null,
+                    'package_title' => $pkg['title'] ?? null,
+
+                    // JSON data
+                    'cities' => json_encode([$item['overnightStay'] ?? null]), // overnightStay কে cities হিসেবে রাখছি
+                    'activities' => json_encode($item['activities'] ?? []),
+
+                    // Meals array থেকে প্রথম meal বা join করে string বানানো
+                    'meal' => isset($item['meals']) ? strtolower($item['meals'][0]) : null,
+
+                    // Extra info
+                    'date' => $item['date'] ?? null,
+                    'day_number' => $item['dayNumber'] ?? null,
+
+                    'created_by' => Auth::id(),
+                ]);
+            }
+
+            $pkg->update(['progress_step' => $step]);
+
+            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
+        }
     }
 }
