@@ -51,16 +51,7 @@
 
             {{-- Step 6: Confirm --}}
             @if ($step == 6)
-                <label>Inclusions (comma separated)</label>
-                <input type="text" name="inclusions" value="{{ old('inclusions', $package->inclusions ?? '') }}"
-                    class="mt-1 w-full border rounded px-3 py-2">
-                @error('inclusions')
-                    <p class="text-red-500 text-sm">{{ $message }}</p>
-                @enderror
-                <div class="text-center py-10">
-                    <h3 class="text-lg font-semibold mb-4">Confirm Package Details</h3>
-                    <p>Click "Finish" to complete the package creation.</p>
-                </div>
+                @include('backend.packages.step-six')
             @endif
 
 

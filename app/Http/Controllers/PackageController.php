@@ -19,7 +19,8 @@ use App\Models\{
     Country,
     ActivityCategory,
     City,
-    Currency
+    Currency,
+    Inclusion
 };
 
 class PackageController extends Controller
@@ -148,7 +149,27 @@ class PackageController extends Controller
 
     public function stepSix($uuid, $step)
     {
+        // dd($uuid, $step);
+        $activities = Activity::where('activity_category_id', 3)->with('inclusions')->get();
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activities'));
+    }
+
+    protected function stepSeven($uuid, $step)
+    {
         dd($uuid, $step);
+        $request->validate([
+            'uuid' => 'required|exists:packages,uuid'
+        ]);
+
+        $pkg = Package::where('uuid', $request->uuid)->firstOrFail();
+        $pkg->update([
+            'is_complete' => true,
+            'completion_status' => 'completed',
+            'progress_step' => 7,
+            'updated_by' => Auth::id()
+        ]);
+
+        return redirect()->route('packages.index')->with('success', 'Package completed successfully.');
     }
 
     public function stepForStore(Request $request, $uuid, $step)
@@ -166,7 +187,7 @@ class PackageController extends Controller
             case 5:
                 return $this->stepFiveStore($request, $uuid, $step);
             case 6:
-                return $this->stepSix($uuid, $step);
+                return $this->stepSixStore($request, $uuid, $step);
             case 7:
                 return $this->stepSeven($uuid, $step);
             default:
@@ -365,6 +386,64 @@ class PackageController extends Controller
 
                     'created_by' => Auth::id(),
                 ]);
+            }
+
+            $pkg->update(['progress_step' => $step]);
+
+            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function stepSixStore($request, $uuid, $step)
+    {
+        try {
+            // dd($request->all());
+            $pkg = Package::where('uuid', $uuid)->firstOrFail();
+            $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
+
+            // Existing inclusions
+            $selectedInclusions = $request->input('inclusions', []);
+
+            // Custom inclusions
+            $customInclusions = $request->input('custom_inclusions', []);
+
+            // Example: Save to DB
+            foreach ($selectedInclusions as $activityId => $inclusionIds) {
+                foreach ($inclusionIds as $id) {
+                    PackInclusion::create([
+                        'uuid' => Str::uuid(),
+                        'title' => $formatted_title,
+                        'package_uuid' => $uuid,
+                        'activity_id'  => $activityId,
+                        'inclusion_id' => $id,
+                        'package_id' => $pkg['id'] ?? null,
+                        'package_title' => $pkg['title'] ?? null,
+
+                    ]);
+                }
+            }
+
+            // Handle custom inclusions (new user-defined texts)
+            foreach ($customInclusions as $activityId => $titles) {
+                foreach ($titles as $title) {
+                    $new = Inclusion::create([
+                        'uuid' => Str::uuid(),
+                        'activity_id' => $activityId,
+                        'title'       => $title,
+                    ]);
+
+                    PackInclusion::create([
+                        'uuid' => Str::uuid(),
+                        'title' => $formatted_title,
+                        'package_uuid' => $uuid,
+                        'activity_id'  => $activityId,
+                        'inclusion_id' => $new->id,
+                        'package_id' => $pkg['id'] ?? null,
+                        'package_title' => $pkg['title'] ?? null,
+                    ]);
+                }
             }
 
             $pkg->update(['progress_step' => $step]);

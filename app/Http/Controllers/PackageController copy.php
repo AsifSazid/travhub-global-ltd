@@ -387,8 +387,9 @@ class PackageController extends Controller
     /**
      * Step 7: Finalize package
      */
-    protected function stepSeven(Request $request)
+    protected function stepSeven($uuid, $step)
     {
+        dd($uuid, $step);
         $request->validate([
             'uuid' => 'required|exists:packages,uuid'
         ]);
