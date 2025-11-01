@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->string('title', 255);
             $table->char('description')->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->enum('status', ['active', 'inactive'])->default('inactive');
             $table->boolean('is_complete')->default(false);
             $table->tinyInteger('progress_step')->nullable();
             $table->enum('completion_status', ['incomplete', 'completed'])->default('incomplete');

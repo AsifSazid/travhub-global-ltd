@@ -156,20 +156,25 @@ class PackageController extends Controller
 
     protected function stepSeven($uuid, $step)
     {
-        dd($uuid, $step);
-        $request->validate([
-            'uuid' => 'required|exists:packages,uuid'
-        ]);
+        $pkg = Package::where('uuid', $uuid)->firstOrFail();
+        $pkgDesInfo = PackDestinationInfo::where('package_uuid', $uuid)->firstOrFail();
+        $pkgQuatDetail = PackQuatDetail::where('package_uuid', $uuid)->firstOrFail();
+        $pkgAccomoDetail = PackAccomoDetail::where('package_uuid', $uuid)->firstOrFail();
+        $pkgPrice = PackPrice::where('package_uuid', $uuid)->firstOrFail();
+        $pkgItenaries = PackItenaries::where('package_uuid', $uuid)->firstOrFail();
+        $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->get();
 
-        $pkg = Package::where('uuid', $request->uuid)->firstOrFail();
-        $pkg->update([
-            'is_complete' => true,
-            'completion_status' => 'completed',
-            'progress_step' => 7,
-            'updated_by' => Auth::id()
-        ]);
+        // dd($pkg, $pkgDesInfo, $pkgQuatDetail, $pkgAccomoDetail, $pkgPrice, $pkgItenaries, $pkgInclusions);
 
-        return redirect()->route('packages.index')->with('success', 'Package completed successfully.');
+        return view('backend.packages.pkg-details', [
+            'package' => $pkg,
+            'pkgDesInfo' => $pkgDesInfo,
+            'pkgQuatDetail' => $pkgQuatDetail,
+            'pkgAccomoDetail' => $pkgAccomoDetail,
+            'pkgPrice' => $pkgPrice,
+            'pkgItenaries' => $pkgItenaries,
+            'pkgInclusions' => $pkgInclusions
+        ])->with('success', 'Package completed successfully.');
     }
 
     public function stepForStore(Request $request, $uuid, $step)
@@ -452,5 +457,15 @@ class PackageController extends Controller
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
+    }
+
+    public function packagePdf()
+    {
+        $mpdf = new \Mpdf\Mpdf();
+        $mpdf->SetHeader("<div style='text-align:center'></div>");
+        $mpdf->SetFooter("This is a system generated document(s). So no need to show external signature or seal!");
+        $view = view('backend.packages.full-package-pdf');
+        $mpdf->WriteHTML($view);
+        $mpdf->Output();
     }
 }
