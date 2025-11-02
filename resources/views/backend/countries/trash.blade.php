@@ -63,7 +63,7 @@
 
         <div class="mt-4 px-4 py-2 bg-gray-100 border-t text-sm text-gray-500 flex justify-between items-center">
             <a href="{{ route('countries.index') }}" class="text-blue-500 hover:text-blue-700 mx-1"
-                title="Country Lists"><i class="fas fa-trash-alt"></i> Country Lists</a>
+                title="Country Lists"><i class="fas fa-list"></i> Country Lists</a>
         </div>
     </div>
 

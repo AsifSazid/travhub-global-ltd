@@ -138,7 +138,7 @@ class CountryController extends Controller
     {
         $search = $request->get('search');
 
-        $query = Country::with('user');
+        $query = Country::with('createdBy');
 
         if ($search) {
             $query->where('title', 'like', "%{$search}%");

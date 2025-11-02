@@ -150,7 +150,7 @@ class CityController extends Controller
     {
         $search = $request->get('search');
 
-        $query = City::with('user');
+        $query = City::with('createdBy');
 
         if ($search) {
             $query->where('title', 'like', "%{$search}%");

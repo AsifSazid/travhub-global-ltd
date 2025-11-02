@@ -149,7 +149,7 @@ class HotelController extends Controller
     {
         $search = $request->get('search');
 
-        $query = Hotel::with('user');
+        $query = Hotel::with('createdBy');
 
         if ($search) {
             $query->where('title', 'like', "%{$search}%");

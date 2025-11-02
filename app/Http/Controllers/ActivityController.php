@@ -71,26 +71,26 @@ class ActivityController extends Controller
     public function edit($activity)
     {
         $activity = Activity::where('uuid', $activity)->first();
-        $countries = Country::get();
+        $activityCategories = ActivityCategory::get();
 
-        return view('backend.activities.edit', compact('activity','countries'));
+        return view('backend.activities.edit', compact('activity','activityCategories'));
     }
 
     public function update(Request $request, Activity $activity)
     {
         $request->validate([
             'title' => 'required|string',
-            'country_uuid' => 'required',
+            'activity_category_uuid' => 'required',
         ]);
 
-        $country_data = Country::where('uuid', $request->country_uuid)->first();
+        $activity_category_data = ActivityCategory::where('uuid', $request->activity_category_uuid)->first();
 
         try {
             $activity->update([
                 'title' => $request->title,
-                'country_uuid' => $request->country_uuid,
-                'country_id' => $country_data->id,
-                'country_title' => $country_data->title,
+                'activity_category_uuid' => $request->activity_uuid,
+                'activity_category_uuid' => $activity_category_data->id,
+                'activity_category_uuid' => $activity_category_data->title,
                 'created_by' => Auth::user()->id,
                 'status' =>  $request->input('status') == '1' ? 'active' : 'inactive'
             ]);

@@ -143,7 +143,7 @@ class InclusionController extends Controller
     {
         $search = $request->get('search');
 
-        $query = Inclusion::with('user');
+        $query = Inclusion::with('createdBy');
 
         if ($search) {
             $query->where('title', 'like', "%{$search}%");

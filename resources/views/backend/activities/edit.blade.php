@@ -24,20 +24,22 @@
 
             <div class="mb-4">
                 <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                <input type="text" name="title" id="title" required value="{{ old('title', $activity->title) }}"
+                <input type="text" name="title" id="title" required
+                    value="{{ old('title', $activity->title) }}"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div class="mb-4">
-                <label for="country_uuid" class="block text-sm font-medium text-gray-700">Country</label>
-                <select name="country_uuid" id="country_uuid"
+                <label for="activity_uuid" class="block text-sm font-medium text-gray-700">Activity Category</label>
+
+                <select name="activity_category_uuid" id="activity_category_uuid"
                     class="mt-1 block w-full px-2 py-2 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="" disabled>Select Any One</option>
-                    @foreach ($countries as $country)
-                        <option value="{{ $country->uuid }}"
-                            {{ $activity->country_uuid == $country->uuid ? 'selected' : '' }}>
-                            {{ $country->title }}
-                        </option>
+
+                    <option value="" selected disabled>Select Any One</option>
+                    @foreach ($activityCategories as $activityCategory)
+                        <option value="{{ $activityCategory->uuid }}"
+                            {{ $activity->activity_category_id == $activityCategory->id ? 'selected' : '' }}>
+                            {{ $activityCategory->title }}</option>
                     @endforeach
                 </select>
             </div>
@@ -51,11 +53,11 @@
                 </div>
 
                 <span id="statusText" class="text-xs font-medium text-gray-700">
-                    {{ $country->status === 'active' ? 'Active' : 'Inactive' }}
+                    {{ $activity->status === 'active' ? 'Active' : 'Inactive' }}
                 </span>
 
                 <input type="hidden" name="status" id="status"
-                    value="{{ $country->status === 'active' ? '1' : '0' }}">
+                    value="{{ $activity->status === 'active' ? '1' : '0' }}">
             </div>
 
             <div class="mt-6">

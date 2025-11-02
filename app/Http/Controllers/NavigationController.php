@@ -146,7 +146,7 @@ class NavigationController extends Controller
     {
         $search = $request->get('search');
 
-        $query = Navigation::with('user');
+        $query = Navigation::with('createdBy');
 
         if ($search) {
             $query->where('title', 'like', "%{$search}%");

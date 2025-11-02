@@ -118,7 +118,7 @@ class RoleController extends Controller
     public function getData(Request $request)
     {
         try {
-            $query = Role::with('user');
+            $query = Role::with('createdBy');
 
             if ($request->filled('search')) {
                 $query->where('title', 'like', "%{$request->search}%");
