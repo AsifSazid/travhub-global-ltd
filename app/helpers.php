@@ -20,3 +20,9 @@ function getNavigations()
     return $navigations;
     // return [];
 }
+
+if (!function_exists('format_mmddyyyy')) {
+    function format_mmddyyyy($date) {
+        return date('m-d-Y', strtotime($date));
+    }
+}

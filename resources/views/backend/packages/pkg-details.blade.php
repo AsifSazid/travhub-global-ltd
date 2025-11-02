@@ -27,7 +27,9 @@
                 <h4 class="text-lg font-semibold text-gray-800 mb-2">{{ __('Destination Information') }}</h4>
                 <p class="text-gray-600 mt-2 mb-4">
                     <label for="country_code" class="font-semibold">Country: </label> {{ $pkgDesInfo->country->title }}
-                    <label for="country_code" class="font-semibold">Cities: </label> {{ $pkgDesInfo->country->title }}
+                </p>
+                <p class="text-gray-600 mt-2 mb-4">
+                    <label for="country_code" class="font-semibold">Cities: </label> {{ $pkgDesInfo->cities }}
                 </p>
             </div>
 

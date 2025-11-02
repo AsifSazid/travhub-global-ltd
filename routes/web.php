@@ -122,5 +122,8 @@ Route::middleware('auth')->group(function () {
     // Route::get('/roles/list', [RoleController::class, 'getData'])->name('roles.getData');
     Route::get('/roles/download/pdf', [RoleController::class, 'downloadPdf'])->name('roles.download.pdf');
 });
+    
+
+Route::post('/api/cities/store', [CityController::class, 'apiStore'])->name('api.cities.store');
 
 require __DIR__ . '/auth.php';

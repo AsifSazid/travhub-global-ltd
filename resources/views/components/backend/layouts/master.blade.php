@@ -37,7 +37,7 @@
                     <!-- Content -->
                     <div class="py-1 max-w-7xl mx-auto sm:px-2 lg:px-2">
                         <div
-                            class="py-6 bg-white dark:bg-primary dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                            class="bg-white dark:bg-primary dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                             <div class="p-6 px-4 text-gray-900 dark:text-gray-800">
                                 {{ $slot }}
                             </div>

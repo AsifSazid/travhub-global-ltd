@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 // Package
 Route::get('/packages', [PackageController::class, 'index'])->name('packages.index'); // list page
-Route::get('/packages/{package}', [PackageController::class, 'edit'])->name('packages.edit'); // Edit Page
+Route::get('/packages/{package}/edit', [PackageController::class, 'edit'])->name('packages.edit'); // Edit Page
 Route::get('/packages/list', [PackageController::class, 'getData'])->name('packages.getData');
 Route::get('/packages/trash', [PackageController::class, 'trash'])->name('packages.trash');
 

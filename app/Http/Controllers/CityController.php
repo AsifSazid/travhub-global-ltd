@@ -6,6 +6,7 @@ use App\Models\City;
 use App\Models\Country;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class CityController extends Controller
 {
@@ -69,7 +70,7 @@ class CityController extends Controller
         $city = City::where('uuid', $city)->first();
         $countries = Country::get();
 
-        return view('backend.cities.edit', compact('city','countries'));
+        return view('backend.cities.edit', compact('city', 'countries'));
     }
 
     public function update(Request $request, City $city)
@@ -163,5 +164,80 @@ class CityController extends Controller
         $view = view('backend.cities.pdf', compact('cities'));
         $mpdf->WriteHTML($view);
         $mpdf->Output();
+    }
+
+    public function apiStore(Request $request)
+    {
+        // dd($request->package_uuid);
+
+        $request->validate([
+            'title' => [
+                'required',
+                'string',
+                Rule::unique('cities')->where(function ($query) use ($request) {
+                    return $query->where('country_id', $request->country_id);
+                }),
+            ],
+            'country_id' => 'required|integer|exists:countries,id',
+        ]);
+
+        $country_data = Country::find($request->country_id);
+
+        try {
+            $city = City::create([
+                'uuid' => (string) \Str::uuid(),
+                'title' => $request->title,
+                'country_uuid' => $country_data->uuid,
+                'country_id' => $country_data->id,
+                'country_title' => $country_data->title,
+                'created_by' => Auth::id(),
+            ]);
+
+            if ($request->package_uuid) {
+                $packDestInfo = \App\Models\PackDestinationInfo::where('package_uuid', $request->package_uuid)->first();
+
+                if ($packDestInfo) {
+                    $cities = [];
+
+                    // ✅ Step 1: Decode existing safely (handles both single and double encoded)
+                    if ($packDestInfo->cities) {
+                        $decoded = json_decode($packDestInfo->cities, true);
+                        if (is_string($decoded)) {
+                            $decoded = json_decode($decoded, true);
+                        }
+                        if (is_array($decoded)) {
+                            $cities = $decoded;
+                        }
+                    }
+
+                    // ✅ Step 2: Append new city (if not duplicate)
+                    $newCity = [
+                        'id'    => (string) $city->id,
+                        'title' => $city->title,
+                    ];
+
+                    $exists = collect($cities)->contains(fn($c) => $c['id'] == $city->id);
+                    if (!$exists) {
+                        $cities[] = $newCity;
+                    }
+
+                    // ✅ Step 3: Encode same as your DB format
+                    $encoded        = json_encode($cities, JSON_UNESCAPED_UNICODE);
+                    $doubleEncoded  = json_encode($encoded);
+
+                    $packDestInfo->cities = $doubleEncoded;
+                    $packDestInfo->save();
+
+                    // For checking result:
+                    // dd($doubleEncoded);
+                }
+            }
+
+            return response()->json($city);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => $th->getMessage()
+            ], 500);
+        }
     }
 }

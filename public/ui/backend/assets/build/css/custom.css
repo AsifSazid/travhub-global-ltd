@@ -2469,3 +2469,75 @@ select {
         color: rgb(209 213 219 / var(--tw-text-opacity, 1))
     }
 }
+
+
+/* === Custom Background Colors (similar to Tailwind shades) === */
+.bg-blue-600 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(37 99 235 / var(--tw-bg-opacity));
+    /* #2563EB */
+}
+
+.bg-green-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(34 197 94 / var(--tw-bg-opacity));
+    /* #22C55E */
+}
+
+.bg-gray-300 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(209 213 219 / var(--tw-bg-opacity));
+    /* #D1D5DB */
+}
+
+.bg-gray-600 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(75 85 99 / var(--tw-bg-opacity));
+    /* #4B5563 */
+}
+
+.text-blue-600 {
+    --tw-text-opacity: 1;
+    color: rgb(37 99 235 / var(--tw-text-opacity));
+    /* #2563EB */
+}
+
+.text-gray-600 {
+    --tw-text-opacity: 1;
+    color: rgb(75 85 99 / var(--tw-text-opacity));
+    /* #4B5563 */
+}
+
+.text-gray-400 {
+    --tw-text-opacity: 1;
+    color: rgb(156 163 175 / var(--tw-text-opacity));
+    /* #9CA3AF */
+}
+
+.hover\:brightness-110:hover {
+    filter: brightness(110%);
+}
+
+/* custom min-height class */
+.min-h-\[40px\] {
+    min-height: 40px !important;
+}
+
+.min-h-\[45px\] {
+    min-height: 45px !important;
+}
+
+.min-h-\[50px\] {
+    min-height: 50px !important;
+}
+
+.min-h-\[100px\] {
+    min-height: 100px !important;
+}
+
+/* Custom responsive 3-column grid at md breakpoint */
+@media (min-width: 768px) {
+    .md\:grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}

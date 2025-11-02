@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 use App\Models\{
     Activity,
     Package,
@@ -53,6 +54,11 @@ class PackageController extends Controller
         return view('backend.packages.create');
     }
 
+    public function edit()
+    {
+        dd('edit');
+    }
+
     public function store(Request $request)
     {
         try {
@@ -97,16 +103,50 @@ class PackageController extends Controller
 
     public function stepOne($uuid, $step)
     {
-        $countries = Country::where('status', 'active')->get();
+        // eager load cities
+        $countries = Country::with(['cities' => function ($q) {
+            $q->where('status', 'active')->orderBy('title');
+        }])->where('status', 'active')->get();
+
         $activities = Activity::where('status', 'active')->where('activity_category_id', 1)->get();
 
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'countries', 'activities'));
+        $packDesInfo = PackDestinationInfo::where('package_uuid', $uuid)->first();
+
+        $package = $this->getPackageInfo($uuid);
+        $completedStep = $package->progress_step ?? 1;
+
+        return view('backend.packages.create-multistep', [
+            'uuid' => $uuid,
+            'step' => $step,
+            'title' => "Destination Information",
+            'countries' => $countries,
+            'activities' => $activities,
+            'packDesInfo' => $packDesInfo ?? null,
+            'completedStep' => $completedStep
+        ]);
     }
 
     public function stepTwo($uuid, $step)
     {
-        // dd($uuid, $step);
-        return view('backend.packages.create-multistep', compact('uuid', 'step'));
+        $packQuatInfo = PackQuatDetail::where('package_uuid', $uuid)->first();
+
+        if ($packQuatInfo && $packQuatInfo->no_of_pax) {
+            $packQuatInfo->no_of_pax = json_decode($packQuatInfo->no_of_pax, true);
+        } else {
+            $packQuatInfo->no_of_pax = [];
+        }
+
+        $title = "Quatation Information";
+        $package = $this->getPackageInfo($uuid);
+        $completedStep = $package->progress_step ?? 2;
+
+        return view('backend.packages.create-multistep', [
+            'uuid' => $uuid,
+            'step' => $step,
+            'title' => $title,
+            'packQuatInfo' => $packQuatInfo ?? null,
+            'completedStep' => $completedStep
+        ]);
     }
 
     public function stepThree($uuid, $step)
@@ -117,41 +157,61 @@ class PackageController extends Controller
 
         if (is_string($cityIds)) {
             $decoded = json_decode($cityIds, true);
-            // If still string after decode, decode again
             if (is_string($decoded)) {
                 $decoded = json_decode($decoded, true);
             }
             $cityIds = $decoded;
         }
 
+        $cityIds = Arr::flatten($cityIds);
+
         if (is_array($cityIds) && count($cityIds)) {
-            $cities = City::whereIn('id', $cityIds)->get(['id', 'uuid', 'title']);
+            $cities = City::whereIn('id', $cityIds)
+                ->get(['id', 'uuid', 'title'])
+                ->map(function ($city) use ($packDestinationCities) {
+                    $city->country_id = $packDestinationCities->country_id;
+                    return $city;
+                });
         } else {
             $cities = collect();
         }
 
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'cities'));
+        $title = "Accommodation Details";
+        $package = $this->getPackageInfo($uuid);
+        $completedStep = $package->progress_step ?? 3;
+
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'cities', 'title', 'completedStep'));
     }
+
 
     public function stepFour($uuid, $step)
     {
         $currencies = Currency::where('status', 'active')->get();
         $packQuatDetails = PackQuatDetail::where('package_uuid', $uuid)->first();
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'currencies', 'packQuatDetails'));
+        $title = "Pricing Details";
+        $package = $this->getPackageInfo($uuid);
+        $completedStep = $package->progress_step ?? 4;
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'currencies', 'packQuatDetails', 'title', 'completedStep'));
     }
 
     public function stepFive($uuid, $step)
     {
         $activites = Activity::where('activity_category_id', 2)->get();
         $packQuatDetails = PackQuatDetail::where('package_uuid', $uuid)->first();
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activites', 'packQuatDetails'));
+        $title = "Itinerary Details";
+        $package = $this->getPackageInfo($uuid);
+        $completedStep = $package->progress_step ?? 5;
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activites', 'packQuatDetails', 'title', 'completedStep'));
     }
 
     public function stepSix($uuid, $step)
     {
         // dd($uuid, $step);
         $activities = Activity::where('activity_category_id', 3)->with('inclusions')->get();
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activities'));
+        $title = "Inclusion Details";
+        $package = $this->getPackageInfo($uuid);
+        $completedStep = $package->progress_step ?? 6;
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activities', 'title', 'completedStep'));
     }
 
     protected function stepSeven($uuid, $step)
@@ -165,6 +225,9 @@ class PackageController extends Controller
         $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->get();
 
         // dd($pkg, $pkgDesInfo, $pkgQuatDetail, $pkgAccomoDetail, $pkgPrice, $pkgItenaries, $pkgInclusions);
+        $title = "Itinerary Details";
+        $package = $this->getPackageInfo($uuid);
+        $completedStep = $package->progress_step ?? 7;
 
         return view('backend.packages.pkg-details', [
             'package' => $pkg,
@@ -173,7 +236,9 @@ class PackageController extends Controller
             'pkgAccomoDetail' => $pkgAccomoDetail,
             'pkgPrice' => $pkgPrice,
             'pkgItenaries' => $pkgItenaries,
-            'pkgInclusions' => $pkgInclusions
+            'pkgInclusions' => $pkgInclusions,
+            'title' => $title,
+            'completedStep' => $completedStep
         ])->with('success', 'Package completed successfully.');
     }
 
@@ -266,7 +331,7 @@ class PackageController extends Controller
                     'duration' => $validated['duration'] ?? null,
                     'start_date' => $validated['start_date'] ?? null,
                     'end_date' => $validated['end_date'] ?? null,
-                    'no_of_pax' => $validated['no_of_pax'] ?? null,
+                    'no_of_pax' => json_encode($validated['no_of_pax']) ?? null,
                     'status' => 'active',
                     'created_by' => Auth::id()
                 ]
@@ -467,5 +532,11 @@ class PackageController extends Controller
         $view = view('backend.packages.full-package-pdf');
         $mpdf->WriteHTML($view);
         $mpdf->Output();
+    }
+
+    public function getPackageInfo($uuid)
+    {
+        $package = Package::where('uuid', $uuid)->firstOrFail();
+        return $package;
     }
 }
