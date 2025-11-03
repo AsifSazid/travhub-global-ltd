@@ -170,38 +170,41 @@ class CityController extends Controller
 
     public function apiStore(Request $request)
     {
-        // dd($request->package_uuid);
-
         $request->validate([
-            'title' => [
-                'required',
-                'string',
-                Rule::unique('cities')->where(function ($query) use ($request) {
-                    return $query->where('country_id', $request->country_id);
-                }),
-            ],
+            'title' => 'required|string',
             'country_id' => 'required|integer|exists:countries,id',
         ]);
 
         $country_data = Country::find($request->country_id);
 
         try {
-            $city = City::create([
-                'uuid' => (string) \Str::uuid(),
-                'title' => $request->title,
-                'country_uuid' => $country_data->uuid,
-                'country_id' => $country_data->id,
-                'country_title' => $country_data->title,
-                'created_by' => Auth::id(),
-            ]);
+            // ✅ Step 1: Check if same city already exists in that country
+            $existingCity = City::where('title', $request->title)
+                ->where('country_id', $request->country_id)
+                ->first();
 
+            if ($existingCity) {
+                $city = $existingCity;
+            } else {
+                // ✅ Step 2: Create new city if not exist
+                $city = City::create([
+                    'uuid' => (string) \Str::uuid(),
+                    'title' => $request->title,
+                    'country_uuid' => $country_data->uuid,
+                    'country_id' => $country_data->id,
+                    'country_title' => $country_data->title,
+                    'created_by' => Auth::id(),
+                ]);
+            }
+
+            // ✅ Step 3: If package_uuid exists → update PackDestinationInfo
             if ($request->package_uuid) {
                 $packDestInfo = \App\Models\PackDestinationInfo::where('package_uuid', $request->package_uuid)->first();
 
                 if ($packDestInfo) {
                     $cities = [];
 
-                    // ✅ Step 1: Decode existing safely (handles both single and double encoded)
+                    // Decode safely (handles both single/double encoded)
                     if ($packDestInfo->cities) {
                         $decoded = json_decode($packDestInfo->cities, true);
                         if (is_string($decoded)) {
@@ -212,7 +215,7 @@ class CityController extends Controller
                         }
                     }
 
-                    // ✅ Step 2: Append new city (if not duplicate)
+                    // ✅ Step 4: Append city only if not already there
                     $newCity = [
                         'id'    => (string) $city->id,
                         'title' => $city->title,
@@ -223,22 +226,19 @@ class CityController extends Controller
                         $cities[] = $newCity;
                     }
 
-                    // ✅ Step 3: Encode same as your DB format
-                    $encoded        = json_encode($cities, JSON_UNESCAPED_UNICODE);
-                    $doubleEncoded  = json_encode($encoded);
+                    // Encode back in same format (double encoded)
+                    $encoded = json_encode($cities, JSON_UNESCAPED_UNICODE);
+                    $doubleEncoded = json_encode($encoded);
 
                     $packDestInfo->cities = $doubleEncoded;
                     $packDestInfo->save();
-
-                    // For checking result:
-                    // dd($doubleEncoded);
                 }
             }
 
             return response()->json($city);
         } catch (\Throwable $th) {
             return response()->json([
-                'error' => $th->getMessage()
+                'error' => $th->getMessage(),
             ], 500);
         }
     }
