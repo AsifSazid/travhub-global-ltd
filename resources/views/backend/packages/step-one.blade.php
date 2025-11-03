@@ -1,7 +1,9 @@
-{{-- Blade snippet: include inside your form --}}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {{-- COUNTRY --}}
     <div class="md:col-span-2">
-        <label for="country" class="block text-sm font-medium">Country <span class="text-red-500">*</span></label>
+        <label for="country" class="block text-sm font-medium">
+            Country <span class="text-red-500">*</span>
+        </label>
         <select id="country" name="country_id" class="mt-1 w-full border rounded px-3 py-2">
             <option value="">Select country</option>
             @foreach ($countries as $country)
@@ -16,51 +18,51 @@
         @enderror
     </div>
 
-    <div>
-        <label class="block text-sm font-medium">Activity <span class="text-red-500">*</span></label>
-        <select name="activity_id" class="mt-1 w-full border rounded px-3 py-2">
-            <option value="">Select Activity</option>
-            @foreach ($activities as $activity)
-                <option value="{{ $activity->id }}"
-                    {{ old('activity_id', $packDesInfo->activity_id ?? '') == $activity->id ? 'selected' : '' }}>
-                    {{ $activity->title }}</option>
-            @endforeach
-        </select>
-        @error('activity_id')
-            <p class="text-red-500 text-sm">{{ $message }}</p>
-        @enderror
-    </div>
-
-    <div class="md:col-span-2 mt-4">
+    {{-- CITIES --}}
+    <div class="md:col-span-2">
         <label class="block text-sm font-medium">Cities <span class="text-red-500">*</span></label>
-
-        <!-- cities container: grid layout -->
-        <div id="cities-container"
+        <div id="cityList"
             class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 rounded mt-1 py-2 min-h-[45px] border p-2 bg-white">
-            <!-- JS will render cities here -->
+            <!-- JS renders cities here -->
         </div>
-
         @error('cities')
             <p class="text-red-500 text-sm">{{ $message }}</p>
         @enderror
     </div>
 
-    {{-- Hidden JSON field: put raw DB JSON or [] --}}
-    <input type="hidden" id="cities-input" name="cities" value='{{ $packDesInfo->cities ?? '[]' }}'>
+    {{-- ACTIVITIES --}}
+    <div class="md:col-span-2">
+        <label class="block text-sm font-medium">Activities <span class="text-red-500">*</span></label>
+        <div id="activityList"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-1 py-2 min-h-[45px] border p-2 bg-white rounded">
+            <!-- JS renders activities here -->
+        </div>
+        @error('activities')
+            <p class="text-red-500 text-sm">{{ $message }}</p>
+        @enderror
+    </div>
+
+    {{-- Hidden JSON Inputs --}}
+    <input type="hidden" id="cityInput" name="cities" value='{{ $packDesInfo->cities ?? '[]' }}'>
+    <input type="hidden" id="activityInput" name="activities" value='{{ $packDesInfo->activities ?? '[]' }}'>
 </div>
 
 @push('js')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const countrySelect = document.getElementById('country');
-            const citiesContainer = document.getElementById('cities-container');
-            const citiesInput = document.getElementById('cities-input');
 
-            // Build JS map for countries + cities (injected from backend)
-            window.COUNTRY_CITIES = {};
-            @foreach ($countries as $c)
-                window.COUNTRY_CITIES["{{ $c->id }}"] = [
-                    @foreach ($c->cities as $city)
+            // ==== DOM References ====
+            const countrySelect = document.getElementById('country');
+            const cityList = document.getElementById('cityList');
+            const cityInput = document.getElementById('cityInput');
+            const activityList = document.getElementById('activityList');
+            const activityInput = document.getElementById('activityInput');
+
+            // ==== Build Country → Cities Mapping ====
+            window.COUNTRY_TO_CITIES = {};
+            @foreach ($countries as $country)
+                window.COUNTRY_TO_CITIES["{{ $country->id }}"] = [
+                    @foreach ($country->cities as $city)
                         {
                             id: "{{ $city->id }}",
                             title: {!! json_encode($city->title) !!}
@@ -72,105 +74,168 @@
                 ];
             @endforeach
 
-            // ✅ Parse selectedCities from DB (handle both single & double encoded)
-            let selectedCities = [];
-            try {
-                selectedCities = JSON.parse(citiesInput.value);
-                if (typeof selectedCities === "string") {
-                    selectedCities = JSON.parse(selectedCities);
+            // ==== Build Activity Data (Country + City level) ====
+            window.ALL_ACTIVITIES = [];
+            @foreach ($countries as $country)
+                @foreach ($country->activities as $activity)
+                    window.ALL_ACTIVITIES.push({
+                        id: "{{ $activity->id }}",
+                        title: {!! json_encode($activity->title) !!},
+                        country_id: "{{ $country->id }}",
+                        city_id: null
+                    });
+                @endforeach
+                @foreach ($country->cities as $city)
+                    @foreach ($city->activities as $activity)
+                        window.ALL_ACTIVITIES.push({
+                            id: "{{ $activity->id }}",
+                            title: {!! json_encode($activity->title) !!},
+                            country_id: "{{ $country->id }}",
+                            city_id: "{{ $city->id }}"
+                        });
+                    @endforeach
+                @endforeach
+            @endforeach
+
+            // ==== State ====
+            let selectedCities = parseJSON(cityInput.value);
+            let selectedActivities = parseJSON(activityInput.value);
+
+            function parseJSON(str) {
+                try {
+                    return JSON.parse(str) || [];
+                } catch {
+                    return [];
                 }
-            } catch (e) {
-                selectedCities = [];
             }
 
-            if (!Array.isArray(selectedCities)) selectedCities = [];
-            selectedCities = selectedCities.map(c => ({
-                id: String(c.id),
-                title: c.title
-            }));
+            const isCityChecked = id => selectedCities.some(c => c.id == id);
+            const isActivityChecked = title => selectedActivities.some(a => a.title == title);
 
-            function isCitySelected(id) {
-                return selectedCities.some(c => String(c.id) === String(id));
-            }
-
-            function renderMessage(text, color = 'gray') {
-                citiesContainer.innerHTML =
-                    `<p class="text-${color}-500 text-sm col-span-3 text-center">${text}</p>`;
-            }
-
-            function renderCityList(list) {
-                citiesContainer.innerHTML = '';
-                if (!Array.isArray(list) || list.length === 0) {
-                    renderMessage('No cities found for this country.', 'gray');
-                    return;
-                }
-
-                list.forEach(city => {
-                    const label = document.createElement('label');
-                    label.className =
-                        'flex items-center space-x-2 border px-3 py-2 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 shadow-sm transition';
+            // ==== Render City Checkboxes ====
+            function renderCities(cities) {
+                cityList.innerHTML = '';
+                cities.forEach(city => {
+                    const wrapper = document.createElement('label');
+                    wrapper.className =
+                        'flex items-center space-x-2 border px-3 py-2 rounded bg-gray-50 hover:bg-gray-100';
 
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
-                    checkbox.value = String(city.id);
-                    checkbox.className = 'accent-indigo-600';
-                    checkbox.id = `city-${city.id}`;
+                    checkbox.value = city.id;
+                    checkbox.checked = isCityChecked(city.id);
 
-                    // ✅ Preselect if it exists in selectedCities
-                    if (isCitySelected(city.id)) {
-                        checkbox.checked = true;
-                    }
-
-                    const span = document.createElement('span');
-                    span.textContent = city.title;
-
-                    label.appendChild(checkbox);
-                    label.appendChild(span);
-                    citiesContainer.appendChild(label);
-
-                    checkbox.addEventListener('change', function() {
-                        const cid = String(this.value);
-                        const ctitle = span.textContent;
-
-                        if (this.checked) {
-                            if (!isCitySelected(cid)) selectedCities.push({
-                                id: cid,
-                                title: ctitle
-                            });
+                    checkbox.addEventListener('change', () => {
+                        if (checkbox.checked) {
+                            selectedCities.push(city);
                         } else {
-                            selectedCities = selectedCities.filter(c => String(c.id) !== cid);
+                            selectedCities = selectedCities.filter(c => c.id != city.id);
                         }
-
-                        citiesInput.value = JSON.stringify(selectedCities);
+                        cityInput.value = JSON.stringify(selectedCities);
+                        loadActivities();
                     });
+
+                    const label = document.createElement('span');
+                    label.className = 'pl-1';
+                    label.textContent = city.title;
+
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(label);
+                    cityList.appendChild(wrapper);
+                });
+                cityInput.value = JSON.stringify(selectedCities);
+            }
+
+            // ==== Load & Render Activities ====
+            function loadActivities() {
+                const selectedCountryId = countrySelect.value;
+                const selectedCityIds = selectedCities.map(c => String(c.id));
+
+                let relevantActivities = [];
+
+                if (selectedCityIds.length > 0) {
+                    // ✅ City selected → only city activities
+                    relevantActivities = window.ALL_ACTIVITIES.filter(a =>
+                        String(a.country_id) === String(selectedCountryId) &&
+                        a.city_id && selectedCityIds.includes(String(a.city_id))
+                    );
+                } else {
+                    // ✅ Only country selected → country-level activities
+                    relevantActivities = window.ALL_ACTIVITIES.filter(a =>
+                        String(a.country_id) === String(selectedCountryId) && a.city_id === null
+                    );
+                }
+
+                // ✅ Remove duplicates by title
+                const uniqueActivities = [];
+                const seenTitles = new Set();
+                relevantActivities.forEach(a => {
+                    if (!seenTitles.has(a.title)) {
+                        seenTitles.add(a.title);
+                        uniqueActivities.push(a);
+                    }
                 });
 
-                citiesInput.value = JSON.stringify(selectedCities);
+                renderActivities(uniqueActivities);
             }
 
-            function loadCitiesForCountry(countryId) {
-                if (!countryId) {
-                    renderMessage('Select a country to load cities...', 'gray');
+            // ==== Render Activity Checkboxes ====
+            function renderActivities(activities) {
+                activityList.innerHTML = '';
+                if (activities.length === 0) {
+                    activityList.innerHTML = `<p class="text-gray-500">No activities found</p>`;
                     return;
                 }
-                const list = window.COUNTRY_CITIES[String(countryId)] || [];
-                renderCityList(list);
+
+                activities.forEach(activity => {
+                    const wrapper = document.createElement('label');
+                    wrapper.className =
+                        'flex items-center space-x-2 border px-3 py-2 rounded bg-gray-50 hover:bg-gray-100';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = activity.id;
+                    checkbox.checked = isActivityChecked(activity.title);
+
+                    checkbox.addEventListener('change', () => {
+                        if (checkbox.checked) {
+                            if (!selectedActivities.some(a => a.title === activity.title)) {
+                                selectedActivities.push(activity);
+                            }
+                        } else {
+                            selectedActivities = selectedActivities.filter(a => a.title != activity
+                                .title);
+                        }
+                        activityInput.value = JSON.stringify(selectedActivities);
+                    });
+
+                    const label = document.createElement('span');
+                    label.className = 'pl-1';
+                    label.textContent = activity.title;
+
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(label);
+                    activityList.appendChild(wrapper);
+                });
+
+                activityInput.value = JSON.stringify(selectedActivities);
             }
 
-            countrySelect.addEventListener('change', function() {
+            // ==== Country Change ====
+            countrySelect.addEventListener('change', () => {
                 selectedCities = [];
-                citiesInput.value = '[]';
-                loadCitiesForCountry(this.value);
+                selectedActivities = [];
+                cityInput.value = '[]';
+                activityInput.value = '[]';
+                renderCities(window.COUNTRY_TO_CITIES[countrySelect.value] || []);
+                loadActivities();
             });
 
-            // ✅ Initial load (preselect)
+            // ==== Initial Load ====
             if (countrySelect.value) {
-                loadCitiesForCountry(countrySelect.value);
-            } else {
-                renderMessage('Select a country to load cities...', 'gray');
+                renderCities(window.COUNTRY_TO_CITIES[countrySelect.value] || []);
+                loadActivities();
             }
-
-            console.debug("✅ Parsed selectedCities:", selectedCities);
         });
     </script>
 @endpush

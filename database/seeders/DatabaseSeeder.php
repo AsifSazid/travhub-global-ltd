@@ -139,15 +139,15 @@ class DatabaseSeeder extends Seeder
             'title' => 'City Tours',
             'country_id' => 1,
             'city_id' => 2,
-            'currency_id' => 1
+            'currency_id' => 3
         ]); 
 
         Activity::create([
             'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'City Tours',
+            'title' => 'Beach Activities',
             'country_id' => 2,
             'city_id' => 1,
-            'currency_id' => 2
+            'currency_id' => 3
         ]);
 
         Activity::create([
@@ -155,7 +155,7 @@ class DatabaseSeeder extends Seeder
             'title' => 'City Tours',
             'country_id' => 2,
             'city_id' => 2,
-            'currency_id' => 2
+            'currency_id' => 4
         ]);
 
         Activity::create([

@@ -21,6 +21,7 @@ use App\Models\{
     ActivityCategory,
     City,
     Currency,
+    Hotel,
     Inclusion
 };
 
@@ -108,7 +109,7 @@ class PackageController extends Controller
             $q->where('status', 'active')->orderBy('title');
         }])->where('status', 'active')->get();
 
-        $activities = Activity::where('status', 'active')->where('activity_category_id', 1)->get();
+        $activities = Activity::where('status', 'active')->get();
 
         $packDesInfo = PackDestinationInfo::where('package_uuid', $uuid)->first();
 
@@ -132,8 +133,6 @@ class PackageController extends Controller
 
         if ($packQuatInfo && $packQuatInfo->no_of_pax) {
             $packQuatInfo->no_of_pax = json_decode($packQuatInfo->no_of_pax, true);
-        } else {
-            $packQuatInfo->no_of_pax = [];
         }
 
         $title = "Quatation Information";
@@ -270,7 +269,7 @@ class PackageController extends Controller
         try {
             $validated  = $request->validate([
                 'country_id' => 'required|exists:countries,id',
-                'activity_id' => 'required|exists:activities,id',
+                'activities' => 'required',
                 'cities' => 'required'
             ]);
 
@@ -289,10 +288,8 @@ class PackageController extends Controller
                     'country_id' => $validated['country_id'],
                     'country_uuid' => optional(Country::find($validated['country_id']))->uuid,
                     'country_title' => optional(Country::find($validated['country_id']))->title,
-                    'activity_id' => $validated['activity_id'],
-                    'activity_uuid' => optional(Activity::find($validated['activity_id']))->uuid,
-                    'activity_title' => optional(Activity::find($validated['activity_id']))->title,
                     'cities' => json_encode($validated['cities']),
+                    'activities' => json_encode($validated['activities']),
                     'status' => 'active',
                     'created_by' => Auth::id()
                 ]
@@ -348,37 +345,75 @@ class PackageController extends Controller
     public function stepThreeStore($request, $uuid, $step)
     {
         try {
-            // dd($request->all());
+            // Selected hotels: format => [city_id => [id, title]]
+            $selectedHotels = $request->input('hotels', []);
+
+            // Custom hotels: format => [city_id => ["Hotel A", "Hotel B"]]
+            $customHotels = $request->input('custom_hotels', []);
+
+            $allHotels = [];
+
+            // 1️⃣ Handle existing hotels
+            foreach ($selectedHotels as $hotelData) {
+                if (!empty($hotelData[0])) {
+                    $allHotels[] = [
+                        'id' => (string)$hotelData[0],
+                        'title' => $hotelData[1] ?? null,
+                    ];
+                }
+            }
+
+            // 2️⃣ Handle custom hotels
+            foreach ($customHotels as $cityId => $titles) {
+                foreach ($titles as $title) {
+                    if (!empty($title)) {
+                        $newHotel = Hotel::create([
+                            'uuid'    => Str::uuid(),
+                            'city_id' => $cityId,
+                            'title'   => trim($title),
+                        ]);
+
+                        $allHotels[] = [
+                            'id' => (string)$newHotel->id,
+                            'title' => $newHotel->title,
+                        ];
+                    }
+                }
+            }
+
+            // 3️⃣ Validation
             $validated = $request->validate([
                 'accomo_cities' => 'nullable|string',
-                'hotels' => 'required'
             ]);
 
+            // 4️⃣ Get package
             $pkg = Package::where('uuid', $uuid)->firstOrFail();
-
             $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
 
+            // 5️⃣ Save accommodation details
             $packAccomo = PackAccomoDetail::updateOrCreate(
                 ['package_uuid' => $pkg->uuid],
                 [
-                    'uuid' => Str::uuid(),
-                    'title' => $formatted_title,
-                    'package_id' => $pkg->id,
-                    'package_uuid' => $pkg->uuid,
-                    'package_title' => $pkg->title,
-                    'hotels' => json_encode($validated['hotels']) ?? null,
-                    'status' => 'active',
-                    'created_by' => Auth::id()
+                    'uuid'           => Str::uuid(),
+                    'title'          => $formatted_title,
+                    'package_id'     => $pkg->id,
+                    'package_uuid'   => $pkg->uuid,
+                    'package_title'  => $pkg->title,
+                    'hotels'         => json_encode($allHotels), // save id+title array
+                    'status'         => 'active',
+                    'created_by'     => Auth::id(),
                 ]
             );
 
+            // 6️⃣ Update progress
             $pkg->update(['progress_step' => $step]);
 
-            // dd($packAccomo, $pkg);
-
-            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('packages.step', [
+                'uuid' => $uuid,
+                'step' => $step + 1
+            ])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
-            dd($e->getMessage());
+            dd($e->getMessage(), $e->getLine());
         }
     }
 

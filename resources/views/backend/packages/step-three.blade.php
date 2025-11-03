@@ -31,9 +31,13 @@
                 <div id="hotel-list-{{ $city->id }}" class="hotel-list space-y-2">
                     @forelse($hotels as $hotel)
                         <label class="flex items-center gap-2 text-sm bg-gray-50 border rounded-lg px-3 py-2">
-                            <input type="radio" name="hotels[{{ $city->id }}]" value="{{ $hotel->id }}">
+                            <input type="radio" name="hotels[{{ $city->id }}][0]" value="{{ $hotel->id }}"
+                                class="hotel-radio" data-city="{{ $city->id }}" data-title="{{ $hotel->title }}">
                             <span>{{ $hotel->title }}</span>
                         </label>
+                        {{-- hidden title field (auto-filled by JS when selected) --}}
+                        <input type="hidden" name="hotels[{{ $city->id }}][1]"
+                            id="hotel-title-{{ $city->id }}" value="">
                     @empty
                         <p class="text-gray-500 text-sm italic">No hotels found</p>
                     @endforelse

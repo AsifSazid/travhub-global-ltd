@@ -38,13 +38,8 @@ return new class extends Migration
             // JSON field: cities
             $table->json('cities')->nullable();
 
-            // Foreign Key: activity (required)
-            $table->unsignedBigInteger('activity_id');
-            $table->foreign('activity_id')->references('id')->on('activities')->cascadeOnDelete();
-
-            // activity reference fields
-            $table->uuid('activity_uuid')->nullable();
-            $table->string('activity_title', 255)->nullable();
+            // JSON field: cities
+            $table->json('activities')->nullable();
 
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();
