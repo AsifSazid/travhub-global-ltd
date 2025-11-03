@@ -35,7 +35,6 @@
                                 class="hotel-radio" data-city="{{ $city->id }}" data-title="{{ $hotel->title }}">
                             <span>{{ $hotel->title }}</span>
                         </label>
-                        {{-- hidden title field (auto-filled by JS when selected) --}}
                         <input type="hidden" name="hotels[{{ $city->id }}][1]"
                             id="hotel-title-{{ $city->id }}" value="">
                     @empty
