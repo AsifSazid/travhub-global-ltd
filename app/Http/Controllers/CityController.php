@@ -62,7 +62,7 @@ class CityController extends Controller
      */
     public function show($city)
     {
-        $city = City::where('uuid', $city)->withCount('hotels')->first();
+        $city = City::where('uuid', $city)->withCount('hotels')->firstOrFail();
         $activities = Activity::where('city_id', $city->id)->where('country_id', $city->country_id)->get();
         return view('backend.cities.show', compact('city', 'activities'));
     }

@@ -57,8 +57,7 @@ class CurrentRateController extends Controller
      */
     public function show($current_rate)
     {
-        $current_rate = CurrentRate::where('uuid', $current_rate)->first();
-        $user = User::where('id', $current_rate->created_by)->first();
+        $current_rate = CurrentRate::where('uuid', $current_rate)->firstOrFail();
         return view('backend.current_rates.show', compact('current_rate', 'user'));
     }
 

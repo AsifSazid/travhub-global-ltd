@@ -54,7 +54,7 @@ class NavigationController extends Controller
 
     public function show($navigation)
     {
-        $navigation = Navigation::where('uuid', $navigation)->first();
+        $navigation = Navigation::where('uuid', $navigation)->firstOrFail();
         return view('backend.navigations.show', compact('navigation'));
     }
 

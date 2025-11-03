@@ -60,7 +60,7 @@ class InclusionController extends Controller
      */
     public function show($inclusion)
     {
-        $inclusion = Inclusion::where('uuid', $inclusion)->first();
+        $inclusion = Inclusion::where('uuid', $inclusion)->firstOrFail();
         return view('backend.inclusions.show', compact('inclusion'));
     }
 

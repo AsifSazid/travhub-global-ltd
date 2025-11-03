@@ -60,7 +60,7 @@ class HotelController extends Controller
      */
     public function show($hotel)
     {
-        $hotel = Hotel::where('uuid', $hotel)->first();
+        $hotel = Hotel::where('uuid', $hotel)->firstOrFail();
         return view('backend.hotels.show', compact('hotel'));
     }
 

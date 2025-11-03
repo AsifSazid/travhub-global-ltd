@@ -53,7 +53,7 @@ class RoleController extends Controller
      */
     public function show($role)
     {
-        $role = Role::where('uuid', $role)->first();
+        $role = Role::where('uuid', $role)->firstOrFail();
         return view('backend.roles.show', compact('role'));
     }
 

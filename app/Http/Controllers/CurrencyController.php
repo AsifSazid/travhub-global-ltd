@@ -64,7 +64,7 @@ class CurrencyController extends Controller
      */
     public function show($currency)
     {
-        $currency = Currency::where('uuid', $currency)->first();
+        $currency = Currency::where('uuid', $currency)->firstOrFail();
         return view('backend.currencies.show', compact('currency'));
     }
 
