@@ -35,4 +35,9 @@ class Country extends Model
     {
         return $this->hasMany(PackDestinationInfo::class, 'activity_id', 'id');
     }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class, 'country_id', 'id');
+    }
 }

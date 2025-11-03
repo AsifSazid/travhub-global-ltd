@@ -30,4 +30,9 @@ class City extends Model
     {
         return $this->hasMany(Hotel::class, 'city_id');
     }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class, 'city_id', 'id');
+    }
 }

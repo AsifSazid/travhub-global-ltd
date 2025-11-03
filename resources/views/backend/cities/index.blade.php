@@ -25,7 +25,7 @@
                     <th class="px-6 py-4">Action</th>
                 </tr>
             </thead>
-            <tbody id="roleTableBody" class="text-center">
+            <tbody id="cityTableBody" class="text-center">
                 <!-- JS will inject rows here -->
             </tbody>
         </table>
@@ -52,7 +52,7 @@
         <script>
             document.addEventListener("DOMContentLoaded", () => {
                 const input = document.getElementById("searchInput");
-                const tableBody = document.getElementById("roleTableBody");
+                const tableBody = document.getElementById("cityTableBody");
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                 const fetchRoles = async (search = '', page = 1) => {

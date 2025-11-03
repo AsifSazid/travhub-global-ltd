@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\City;
 use App\Models\Country;
 use Illuminate\Http\Request;
@@ -62,7 +63,8 @@ class CityController extends Controller
     public function show($city)
     {
         $city = City::where('uuid', $city)->withCount('hotels')->first();
-        return view('backend.cities.show', compact('city'));
+        $activities = Activity::where('city_id', $city->id)->where('country_id', $city->country_id)->get();
+        return view('backend.cities.show', compact('city', 'activities'));
     }
 
     public function edit($city)

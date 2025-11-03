@@ -11,9 +11,14 @@ class Activity extends Model
 
     protected $guarded = [];
 
-    public function activityCategory()
+    public function country()
     {
-        return $this->belongsTo(ActivityCategory::class,  'activity_category_id', 'id');
+        return $this->belongsTo(Country::class,  'country_id', 'id');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class,  'city_id', 'id');
     }
 
     public function createdBy()
@@ -34,5 +39,10 @@ class Activity extends Model
     public function packDestinationInfos()
     {
         return $this->hasMany(PackDestinationInfo::class, 'activity_id', 'id');
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'currency_id', 'id');
     }
 }

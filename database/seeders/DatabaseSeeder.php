@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\ActivityCategory;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Currency;
 use App\Models\Hotel;
 use App\Models\Inclusion;
 use App\Models\Navigation;
@@ -85,188 +86,111 @@ class DatabaseSeeder extends Seeder
             'country_id' => 1
         ]);
 
+        City::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'Pattaya',
+            'country_id' => 2
+        ]);
+
+        City::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'Phuket',
+            'country_id' => 2
+        ]);
+
+        City::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'Bangkok',
+            'country_id' => 2
+        ]);
+
+        Currency::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'Bangladeshi Taka',
+            'currency_code' => 'BDT',
+            'country_id' => 1,
+            'icon' => '৳'
+        ]);
+
+        Currency::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'Thai Baht',
+            'currency_code' => 'THB',
+            'country_id' => 2,
+            'icon' => '฿'
+        ]);
+
         Hotel::create([
             'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'title' => 'Hotel Intercontinental Ltd',
             'city_id' => 1
         ]);
 
-        ActivityCategory::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Activity to be include in Pack Destination',
-        ]);
-
-        ActivityCategory::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Activity to be include in Itenaries',
-        ]);
-
-        ActivityCategory::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Activity to be include in Inclusion',
-        ]);
-        
         Activity::create([
             'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'title' => 'City Tours',
-            'activity_category_id' => 1
+            'country_id' => 1,
+            'city_id' => 1,
+            'currency_id' => 1
+        ]);
+
+        Activity::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'City Tours',
+            'country_id' => 1,
+            'city_id' => 2,
+            'currency_id' => 1
+        ]); 
+
+        Activity::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'City Tours',
+            'country_id' => 2,
+            'city_id' => 1,
+            'currency_id' => 2
+        ]);
+
+        Activity::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'title' => 'City Tours',
+            'country_id' => 2,
+            'city_id' => 2,
+            'currency_id' => 2
         ]);
 
         Activity::create([
             'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'title' => 'Museum Visits',
-            'activity_category_id' => 1
+            'country_id' => 1,
+            'city_id' => 1,
+            'currency_id' => 1
         ]);
 
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Adventure Sports',
-            'activity_category_id' => 1
-        ]);
-        
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Cooking Classes',
-            'activity_category_id' => 1
-        ]);
-        
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Wine Tasting',
-            'activity_category_id' => 1
-        ]);
+        // Activity::create([
+        //     'uuid' => (string) \Illuminate\Support\Str::uuid(),
+        //     'title' => 'Adventure Sports',
+        //     'activity_category_id' => 1
+        // ]);
 
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Beach Activities',
-            'activity_category_id' => 1
-        ]);
-        
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Arrival at Rome Fiumicino Airport',
-            'activity_category_id' => 2
-        ]);
-        
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Welcome Dinner',
-            'activity_category_id' => 2
-        ]);
+        // Activity::create([
+        //     'uuid' => (string) \Illuminate\Support\Str::uuid(),
+        //     'title' => 'Cooking Classes',
+        //     'activity_category_id' => 1
+        // ]);
 
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Colosseum & Roman Forum Tour',
-            'activity_category_id' => 2
-        ]);
+        // Activity::create([
+        //     'uuid' => (string) \Illuminate\Support\Str::uuid(),
+        //     'title' => 'Wine Tasting',
+        //     'activity_category_id' => 1
+        // ]);
 
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Airport Transfers',
-            'activity_category_id' => 3
-        ]);
-        
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Accommodation',
-            'activity_category_id' => 3
-        ]);
-        
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Meals',
-            'activity_category_id' => 3
-        ]);
+        // Activity::create([
+        //     'uuid' => (string) \Illuminate\Support\Str::uuid(),
+        //     'title' => 'Beach Activities',
+        //     'activity_category_id' => 1
+        // ]);
 
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Tours & Excursions',
-            'activity_category_id' => 3
-        ]);
-        
-        Activity::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Professional Services',
-            'activity_category_id' => 3
-        ]);
-        
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Airport transfers on arrival and departure',
-            'activity_id' => 10
-        ]);
 
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'All inter-city transfers',
-            'activity_id' => 10
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => '7 nights in selected hotels',
-            'activity_id' => 11
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Daily breakfast included',
-            'activity_id' => 11
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Room upgrades available',
-            'activity_id' => 11
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Daily breakfast',
-            'activity_id' => 12
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => '3 lunches as specified',
-            'activity_id' => 12
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => '2 dinners as specified',
-            'activity_id' => 12
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'All tours mentioned in itinerary',
-            'activity_id' => 13
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Entrance fees to attractions',
-            'activity_id' => 13
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'English-speaking guides',
-            'activity_id' => 13
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => '24/7 local support',
-            'activity_id' => 14
-        ]);
-
-        Inclusion::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'title' => 'Dedicated tour manager',
-            'activity_id' => 14
-        ]);
 
         Navigation::create([
             "uuid" => "46efcfb5-001c-41cd-a9d7-875ebd4f0484",

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use App\Models\ActivityCategory;
+use App\Models\City;
 use App\Models\Country;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,8 +26,10 @@ class ActivityController extends Controller
      */
     public function create()
     {
-        $activityCategories = ActivityCategory::get();
-        return view('backend.activities.create', compact('activityCategories'));
+        $countries = Country::get();
+        $cities = City::get();
+        $currencies = Currency::get();
+        return view('backend.activities.create', compact('countries', 'cities', 'currencies'));
     }
 
     /**
@@ -33,27 +37,53 @@ class ActivityController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'activity_category_uuid' => 'required'
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'country_uuid' => 'required|exists:countries,uuid',
+            'city_uuid' => 'required|exists:cities,uuid',
+            'currency_uuid' => 'nullable|exists:currencies,uuid',
+            'description' => 'nullable|string',
+            'price_json' => 'nullable|string'
         ]);
 
-        
-        $activityCategory = ActivityCategory::where('uuid', $request->activity_category_uuid)->first();
-        
-        // dd($activityCategory);
-
         try {
+            $country = Country::where('uuid', $request->country_uuid)->firstOrFail();
+            $city = City::where('uuid', $request->city_uuid)->firstOrFail();
+            $currency = $request->currency_uuid
+                ? Currency::where('uuid', $request->currency_uuid)->first()
+                : null;
+
+            $prices = json_decode($request->price_json, true) ?? [];
+
+            $adult = $prices['adult'] ?? 0;
+            $child = $prices['child'] ?? 0;
+            $infant = $prices['infant'] ?? 0;
+
+            $priceData = [
+                'adult' => (float) $adult,
+                'child' => (float) $child,
+                'infant' => (float) $infant,
+            ];
+
             $activity = Activity::create([
                 'uuid' => (string) \Str::uuid(),
-                'title' => $request->title,
-                'activity_category_uuid' => $request->activity_category_uuid,
-                'activity_category_id' => $activityCategory->id,
-                'activity_category_title' => $activityCategory->title,
-                'created_by' => Auth::user()->id,
+                'title' => $validated['title'],
+                'description' => $request->description,
+                'country_id' => $country->id,
+                'country_uuid' => $country->uuid,
+                'country_title' => $country->title,
+                'city_id' => $city->id,
+                'city_uuid' => $city->uuid,
+                'city_title' => $city->title,
+                'currency_uuid' => $currency?->uuid,
+                'currency_title' => $currency?->title,
+                'price_json' => json_encode($priceData),
+                'created_by' => Auth::id(),
             ]);
 
-            return redirect()->route('activities.index')->with('success', 'Activity created successfully!');
+            return redirect()
+                ->route('activities.index')
+                ->with('success', 'Activity created successfully!');
         } catch (\Throwable $th) {
             dd($th);
         }
@@ -62,37 +92,86 @@ class ActivityController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($activity)
+    // public function show($activity)
+    // {
+    //     try {
+    //         $activity = Activity::where('uuid', $activity)->withCount('inclusions')->first();
+    //         return view('backend.activities.show', compact('activity'));
+    //     } catch (\Throwable $th) {
+    //         return redirect()->route('activities.index')->with('error', 'Activity not found.', 404);
+    //     }
+    // }
+
+    public function show($uuid)
     {
-        $activity = Activity::where('uuid', $activity)->withCount('inclusions')->first();
+        $activity = Activity::withCount('inclusions')
+            ->with(['country', 'city', 'createdBy', 'updatedBy'])
+            ->where('uuid', $uuid)
+            ->firstOrFail(); // throws ModelNotFoundException if not found
+
         return view('backend.activities.show', compact('activity'));
     }
 
-    public function edit($activity)
+    // Edit Activity
+    public function edit($uuid)
     {
-        $activity = Activity::where('uuid', $activity)->first();
-        $activityCategories = ActivityCategory::get();
-
-        return view('backend.activities.edit', compact('activity','activityCategories'));
+        $countries = Country::get();
+        $cities = City::get();
+        $currencies = Currency::get();
+        $activity = Activity::where('uuid', $uuid)->firstOrFail();
+        return view('backend.activities.edit', compact('activity', 'countries', 'cities', 'currencies'));
     }
 
-    public function update(Request $request, Activity $activity)
+    // Update Activity
+    public function update(Request $request, $uuid)
     {
+        $activity = Activity::where('uuid', $uuid)->firstOrFail();
+
+        // Validation
         $request->validate([
-            'title' => 'required|string',
-            'activity_category_uuid' => 'required',
+            'title' => 'required|string|max:255',
+            'country_uuid' => 'required|exists:countries,uuid',
+            'city_uuid' => 'required|exists:cities,uuid',
+            'currency_uuid' => 'nullable|exists:currencies,uuid',
+            'description' => 'nullable|string',
+            'price_json' => 'nullable|string'
         ]);
 
-        $activity_category_data = ActivityCategory::where('uuid', $request->activity_category_uuid)->first();
-
         try {
+            // Resolve foreign models
+            $country = Country::where('uuid', $request->country_uuid)->firstOrFail();
+            $city = City::where('uuid', $request->city_uuid)->firstOrFail();
+            $currency = $request->currency_uuid
+                ? Currency::where('uuid', $request->currency_uuid)->first()
+                : null;
+
+            // Parse prices safely
+            $prices = json_decode($request->price_json, true) ?? [];
+            $adult = $prices['adult'] ?? 0;
+            $child = $prices['child'] ?? 0;
+            $infant = $prices['infant'] ?? 0;
+
+            $priceData = [
+                'adult' => (float) $adult,
+                'child' => (float) $child,
+                'infant' => (float) $infant,
+            ];
+
+            // Update activity
             $activity->update([
                 'title' => $request->title,
-                'activity_category_uuid' => $request->activity_uuid,
-                'activity_category_uuid' => $activity_category_data->id,
-                'activity_category_uuid' => $activity_category_data->title,
-                'created_by' => Auth::user()->id,
-                'status' =>  $request->input('status') == '1' ? 'active' : 'inactive'
+                'description' => $request->description,
+                'country_id' => $country->id,
+                'country_uuid' => $country->uuid,
+                'country_title' => $country->title,
+                'city_id' => $city->id,
+                'city_uuid' => $city->uuid,
+                'city_title' => $city->title,
+                'currency_uuid' => $currency?->uuid,
+                'currency_title' => $currency?->title,
+                'price' => json_encode($priceData),
+                'created_by' => Auth::id(),
+                'status' => $request->input('status') == '1' ? 'active' : 'inactive',
             ]);
 
             return redirect()->route('activities.index')->with('success', 'Activity updated successfully!');
@@ -100,6 +179,7 @@ class ActivityController extends Controller
             dd($th);
         }
     }
+
 
     public function destroy($uuid)
     {
@@ -135,7 +215,7 @@ class ActivityController extends Controller
     public function getData(Request $request)
     {
         try {
-            $query = Activity::with('activityCategory');
+            $query = Activity::with('createdBy', 'country', 'city', 'currency');
 
             if ($request->filled('search')) {
                 $query->where('title', 'like', "%{$request->search}%");

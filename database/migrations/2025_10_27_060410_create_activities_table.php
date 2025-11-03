@@ -17,14 +17,23 @@ return new class extends Migration
             $table->string('title', 255);
             $table->char('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->json('price')->nullable();
 
-            // Foreign key -> activity_categories
-            $table->unsignedBigInteger('activity_category_id');
-            $table->foreign('activity_category_id')->references('id')->on('activity_categories')->cascadeOnDelete();
+            // Foreign key -> country_id, city_id
+            $table->unsignedBigInteger('country_id');
+            $table->foreign('country_id')->references('id')->on('countries')->cascadeOnDelete();
+            $table->unsignedBigInteger('city_id');
+            $table->foreign('city_id')->references('id')->on('cities')->cascadeOnDelete();
+            $table->unsignedBigInteger('currency_id');
+            $table->foreign('currency_id')->references('id')->on('currencies')->cascadeOnDelete();
 
             // Reference fields
-            $table->uuid('activity_category_uuid')->nullable();
-            $table->string('activity_category_title', 255)->nullable();
+            $table->uuid('country_uuid')->nullable();
+            $table->string('country_title', 255)->nullable();
+            $table->uuid('city_uuid')->nullable();
+            $table->string('city_title', 255)->nullable();
+            $table->uuid('currency_uuid')->nullable();
+            $table->string('currency_title', 255)->nullable();
 
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();

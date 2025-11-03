@@ -27,14 +27,15 @@
                     <label for="country_title" class="font-semibold">Country: </label> <a href="{{ route('countries.show', ['country' => $city->country->uuid]) }}">{{ $city->country->title }}</a>
                 </p>
             </div>
+
             <div class="p-6">
-                <label for="" class="block text-sm font-medium text-gray-700">City Lists
-                    [Total City: <strong>{{ $city->hotels_count }}</strong>]</label>
+                <label for="" class="block text-sm font-medium text-gray-700">Hotel Lists
+                    [Total Hotel: <strong>{{ $city->hotels_count }}</strong>]</label>
                 <table id="roleTable" class="w-full table-striped table-bordered text-sm mt-4">
                     <thead class="bg-gray-100 text-gray-700 uppercase">
                         <tr>
                             <th class="px-6 py-4">Sl No.</th>
-                            <th class="px-6 py-4">City Name</th>
+                            <th class="px-6 py-4">Hotel Name</th>
                             <th class="px-6 py-4">Status</th>
                         </tr>
                     </thead>
@@ -59,6 +60,40 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="p-6">
+                <label for="" class="block text-sm font-medium text-gray-700">Activity Lists
+                    [Total activites: <strong>{{ $activities->count() }}</strong>]</label>
+                <table id="roleTable" class="w-full table-striped table-bordered text-sm mt-4">
+                    <thead class="bg-gray-100 text-gray-700 uppercase">
+                        <tr>
+                            <th class="px-6 py-4">Sl No.</th>
+                            <th class="px-6 py-4">Activites Title</th>
+                            <th class="px-6 py-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @forelse ($activities as $activity)
+                            <tr>
+                                <td class="py-2">{{ $loop->iteration }}</td>
+                                <td><a href="{{ route('activities.show', ['activity' => $activity->uuid]) }}">{{ $activity->title }}</a></td>
+                                <td>
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $activity->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ $activity->status == 'active' ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3">
+                                    No cities found for this hotel.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
             <div class="px-4 py-2 bg-gray-100 border-t text-sm text-gray-500 flex justify-between items-center">
                 <div>
                     <span class="">Created on: {{ $city->created_at->format('d-M-Y H:i') }}</span>

@@ -30,4 +30,9 @@ class Currency extends Model
     {
         return $this->belongsTo(CurrentRate::class, 'current_rate_id');
     }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class, 'currency_id', 'id');
+    }
 }

@@ -12,7 +12,8 @@
             <div class="px-4 py-2 bg-gray-100 border-t text-sm text-gray-500 flex justify-between items-center">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ $activity->title }}</h3>
-                    <p class="px-4"><strong><a href="#">[Created By: {{ $activity->createdBy->title ?? ' ' }}]</strong></a></p>
+                    <p class="px-4"><strong><a href="#">[Created By:
+                                {{ $activity->createdBy->title ?? ' ' }}]</strong></a></p>
                 </div>
                 <p><strong>Status:</strong>
                     @if ($activity->status === 'active')
@@ -24,17 +25,47 @@
             </div>
             <div class="p-4">
                 <p class="text-gray-600 mt-2 mb-4">
-                    <label for="category_title" class="font-semibold">Category: </label>{{ $activity->title }}</a>
+                    <label for="country_title"
+                        class="font-semibold">{{ __('Country: ') }}</label>{{ $activity->country->title }}</a>
+                </p>
+
+                <p class="text-gray-600 mt-2 mb-4">
+                    <label for="city_title"
+                        class="font-semibold">{{ __('City: ') }}</label>{{ $activity->city->title }}</a>
+                </p>
+
+                <p class="text-gray-600 mt-2 mb-4">
+                    <label for="activities_description" class="font-semibold">{{ __('Description: ') }}</label>
+                <p> {{ $activity->description }} </p>
+                </p>
+
+                <p class="text-gray-600 mt-2 mb-4">
+                    <label for="currency_title"
+                        class="font-semibold">{{ __('Pricing Currnecy: ') }}</label>{{ $activity->currency->title }}</a>
+                </p>
+
+                <p class="text-gray-600 mt-2 mb-4">
+                    <label class="font-semibold">Price List</label>
+                <ul class="list-disc list-inside">
+                    @php
+                        // Decode JSON safely
+                        $prices = json_decode($activity->price_list ?? '[]', true);
+                    @endphp
+
+                    @foreach ($prices as $key => $price)
+                        <li>{{ ucfirst($key) }}: {{ number_format($price, 2) }}</li>
+                    @endforeach
+                </ul>
                 </p>
             </div>
             <div class="p-6">
-                <label for="" class="block text-sm font-medium text-gray-700">Activity Lists
-                    [Total Activity: <strong>{{ $activity->hotels_count }}</strong>]</label>
-                <table id="roleTable" class="w-full table-striped table-bordered text-sm mt-4">
+                <label for="" class="block text-sm font-medium text-gray-700">Inclusion Lists
+                    [Total Inclusions: <strong>{{ $activity->inclusions_count }}</strong>]</label>
+                <table class="w-full table-striped table-bordered text-sm mt-4">
                     <thead class="bg-gray-100 text-gray-700 uppercase">
                         <tr>
                             <th class="px-6 py-4">Sl No.</th>
-                            <th class="px-6 py-4">Activity Name</th>
+                            <th class="px-6 py-4">Inclusion Title</th>
                             <th class="px-6 py-4">Status</th>
                         </tr>
                     </thead>
@@ -42,17 +73,20 @@
                         @forelse ($activity->inclusions as $inclusion)
                             <tr>
                                 <td class="py-2">{{ $loop->iteration }}</td>
-                                <td><a href="{{ route('inclusions.show', ['inclusion' => $inclusion->uuid]) }}">{{ $inclusion->title }}</a></td>
+                                <td><a
+                                        href="{{ route('inclusions.show', ['inclusion' => $inclusion->uuid]) }}">{{ $inclusion->title }}</a>
+                                </td>
                                 <td>
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $inclusion->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                    <span
+                                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $inclusion->status == 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                         {{ $inclusion->status == 'active' ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3">
-                                    No activities found for this inclusion.
+                                <td colspan="3" class="py-4 text-center text-gray-500">
+                                    No inclusions found for this activity.
                                 </td>
                             </tr>
                         @endforelse
