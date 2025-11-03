@@ -1,4 +1,4 @@
-<x-backend.layouts.master> 
+<x-backend.layouts.master>
     <x-slot name="header">
         <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
             <h2 class="text-2xl font-semibold">
@@ -72,9 +72,16 @@
             </div>
 
             <div class="mb-4">
-                <label for="description" class="block text-sm font-medium text-gray-700">Details / Description</label>
-                <textarea name="description" id="description" rows="4"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('description', $activity->description) }}</textarea>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+
+                <!-- Hidden textarea for form submission -->
+                <textarea name="description" id="description" hidden>{{ old('description', $activity->description ?? '') }}</textarea>
+
+                <!-- Quill editor container -->
+                <div class="quill-editor border rounded p-2" data-target-textarea="description"
+                    style="min-height: 200px;">
+                    {!! old('description', $activity->description ?? '') !!}
+                </div>
             </div>
 
             <!-- Prices block -->
@@ -115,6 +122,22 @@
                 </div>
             </div>
 
+            <div class="mb-4 flex items-center gap-2">
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <div id="statusToggle"
+                    class="relative w-10 h-5 rounded-full bg-gray-300 cursor-pointer transition-colors">
+                    <div id="toggleKnob"
+                        class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all"></div>
+                </div>
+
+                <span id="statusText" class="text-xs font-medium text-gray-700">
+                    {{ $activity->status === 'active' ? 'Active' : 'Inactive' }}
+                </span>
+
+                <input type="hidden" name="status" id="status"
+                    value="{{ $activity->status === 'active' ? '1' : '0' }}">
+            </div>
+
             <div class="mt-6">
                 <button type="submit"
                     class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md bg-primary border border-gray-300 hover:bg-primary-dark focus:outline-none focus:ring focus:ring-primary-dark">
@@ -127,7 +150,80 @@
 
     @push('js')
         <script>
-            document.addEventListener("DOMContentLoaded", () => {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.quill-editor').forEach(editorDiv => {
+                    const targetTextareaId = editorDiv.dataset.targetTextarea;
+                    const hiddenTextarea = document.getElementById(targetTextareaId);
+
+                    // Initialize Quill
+                    const quill = new Quill(editorDiv, {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline'],
+                                [{
+                                    'font': []
+                                }],
+                                [{
+                                    'align': []
+                                }],
+                                [{
+                                    'list': 'ordered'
+                                }, {
+                                    'list': 'bullet'
+                                }]
+                            ]
+                        }
+                    });
+
+                    // Set initial content from hidden textarea if available
+                    if (hiddenTextarea.value) {
+                        quill.root.innerHTML = hiddenTextarea.value;
+                    }
+
+                    // On form submit: copy Quill content to hidden textarea
+                    const form = editorDiv.closest('form');
+                    if (form) {
+                        form.addEventListener('submit', () => {
+                            hiddenTextarea.value = quill.root.innerHTML;
+                        });
+                    }
+                });
+            });
+            
+            // Toggle switch logic
+            const toggle = document.getElementById('statusToggle');
+            const knob = document.getElementById('toggleKnob');
+            const statusInput = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+
+            // Initialize position
+            if (statusInput.value === '1') {
+                knob.style.transform = 'translateX(24px)';
+                toggle.style.backgroundColor = '#22c55e'; // Green
+            } else {
+                knob.style.transform = 'translateX(0px)';
+                toggle.style.backgroundColor = '#6b7280'; // Gray
+            }
+
+            // Click event
+            toggle.addEventListener('click', () => {
+                if (statusInput.value === '1') {
+                    // Switch to inactive
+                    statusInput.value = '0';
+                    statusText.textContent = 'Inactive';
+                    knob.style.transform = 'translateX(0px)';
+                    toggle.style.backgroundColor = '#6b7280';
+                } else {
+                    // Switch to active
+                    statusInput.value = '1';
+                    statusText.textContent = 'Active';
+                    knob.style.transform = 'translateX(24px)';
+                    toggle.style.backgroundColor = '#22c55e';
+                }
+            });
+
+            document.addEventListener('DOMContentLoaded', function() {
                 // Restore working city filter logic
                 const countrySelect = document.getElementById('country_uuid');
                 const citySelect = document.getElementById('city_uuid');
@@ -196,9 +292,12 @@
                     });
 
                     input.addEventListener("keydown", e => {
-                        const allowedKeys = ["Backspace", "Tab", "ArrowLeft", "ArrowRight", "Delete", "Home", "End"];
+                        const allowedKeys = ["Backspace", "Tab", "ArrowLeft", "ArrowRight", "Delete",
+                            "Home", "End"
+                        ];
                         if (allowedKeys.includes(e.key)) return;
-                        if ((e.ctrlKey || e.metaKey) && ["a","c","v","x"].includes(e.key.toLowerCase())) return;
+                        if ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(e.key
+                                .toLowerCase())) return;
                         if (/^[0-9.]$/.test(e.key)) {
                             if (e.key === "." && input.value.includes(".")) e.preventDefault();
                             return;

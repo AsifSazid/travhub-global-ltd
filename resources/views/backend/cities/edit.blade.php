@@ -51,11 +51,11 @@
                 </div>
 
                 <span id="statusText" class="text-xs font-medium text-gray-700">
-                    {{ $country->status === 'active' ? 'Active' : 'Inactive' }}
+                    {{ $city->status === 'active' ? 'Active' : 'Inactive' }}
                 </span>
 
                 <input type="hidden" name="status" id="status"
-                    value="{{ $country->status === 'active' ? '1' : '0' }}">
+                    value="{{ $city->status === 'active' ? '1' : '0' }}">
             </div>
 
             <div class="mt-6">

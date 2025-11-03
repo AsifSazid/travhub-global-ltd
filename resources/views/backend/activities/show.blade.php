@@ -36,27 +36,45 @@
 
                 <p class="text-gray-600 mt-2 mb-4">
                     <label for="activities_description" class="font-semibold">{{ __('Description: ') }}</label>
-                <p> {{ $activity->description }} </p>
+                    <span> {!! $activity->description !!} </span>
                 </p>
 
-                <p class="text-gray-600 mt-2 mb-4">
+                <p class="text-gray-600 mt-6 mb-4">
                     <label for="currency_title"
                         class="font-semibold">{{ __('Pricing Currnecy: ') }}</label>{{ $activity->currency->title }}</a>
                 </p>
 
-                <p class="text-gray-600 mt-2 mb-4">
-                    <label class="font-semibold">Price List</label>
-                <ul class="list-disc list-inside">
+                <div class="text-gray-600 mt-4">
+                    <label class="font-semibold block mb-2">Price List</label>
                     @php
-                        // Decode JSON safely
-                        $prices = json_decode($activity->price_list ?? '[]', true);
+                        $prices = json_decode($activity->price ?? '[]', true);
                     @endphp
-
-                    @foreach ($prices as $key => $price)
-                        <li>{{ ucfirst($key) }}: {{ number_format($price, 2) }}</li>
-                    @endforeach
-                </ul>
-                </p>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full border border-gray-300 divide-y divide-gray-200 table-auto">
+                            <thead class="bg-gray-100 font-semibold uppercase">
+                                <tr>
+                                    <th class="w-1/2 px-4 py-2 text-left text-sm font-medium text-gray-700 border-b">
+                                        Type</th>
+                                    <th class="w-1/2 px-4 py-2 text-right text-sm font-medium text-gray-700 border-b">
+                                        {{ __('Price (:icon - :code)', ['icon' => $activity->currency->icon, 'code' =>$activity->currency->currency_code]) }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach ($prices as $key => $price)
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm text-gray-700">{{ ucfirst($key) }}</td>
+                                        <td class="px-4 py-2 text-sm text-gray-700 text-right">
+                                            {{ number_format($price, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="font-semibold text-gray-900">
+                                    <td class="px-4 py-2">Total</td>
+                                    <td class="px-4 py-2 text-right">{{ number_format(array_sum($prices), 2) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
             <div class="p-6">
                 <label for="" class="block text-sm font-medium text-gray-700">Inclusion Lists

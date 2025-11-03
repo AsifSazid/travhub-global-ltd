@@ -172,3 +172,6 @@
         }
     }
 </script>
+
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+
