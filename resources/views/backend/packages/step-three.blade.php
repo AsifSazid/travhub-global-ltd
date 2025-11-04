@@ -31,12 +31,12 @@
                 <div id="hotel-list-{{ $city->id }}" class="hotel-list space-y-2">
                     @forelse($hotels as $hotel)
                         <label class="flex items-center gap-2 text-sm bg-gray-50 border rounded-lg px-3 py-2">
-                            <input type="radio" name="hotels[{{ $city->id }}][0]" value="{{ $hotel->id }}"
-                                class="hotel-radio" data-city="{{ $city->id }}" data-title="{{ $hotel->title }}">
+                            <input type="checkbox" name="hotels[{{ $city->id }}][{{ $hotel->id }}][id]"
+                                value="{{ $hotel->id }}" class="hotel-checkbox">
+                            <input type="hidden" name="hotels[{{ $city->id }}][{{ $hotel->id }}][title]"
+                                value="{{ $hotel->title }}">
                             <span>{{ $hotel->title }}</span>
                         </label>
-                        <input type="hidden" name="hotels[{{ $city->id }}][1]"
-                            id="hotel-title-{{ $city->id }}" value="">
                     @empty
                         <p class="text-gray-500 text-sm italic">No hotels found</p>
                     @endforelse
@@ -154,7 +154,6 @@
                 data.append("_token", csrfToken);
                 data.append("package_uuid", "{{ $uuid }}");
 
-
                 try {
                     const res = await fetch("{{ route('api.cities.store') }}", {
                         method: "POST",
@@ -174,7 +173,6 @@
 
                     const city = await res.json();
 
-                    // --- Add tab button ---
                     const newBtn = document.createElement("button");
                     newBtn.type = "button";
                     newBtn.dataset.tab = "city_" + city.id;
@@ -183,7 +181,6 @@
                     newBtn.textContent = city.title;
                     cityTabs.insertBefore(newBtn, document.getElementById("openCityModal"));
 
-                    // --- Add content div ---
                     const div = document.createElement("div");
                     div.id = "city_" + city.id;
                     div.className = "tab-content hidden";
@@ -205,7 +202,7 @@
             `;
                     tabContentWrapper.appendChild(div);
 
-                    initTabs(); // re-init tabs
+                    initTabs();
                     cityModal.classList.add("hidden");
                     document.getElementById("cityName").value = "";
 
@@ -226,10 +223,10 @@
             const list = document.getElementById(`hotel-list-${cityId}`);
 
             const label = document.createElement('label');
-            label.className = 'flex items-center space-x-2 border rounded-md p-3 hover:bg-blue-50';
+            label.className = 'flex items-center gap-2 text-sm bg-gray-50 border rounded-lg px-3 py-2';
             label.innerHTML = `
-        <input type="checkbox" name="custom_hotels[${cityId}][]" value="${value}" class="text-blue-600 rounded" checked>
-        <span class="text-gray-700">${value}</span>
+        <input type="checkbox" name="custom_hotels[${cityId}][]" value="${value}" checked>
+        <span>${value}</span>
     `;
             list.appendChild(label);
             input.value = '';

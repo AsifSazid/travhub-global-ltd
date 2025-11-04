@@ -186,16 +186,27 @@ class PackageController extends Controller
     public function stepFour($uuid, $step)
     {
         $currencies = Currency::where('status', 'active')->get();
-        $packQuatDetails = PackQuatDetail::where('package_uuid', $uuid)->first();
+        $pkgPrice = PackPrice::where('package_uuid', $uuid)->first();
+        $packAccomoDetails = PackAccomoDetail::where('package_uuid', $uuid)->first();
+        $hotels = json_decode($packAccomoDetails->hotels) ?? [];
+        foreach ($hotels as $hotel) {
+            $city = City::find($hotel->city_id);
+            if ($city) {
+                $hotel->city_title = $city->title;
+            } else {
+                $hotel->city_title = 'City Not Found';
+            }
+        }
+        // dd($hotels);
         $title = "Pricing Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 4;
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'currencies', 'packQuatDetails', 'title', 'completedStep'));
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'pkgPrice', 'currencies', 'hotels', 'title', 'completedStep'));
     }
 
     public function stepFive($uuid, $step)
     {
-        $activites = Activity::where('activity_category_id', 2)->get();
+        $activites = Activity::get();
         $packQuatDetails = PackQuatDetail::where('package_uuid', $uuid)->first();
         $title = "Itinerary Details";
         $package = $this->getPackageInfo($uuid);
@@ -345,25 +356,25 @@ class PackageController extends Controller
     public function stepThreeStore($request, $uuid, $step)
     {
         try {
-            // Selected hotels: format => [city_id => [id, title]]
             $selectedHotels = $request->input('hotels', []);
-
-            // Custom hotels: format => [city_id => ["Hotel A", "Hotel B"]]
             $customHotels = $request->input('custom_hotels', []);
-
             $allHotels = [];
 
-            // 1️⃣ Handle existing hotels
-            foreach ($selectedHotels as $hotelData) {
-                if (!empty($hotelData[0])) {
-                    $allHotels[] = [
-                        'id' => (string)$hotelData[0],
-                        'title' => $hotelData[1] ?? null,
-                    ];
+            // Existing Hotels
+            foreach ($selectedHotels as $cityId => $hotelsInCity) {
+                foreach ($hotelsInCity as $hotelId => $hotelData) {
+                    if (!empty($hotelData['id'])) {
+                        $allHotels[] = [
+                            'id' => (string) $hotelData['id'],
+                            'title' => $hotelData['title'] ?? null,
+                            'city_id' => (int) $cityId,
+                            'type' => 'existing',
+                        ];
+                    }
                 }
             }
 
-            // 2️⃣ Handle custom hotels
+            // Custom Hotels
             foreach ($customHotels as $cityId => $titles) {
                 foreach ($titles as $title) {
                     if (!empty($title)) {
@@ -376,22 +387,17 @@ class PackageController extends Controller
                         $allHotels[] = [
                             'id' => (string)$newHotel->id,
                             'title' => $newHotel->title,
+                            'city_id' => (int)$cityId,
+                            'type' => 'custom',
                         ];
                     }
                 }
             }
 
-            // 3️⃣ Validation
-            $validated = $request->validate([
-                'accomo_cities' => 'nullable|string',
-            ]);
-
-            // 4️⃣ Get package
             $pkg = Package::where('uuid', $uuid)->firstOrFail();
             $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
 
-            // 5️⃣ Save accommodation details
-            $packAccomo = PackAccomoDetail::updateOrCreate(
+            PackAccomoDetail::updateOrCreate(
                 ['package_uuid' => $pkg->uuid],
                 [
                     'uuid'           => Str::uuid(),
@@ -399,19 +405,18 @@ class PackageController extends Controller
                     'package_id'     => $pkg->id,
                     'package_uuid'   => $pkg->uuid,
                     'package_title'  => $pkg->title,
-                    'hotels'         => json_encode($allHotels), // save id+title array
+                    'hotels'         => json_encode($allHotels, JSON_PRETTY_PRINT),
                     'status'         => 'active',
                     'created_by'     => Auth::id(),
                 ]
             );
 
-            // 6️⃣ Update progress
             $pkg->update(['progress_step' => $step]);
 
             return redirect()->route('packages.step', [
                 'uuid' => $uuid,
                 'step' => $step + 1
-            ])->with('success', 'Step ' . $step . ' saved.');
+            ])->with('success', 'Step ' . $step . ' saved successfully.');
         } catch (\Throwable $e) {
             dd($e->getMessage(), $e->getLine());
         }
@@ -424,7 +429,7 @@ class PackageController extends Controller
             $validated = $request->validate([
                 'currency_id' => 'required|exists:currencies,id',
                 'air_ticket_details' => 'nullable|string',
-                'price_options' => 'nullable|string'
+                'format_data' => 'nullable|string'
             ]);
 
             $pkg = Package::where('uuid', $uuid)->firstOrFail();
@@ -443,7 +448,7 @@ class PackageController extends Controller
                     'currency_uuid' => optional(Currency::find($validated['currency_id']))->uuid,
                     'currency_title' => optional(Currency::find($validated['currency_id']))->title,
                     'air_ticket_details' => json_encode($validated['air_ticket_details']) ?? null,
-                    'pack_price' => json_encode($validated['price_options']),
+                    'pack_price' => json_encode($validated['format_data']),
                     'status' => 'active',
                     'created_by' => Auth::id()
                 ]
