@@ -150,7 +150,7 @@
                 return {
                     id: Date.now() + Math.floor(Math.random() * 1000),
                     dayNumber: index,
-                    title: `Day ${index}: Title-${index} ${formatted} (${dayName})`,
+                    title: `Day ${index}: Title || ${formatted} (${dayName})`,
                     date: nextDate,
                     overnightStay: cities[0]?.id || null,
                     meals: [],
@@ -194,6 +194,10 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700">Meals Included</label>
                 <div class="mt-1 space-y-1">
+                    <label class="inline-flex items-center space-x-2 font-semibold text-blue-700">
+                        <input type="checkbox" data-day-id="${day.id}" class="meal-check-all ml-1" />
+                        <span class="text-sm">Check All</span>
+                    </label>
                     ${mealOptions.map(m => `
                             <label class="inline-flex items-center space-x-2">
                                 <input type="checkbox" data-day-id="${day.id}" class="meal-checkbox ml-1" value="${escapeHtml(m)}" ${day.meals.includes(m)?'checked':''}/>
@@ -239,6 +243,23 @@
                         }
                     });
                 });
+                // Handle "Check All" meals
+                const checkAll = wrapper.querySelector('.meal-check-all');
+                checkAll.addEventListener('change', e => {
+                    const d = itenary.find(x => x.id == e.target.dataset.dayId);
+                    const checkboxes = wrapper.querySelectorAll('.meal-checkbox');
+                    if (d) {
+                        if (e.target.checked) {
+                            d.meals = [...mealOptions];
+                            checkboxes.forEach(cb => cb.checked = true);
+                        } else {
+                            d.meals = [];
+                            checkboxes.forEach(cb => cb.checked = false);
+                        }
+                        updateItineraryField();
+                    }
+                });
+
                 wrapper.querySelector('.delete-day-btn').addEventListener('click', () => {
                     if (!confirm('Delete this day?')) return;
                     itenary = itenary.filter(d => d.id !== day.id);

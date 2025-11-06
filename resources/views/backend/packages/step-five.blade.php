@@ -9,16 +9,15 @@
                 + Add Day
             </button>
             <button id="export-json-btn" type="button"
-                class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700">
+                class="px-4 py-2 text-white rounded bg-green-500 hover:scale-110 hover:brightness-110">
+                <i class="fa-solid fa-download"></i>
                 Export JSON
             </button>
         </div>
     </header>
 
-    <!-- Days Container -->
     <div id="days-container" class="space-y-6"></div>
 
-    <!-- JSON Preview -->
     <div class="mt-8">
         <h2 class="text-lg font-medium text-gray-700 mb-2">JSON Preview</h2>
         <pre id="json-preview" class="p-4 bg-white border rounded text-sm text-gray-700 overflow-x-auto max-h-64"></pre>
@@ -27,33 +26,33 @@
 
 <!-- Activity Modal -->
 <div id="activity-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 transform transition-transform scale-95">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 transform transition-transform scale-95"
+        style="width: 90%; height: 80%; overflow-y: auto;">
         <div class="flex items-center justify-between mb-4">
             <h3 id="modal-heading" class="text-lg font-semibold text-gray-800">Add Activity</h3>
             <button id="modal-close" type="button" class="text-gray-500 hover:text-gray-700">✕</button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Create New Activity -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Activity Title</label>
                 <input id="activity-title" type="text" class="mt-1 block w-full border rounded px-3 py-2"
                     placeholder="e.g., City tour" />
 
                 <label class="block text-sm font-medium text-gray-700 mt-3">Description</label>
-                <textarea id="activity-desc" rows="4" class="mt-1 block w-full border rounded px-3 py-2"
-                    placeholder="Describe the activity..."></textarea>
+                <div id="activity-desc" class="quill-editor border rounded p-2" style="max-height: 40% !important;">
+                </div>
 
                 <label class="block text-sm font-medium text-gray-700 mt-3">Time (optional)</label>
                 <input id="activity-time" type="time" class="mt-1 block w-full border rounded px-3 py-2" />
 
                 <div class="mt-4">
                     <button id="save-activity-btn" type="button"
-                        class="px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700">Save & Add</button>
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:scale-110 hover:brightness-110">+
+                        Add</button>
                 </div>
             </div>
 
-            <!-- Choose from Presets (multiple select) -->
             <div>
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="font-medium text-gray-700">Choose from presets</h4>
@@ -61,9 +60,7 @@
                         class="text-sm text-gray-500 hover:text-gray-700">Refresh</button>
                 </div>
 
-                <div id="presets-list" class="space-y-2 max-h-60 overflow-auto p-2 border rounded bg-gray-50">
-                    <!-- JS will populate preset options with checkboxes -->
-                </div>
+                <div id="presets-list" class="space-y-2 max-h-60 overflow-auto p-2 border rounded bg-gray-50"></div>
 
                 <div class="mt-4 flex justify-end gap-2">
                     <button id="add-selected-presets" type="button"
@@ -71,526 +68,379 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
 @push('js')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const cities = @json($cities);
+            const startDate = @json($packQuatDetails->start_date);
+            const presetActivities = @json($activities);
+            let itenary = [];
 
-            let itenary = []; // stores all day objects
-
-            // itenary hidden input
+            const mealOptions = ["Breakfast", "Lunch", "Dinner", "Snacks"];
+            const daysContainer = document.getElementById('days-container');
+            const jsonPreview = document.getElementById('json-preview');
+            const addDayBtn = document.getElementById('add-day-btn');
+            const exportBtn = document.getElementById('export-json-btn');
             const itineraryInput = document.getElementById('itenary-input');
 
+            // Initialize Quill for activity description
+            const quillActivity = new Quill('#activity-desc', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{
+                            'list': 'ordered'
+                        }, {
+                            'list': 'bullet'
+                        }],
+                        [{
+                            'align': []
+                        }],
+                        ['clean']
+                    ]
+                }
+            });
+
             function updateItineraryField() {
-                const itineraryInput = document.getElementById('itenary-input'); // ✅ reselect
-                if (itineraryInput) {
-                    itineraryInput.value = JSON.stringify(itenary);
-                }
+                itineraryInput.value = JSON.stringify(itenary);
+                jsonPreview.textContent = itineraryInput.value;
             }
 
-            function addToItinerary(dayData) {
-                itenary.push(dayData);
-                updateItineraryField();
+            function parseLocalDateTime(dateStr) {
+                const [datePart, timePart] = dateStr.split(' ');
+                const [y, m, d] = datePart.split('-').map(Number);
+                const [h, min, s] = timePart ? timePart.split(':').map(Number) : [0, 0, 0];
+                return new Date(y, m - 1, d, h, min, s);
             }
 
-            function removeItineraryItem(index) {
-                itenary.splice(index, 1);
-                updateItineraryField();
+            function addDays(dateStr, days) {
+                const base = parseLocalDateTime(dateStr);
+                base.setDate(base.getDate() + days);
+                const year = base.getFullYear();
+                const month = String(base.getMonth() + 1).padStart(2, '0');
+                const day = String(base.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
             }
 
-            function updateItineraryItem(index, newData) {
-                itenary[index] = newData;
-                updateItineraryField();
+            function formatDateInfo(dateStr) {
+                const [y, m, d] = dateStr.split('-').map(Number);
+                const dateObj = new Date(y, m - 1, d);
+                return {
+                    formatted: dateObj.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: '2-digit',
+                        year: 'numeric'
+                    }),
+                    dayName: dateObj.toLocaleDateString('en-US', {
+                        weekday: 'long'
+                    })
+                };
             }
 
-            console.log("Hidden input always holds:", itineraryInput.value);
-
-            // Some sample preset activities to choose from (you can change)
-            const presetActivities = [{
-                    title: "Airport Arrival",
-                    description: "Meet your driver and transfer to hotel."
-                },
-                {
-                    title: "Welcome Dinner",
-                    description: "Enjoy a traditional dinner near the hotel."
-                },
-                {
-                    title: "City Tour",
-                    description: "Guided city tour visiting main attractions."
-                },
-                {
-                    title: "Museum Visit",
-                    description: "Visit a famous museum."
-                },
-                {
-                    title: "Free Time",
-                    description: "Relax or explore on your own."
-                }
-            ];
-
-            // Some sample city options for Overnight Stay
-            const cityOptions = ["Rome", "Florence", "Venice", "Milan", "Naples", "Bologna", "Verona", "Turin"];
-
-            // Some meal options
-            const mealOptions = ["Breakfast", "Lunch", "Dinner", "Snacks"];
-
-            /* ---------------------------
-            Helpers: Create default day
-            ----------------------------*/
             function createEmptyDay(index) {
+                const nextDate = addDays(startDate, index - 1);
+                const {
+                    formatted,
+                    dayName
+                } = formatDateInfo(nextDate);
                 return {
                     id: Date.now() + Math.floor(Math.random() * 1000),
                     dayNumber: index,
-                    title: `Day ${index}: Untitled`,
-                    date: "",
-                    overnightStay: cityOptions[0],
+                    title: `Day ${index}: Title || ${formatted} (${dayName})`,
+                    date: nextDate,
+                    overnightStay: cities[0]?.id || null,
                     meals: [],
                     activities: []
                 };
             }
 
-            /* ---------------------------
-            DOM References
-            ----------------------------*/
-            const daysContainer = document.getElementById('days-container');
-            const jsonPreview = document.getElementById('json-preview');
-            const addDayBtn = document.getElementById('add-day-btn');
-            const exportBtn = document.getElementById('export-json-btn');
-
-            /* ---------------------------
-            Render Functions
-            ----------------------------*/
             function renderAll() {
                 daysContainer.innerHTML = '';
                 itenary.forEach((day, idx) => {
                     daysContainer.appendChild(createDayCard(day, idx + 1));
                 });
-                updateJSONPreview();
+                updateItineraryField();
             }
 
-            function updateJSONPreview() {
-                jsonPreview.textContent = JSON.stringify(itenary, null, 2);
-            }
-
-            /* ---------------------------
-            Day Card HTML builder
-            ----------------------------*/
             function createDayCard(day, displayIndex) {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'bg-white border rounded p-6 shadow-sm';
-
-                // Header
                 wrapper.innerHTML = `
-                    <div class="flex items-start justify-between gap-3">
-                    <div class="flex-1">
-                    <input data-day-id="${day.id}" class="day-title block w-full text-lg font-semibold text-gray-800 border-b pb-2" value="${escapeHtml(day.title)}" />
-                    <div class="mt-2 text-sm text-gray-500">Day ${displayIndex}</div>
-                    </div>
-                    <div class="flex items-start gap-2">
-                    <button data-day-id="${day.id}" class="edit-day-btn type-button px-3 py-2 bg-yellow-400 text-white rounded hover:bg-yellow-500">Edit</button>
-                    <button data-day-id="${day.id}" class="delete-day-btn type-button px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
-                    </div>
-                    </div>
+        <div class="flex items-start justify-between gap-3">
+            <div class="flex-1">
+                <input data-day-id="${day.id}" class="day-title block w-full text-lg font-semibold text-gray-800 border-b p-2" value="${escapeHtml(day.title)}" />
+                <div class="mt-2 text-sm text-gray-500">Day ${displayIndex}</div>
+            </div>
+            <div class="flex items-start gap-2">
+                <button data-day-id="${day.id}" class="delete-day-btn px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
+            </div>
+        </div>
 
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                    <label class="block text-sm font-medium text-gray-700">Date</label>
-                    <input data-day-id="${day.id}" class="day-date mt-1 block w-full border rounded px-3 py-2" type="date" value="${day.date || ''}" />
-                    </div>
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Date</label>
+                <input data-day-id="${day.id}" class="day-date mt-1 block w-full border rounded px-3 py-2" type="date" value="${day.date || ''}" readonly />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Overnight Stay</label>
+                <select data-day-id="${day.id}" class="overnight-select mt-1 block w-full border rounded px-3 py-2">
+                    ${cities.map(c => `<option value="${c.id}" ${day.overnightStay == c.id ? 'selected':''}>${escapeHtml(c.title)}</option>`).join('')}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Meals Included</label>
+                <div class="mt-1 space-y-1">
+                    <label class="inline-flex items-center space-x-2 font-semibold text-blue-700">
+                        <input type="checkbox" data-day-id="${day.id}" class="meal-check-all ml-1" />
+                        <span class="text-sm">Check All</span>
+                    </label>
+                    ${mealOptions.map(m => `
+                            <label class="inline-flex items-center space-x-2">
+                                <input type="checkbox" data-day-id="${day.id}" class="meal-checkbox ml-1" value="${escapeHtml(m)}" ${day.meals.includes(m)?'checked':''}/>
+                                <span class="text-sm text-gray-700">${escapeHtml(m)}</span>
+                            </label>`).join('')}
+                </div>
+            </div>
+        </div>
 
-                    <div>
-                    <label class="block text-sm font-medium text-gray-700">Overnight Stay</label>
-                    <select data-day-id="${day.id}" class="overnight-select mt-1 block w-full border rounded px-3 py-2">
-                        ${cityOptions.map(c => `<option ${c===day.overnightStay ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
-                    </select>
-                    </div>
+        <h3 class="mt-6 mb-3 font-semibold text-gray-800">Activities</h3>
+        <div class="space-y-3" id="activities-area-${day.id}">
+            ${day.activities.map((a, i) => renderActivityHtml(day.id, a, i)).join('')}
+        </div>
 
-                    <div>
-                    <label class="block text-sm font-medium text-gray-700">Meals Included</label>
-                    <div class="mt-1 space-y-1">
-                        ${mealOptions.map(m => `
-                                                                                                                    <label class="inline-flex items-center space-x-2">
-                                                                                                                    <input type="checkbox" data-day-id="${day.id}" class="meal-checkbox" value="${escapeHtml(m)}" ${day.meals.includes(m) ? 'checked' : ''} />
-                                                                                                                    <span class="text-sm text-gray-700">${escapeHtml(m)}</span>
-                                                                                                                    </label>`).join('')}
-                    </div>
-                    </div>
-                    </div>
+        <div class="mt-4 flex gap-2">
+            <button type="button" data-day-id="${day.id}" class="add-activity-btn px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">+ Add Activity</button>
+        </div>
+        `;
 
-                    <h3 class="mt-6 mb-3 font-semibold text-gray-800">Activities</h3>
-                    <div class="space-y-3" id="activities-area-${day.id}">
-                    ${day.activities.map(a => renderActivityHtml(day.id, a)).join('')}
-                    </div>
-
-                    <div class="mt-4 flex gap-2">
-                    <button type="button" data-day-id="${day.id}" class="add-activity-btn px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">+ Add Activity</button>
-                    <button type="button" data-day-id="${day.id}" class="export-day-btn px-4 py-2 bg-gray-100 text-gray-800 rounded">Show JSON</button>
-                    </div>
-                    `;
-
-                // Attach event listeners for dynamically created elements
-
-                // Title change (inline input)
-                wrapper.querySelector('.day-title').addEventListener('input', (e) => {
-                    const id = e.target.dataset.dayId;
-                    const d = itenary.find(x => x.id == id);
+                // Event listeners
+                wrapper.querySelector('.day-title').addEventListener('input', e => {
+                    const d = itenary.find(x => x.id == e.target.dataset.dayId);
                     if (d) {
                         d.title = e.target.value;
-                        updateJSONPreview();
+                        updateItineraryField();
                     }
                 });
-
-                // Date input
-                wrapper.querySelector('.day-date').addEventListener('change', (e) => {
-                    const id = e.target.dataset.dayId;
-                    const d = itenary.find(x => x.id == id);
-                    if (d) {
-                        d.date = e.target.value;
-                        updateJSONPreview();
-                    }
-                });
-
-                // Overnight select
-                wrapper.querySelector('.overnight-select').addEventListener('change', (e) => {
-                    const id = e.target.dataset.dayId;
-                    const d = itenary.find(x => x.id == id);
+                wrapper.querySelector('.overnight-select').addEventListener('change', e => {
+                    const d = itenary.find(x => x.id == e.target.dataset.dayId);
                     if (d) {
                         d.overnightStay = e.target.value;
-                        updateJSONPreview();
+                        updateItineraryField();
                     }
                 });
-
-                // Meal checkboxes
                 wrapper.querySelectorAll('.meal-checkbox').forEach(cb => {
-                    cb.addEventListener('change', (e) => {
-                        const id = e.target.dataset.dayId;
-                        const d = itenary.find(x => x.id == id);
+                    cb.addEventListener('change', e => {
+                        const d = itenary.find(x => x.id == e.target.dataset.dayId);
                         if (d) {
                             const val = e.target.value;
-                            if (e.target.checked) {
-                                if (!d.meals.includes(val)) d.meals.push(val);
-                            } else {
-                                d.meals = d.meals.filter(m => m !== val);
-                            }
-                            updateJSONPreview();
+                            if (e.target.checked) d.meals.push(val);
+                            else d.meals = d.meals.filter(m => m !== val);
+                            updateItineraryField();
                         }
                     });
                 });
-
-                // Add activity button
-                wrapper.querySelector('.add-activity-btn').addEventListener('click', () => {
-                    openActivityModal('add', day.id);
+                // Handle "Check All" meals
+                const checkAll = wrapper.querySelector('.meal-check-all');
+                checkAll.addEventListener('change', e => {
+                    const d = itenary.find(x => x.id == e.target.dataset.dayId);
+                    const checkboxes = wrapper.querySelectorAll('.meal-checkbox');
+                    if (d) {
+                        if (e.target.checked) {
+                            d.meals = [...mealOptions];
+                            checkboxes.forEach(cb => cb.checked = true);
+                        } else {
+                            d.meals = [];
+                            checkboxes.forEach(cb => cb.checked = false);
+                        }
+                        updateItineraryField();
+                    }
                 });
 
-                // Export day JSON
-                wrapper.querySelector('.export-day-btn').addEventListener('click', () => {
-                    alert(JSON.stringify(day, null, 2));
-                });
-
-                // Delete day
                 wrapper.querySelector('.delete-day-btn').addEventListener('click', () => {
                     if (!confirm('Delete this day?')) return;
                     itenary = itenary.filter(d => d.id !== day.id);
-                    // reassign day numbers
                     itenary.forEach((d, i) => d.dayNumber = i + 1);
-                    updateItineraryField();
                     renderAll();
                 });
+                wrapper.querySelector('.add-activity-btn').addEventListener('click', () => openActivityModal('add',
+                    day.id));
 
                 return wrapper;
             }
 
-            /* ---------------------------
-            Activity HTML builder
-            ----------------------------*/
-            function renderActivityHtml(dayId, activity) {
-                // use data- attributes for actions
-                const idAttr = activity._uid || ('a' + (Date.now() + Math.floor(Math.random() * 1000)));
-                activity._uid = idAttr; // persist uid
+            function renderActivityHtml(dayId, activity, index) {
                 return `
-                    <div class="p-4 border rounded bg-gray-50 flex items-start justify-between" data-activity-id="${idAttr}">
-                    <div>
-                    <div class="font-medium text-gray-800">${escapeHtml(activity.title)}</div>
-                    <div class="text-sm text-gray-600 mt-1">${escapeHtml(activity.description || '')}</div>
-                    ${activity.time ? `<div class="text-xs text-gray-500 mt-1">Time: ${escapeHtml(activity.time)}</div>` : ''}
-                    </div>
-                    <div class="flex flex-col gap-2">
-                    <button data-day-id="${dayId}" data-activity-uid="${idAttr}" class="edit-activity-btn px-3 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">Edit</button>
-                    <button data-day-id="${dayId}" data-activity-uid="${idAttr}" class="remove-activity-btn px-3 py-1 bg-red-100 text-red-800 rounded text-sm">Remove</button>
-                    </div>
-                    </div>
-                    `;
+        <div class="p-4 border rounded bg-gray-50 flex items-start justify-between">
+            <div>
+                <div class="font-medium text-gray-800">${escapeHtml(activity.title)}</div>
+                <div class="text-sm text-gray-600 mt-1">${activity.description || ''}</div>
+                ${activity.time?`<div class="text-xs text-gray-500 mt-1">Time: ${escapeHtml(activity.time)}</div>`:''}
+            </div>
+            <button type="button" data-day-id="${dayId}" data-activity-index="${index}" 
+                class="edit-activity-btn text-blue-600 hover:text-blue-800 font-semibold ml-4">
+                ✎ Edit
+            </button>
+        </div>`;
             }
 
-            /* ---------------------------
-            Modal Control + Activity Add/Edit
-            ----------------------------*/
+            /* =========================
+               Activity Modal Logic
+            ==========================*/
             const activityModal = document.getElementById('activity-modal');
             const modalClose = document.getElementById('modal-close');
-            const modalHeading = document.getElementById('modal-heading');
             const activityTitle = document.getElementById('activity-title');
-            const activityDesc = document.getElementById('activity-desc');
             const activityTime = document.getElementById('activity-time');
             const saveActivityBtn = document.getElementById('save-activity-btn');
             const presetsList = document.getElementById('presets-list');
             const addSelectedPresetsBtn = document.getElementById('add-selected-presets');
             const refreshPresetsBtn = document.getElementById('refresh-presets');
 
-            let modalMode = 'add'; // 'add' or 'edit'
+            let modalMode = 'add';
             let targetDayId = null;
-            let editingActivityUid = null;
+            let targetActivityIndex = null;
 
-            function openActivityModal(mode, dayId, activityUid = null) {
+            function openActivityModal(mode, dayId, activityIndex = null) {
                 modalMode = mode;
                 targetDayId = dayId;
-                editingActivityUid = activityUid;
-
-                // If edit, populate form from activity
+                targetActivityIndex = activityIndex;
                 if (mode === 'edit') {
-                    modalHeading.textContent = 'Edit Activity';
                     const day = itenary.find(d => d.id == dayId);
-                    if (!day) return;
-                    const activity = day.activities.find(a => a._uid === activityUid);
-                    if (!activity) return;
-                    activityTitle.value = activity.title || '';
-                    activityDesc.value = activity.description || '';
+                    const activity = day.activities[activityIndex];
+                    activityTitle.value = activity.title;
+                    quillActivity.root.innerHTML = activity.description || '';
                     activityTime.value = activity.time || '';
+                    document.getElementById('modal-heading').textContent = 'Edit Activity';
+                    saveActivityBtn.textContent = 'Save Changes';
                 } else {
-                    modalHeading.textContent = 'Add Activity';
                     activityTitle.value = '';
-                    activityDesc.value = '';
                     activityTime.value = '';
+                    quillActivity.root.innerHTML = '';
+                    document.getElementById('modal-heading').textContent = 'Add Activity';
+                    saveActivityBtn.textContent = '+ Add';
                 }
-
-                // populate presets
                 populatePresets();
                 activityModal.classList.remove('hidden');
                 activityModal.classList.add('flex');
             }
 
             function closeActivityModal() {
-                activityModal.classList.remove('flex');
                 activityModal.classList.add('hidden');
-                modalMode = 'add';
                 targetDayId = null;
-                editingActivityUid = null;
-                // clear inputs
-                activityTitle.value = '';
-                activityDesc.value = '';
-                activityTime.value = '';
-                // uncheck presets
-                presetsList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                targetActivityIndex = null;
             }
 
-            /* Save single (create or update) */
             saveActivityBtn.addEventListener('click', () => {
-                if (!targetDayId) {
-                    alert('No target day selected');
-                    return;
-                }
                 const title = activityTitle.value.trim();
-                const desc = activityDesc.value.trim();
+                if (!title) return alert('Add a title');
+                const desc = quillActivity.root.innerHTML.trim();
                 const time = activityTime.value || '';
-
-                if (!title) {
-                    alert('Please add activity title');
-                    return;
-                }
-
                 const day = itenary.find(d => d.id == targetDayId);
-                if (!day) return;
 
-                if (modalMode === 'edit' && editingActivityUid) {
-                    const act = day.activities.find(a => a._uid === editingActivityUid);
-                    if (act) {
-                        act.title = title;
-                        act.description = desc;
-                        act.time = time;
-                    }
-                } else {
-                    const activityObj = {
+                if (modalMode === 'edit' && targetActivityIndex !== null) {
+                    day.activities[targetActivityIndex] = {
                         title,
                         description: desc,
                         time
                     };
-                    activityObj._uid = 'a' + (Date.now() + Math.floor(Math.random() * 1000));
-                    day.activities.push(activityObj);
+                } else {
+                    day.activities.push({
+                        title,
+                        description: desc,
+                        time
+                    });
                 }
 
                 closeActivityModal();
-                updateItineraryField();
                 renderAll();
             });
 
-            /* Add selected preset activities (multiple) */
-            addSelectedPresetsBtn.addEventListener('click', () => {
-                if (!targetDayId) {
-                    alert('No target day');
-                    return;
-                }
-                const day = itenary.find(d => d.id == targetDayId);
-                if (!day) return;
-
-                const checked = Array.from(presetsList.querySelectorAll('input[type="checkbox"]:checked'));
-                if (checked.length === 0) {
-                    alert('Select at least one preset');
-                    return;
-                }
-
-                checked.forEach(cb => {
-                    const idx = cb.dataset.presetIndex;
-                    if (presetActivities[idx]) {
-                        const act = {
-                            ...presetActivities[idx]
-                        };
-                        act._uid = 'a' + (Date.now() + Math.floor(Math.random() * 1000)) + Math
-                            .floor(Math
-                                .random() * 100);
-                        day.activities.push(act);
-                    }
-                    cb.checked = false;
-                });
-
-                closeActivityModal();
-                updateItineraryField();
-                renderAll();
-            });
-
-            /* Populate presets list */
             function populatePresets() {
                 presetsList.innerHTML = '';
-                presetActivities.forEach((p, i) => {
-                    const el = document.createElement('label');
-                    el.className = 'flex items-start gap-2 p-2 rounded hover:bg-gray-100';
-                    el.innerHTML = `
-                    <input type="checkbox" data-preset-index="${i}" class="mt-1">
-                    <div>
-                    <div class="font-medium text-gray-800">${escapeHtml(p.title)}</div>
-                    <div class="text-sm text-gray-600">${escapeHtml(p.description)}</div>
-                    </div>
-                    `;
-                    presetsList.appendChild(el);
+                presetActivities.forEach((preset, i) => {
+                    const item = document.createElement('div');
+                    item.className =
+                        'cursor-pointer p-2 bg-white rounded border hover:bg-blue-50 transition';
+                    item.innerHTML = `
+            <div class="font-medium text-gray-800">${escapeHtml(preset.title)}</div>
+            <div class="text-sm text-gray-500">${escapeHtml(preset.description || '')}</div>`;
+                    item.addEventListener('click', () => {
+                        activityTitle.value = preset.title;
+                        quillActivity.root.innerHTML = preset.description || '';
+                        document.querySelectorAll('#presets-list .selected').forEach(el => el
+                            .classList.remove('selected'));
+                        item.classList.add('selected');
+                    });
+                    presetsList.appendChild(item);
                 });
             }
 
-            /* Modal close handlers */
-            modalClose.addEventListener('click', closeActivityModal);
-            refreshPresetsBtn.addEventListener('click', populatePresets);
+            addSelectedPresetsBtn.addEventListener('click', () => {
+                if (!targetDayId) return alert('No target day');
+                const day = itenary.find(d => d.id == targetDayId);
+                const selected = document.querySelector('#presets-list .selected');
+                if (!selected) return alert('Select a preset first');
+                const preset = presetActivities.find(p => p.title === activityTitle.value);
+                if (preset) day.activities.push({
+                    ...preset
+                });
+                closeActivityModal();
+                renderAll();
+            });
 
-            // click outside modal to close
-            activityModal.addEventListener('click', (e) => {
+            modalClose.addEventListener('click', closeActivityModal);
+            activityModal.addEventListener('click', e => {
                 if (e.target === activityModal) closeActivityModal();
             });
+            refreshPresetsBtn.addEventListener('click', populatePresets);
 
-            /* ---------------------------
-            Event delegation for edit/remove activity buttons
-            ----------------------------*/
-            document.addEventListener('click', (e) => {
-                // Edit activity
-                if (e.target.closest('.edit-activity-btn')) {
-                    const btn = e.target.closest('.edit-activity-btn');
-                    const dayId = btn.dataset.dayId;
-                    const uid = btn.dataset.activityUid;
-                    openActivityModal('edit', dayId, uid);
-                }
-
-                // Remove activity
-                if (e.target.closest('.remove-activity-btn')) {
-                    const btn = e.target.closest('.remove-activity-btn');
-                    const dayId = btn.dataset.dayId;
-                    const uid = btn.dataset.activityUid;
-                    const day = itenary.find(d => d.id == dayId);
-                    if (!day) return;
-                    if (!confirm('Remove this activity?')) return;
-                    day.activities = day.activities.filter(a => a._uid !== uid);
-                    updateItineraryField();
-                    renderAll();
-                }
-            });
-
-            /* ---------------------------
-            Add / Remove Days
-            ----------------------------*/
             addDayBtn.addEventListener('click', () => {
                 const newDay = createEmptyDay(itenary.length + 1);
                 itenary.push(newDay);
-                updateItineraryField();
                 renderAll();
             });
 
-            // Export JSON button
             exportBtn.addEventListener('click', () => {
-                const dataStr = JSON.stringify(itenary, null, 2);
-                // Provide download
-                const blob = new Blob([dataStr], {
-                    type: "application/json"
+                const blob = new Blob([JSON.stringify(itenary, null, 2)], {
+                    type: 'application/json'
                 });
-                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url;
+                a.href = URL.createObjectURL(blob);
                 a.download = 'itenary.json';
                 a.click();
-                URL.revokeObjectURL(url);
+                URL.revokeObjectURL(a.href);
             });
 
-            /* ---------------------------
-            Initialize with one sample day
-            ----------------------------*/
-            (function init() {
-                // start with 1 sample day
-                itenary.push({
-                    id: Date.now(),
-                    dayNumber: 1,
-                    title: 'Day 1: Arrival in Rome - June 15, 2023 (Friday)',
-                    date: '2023-06-15',
-                    overnightStay: 'Rome',
-                    meals: ['Dinner'],
-                    activities: [{
-                            title: "Arrival at Rome Fiumicino Airport",
-                            description: "Meet your driver and transfer to your hotel. Check in and free time to relax.",
-                            time: "",
-                            _uid: 'a1'
-                        },
-                        {
-                            title: "Welcome Dinner",
-                            description: "Enjoy a traditional Italian dinner at a local restaurant near your hotel.",
-                            time: "",
-                            _uid: 'a2'
-                        }
-                    ]
-                });
-                updateItineraryField();
-                renderAll();
-            })();
-
-            /* ---------------------------
-            Small util: escapeHtml
-            ----------------------------*/
             function escapeHtml(unsafe) {
-                if (!unsafe && unsafe !== 0) return '';
-                return String(unsafe)
+                return String(unsafe || '')
                     .replaceAll('&', '&amp;')
                     .replaceAll('<', '&lt;')
                     .replaceAll('>', '&gt;')
                     .replaceAll('"', '&quot;')
-                    .replaceAll("'", '&#039;');
+                    .replaceAll("'", "&#039;");
             }
 
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('[type="submit"]')) {
-                    const itineraryInput = document.getElementById('itenary-input');
-                    if (itineraryInput) {
-                        itineraryInput.value = JSON.stringify(itenary);
-                        console.log("✔ Itinerary set before submit:", itineraryInput.value);
-                    } else {
-                        console.error("❌ itenary-input field not found!");
-                    }
+            // Handle edit button clicks (delegated)
+            daysContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('edit-activity-btn')) {
+                    const dayId = e.target.dataset.dayId;
+                    const actIndex = e.target.dataset.activityIndex;
+                    openActivityModal('edit', dayId, actIndex);
                 }
             });
 
+            // initialize
+            (function init() {
+                if (startDate) {
+                    const first = createEmptyDay(1);
+                    first.activities = [];
+                    itenary.push(first);
+                    renderAll();
+                }
+            })();
         });
     </script>
 @endpush

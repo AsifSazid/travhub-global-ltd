@@ -218,12 +218,60 @@ class PackageController extends Controller
         }
         $activities = json_decode($packDesDetails->activities, true) ?? [];
 
-        // Handle double JSON encoding cases
+        // Decode JSON activities if needed
+        $activities = json_decode($packDesDetails->activities, true) ?? [];
+
         if (is_string($activities)) {
             $activities = json_decode($activities, true) ?? [];
         }
 
-        // Extract all activity IDs at once
+        // Static activities (predefined)
+        $staticActivities = [
+            [
+                'id' => null,
+                'title' => 'Airport Pick',
+                'description' => '<ul>' .
+                    '<li>Airport Name: </li>' .
+                    '<li>Terminal/Gate: </li>' .
+                    '<li>Drop off location: </li>' .
+                    '<li>Pickup Time: </li>' .
+                    '<li>Vehicles Use: </li>' .
+                    '<li>Flight No: </li>' .
+                    '</ul>',
+            ],
+            [
+                'id' => null,
+                'title' => 'Domestic Connecting Flight',
+                'description' => '<ul>' .
+                    '<li>Self Transfer: </li>' .
+                    '<li>Specific Instructions: </li>' .
+                    '<li>Add next flight details: </li>' .
+                    '</ul>',
+            ],
+            [
+                'id' => null,
+                'title' => 'Car Transfer',
+                'description' => '<ul>' .
+                    '<li>Start: </li>' .
+                    '<li>End: </li>' .
+                    '<li>Enroute activities: </li>' .
+                    '<li>Vehicles Use: </li>' .
+                    '</ul>',
+            ],
+            [
+                'id' => null,
+                'title' => 'Airport Drop',
+                'description' => '<ul>' .
+                    '<li>Hotel/Location: </li>' .
+                    '<li>Airport: </li>' .
+                    '<li>Pickup time: </li>' .
+                    '<li>Vehicles Use: </li>' .
+                    '</ul>',
+            ],
+        ];
+
+
+        // ✅ Extract all activity IDs from dynamic ones
         $activityIds = collect($activities)
             ->pluck('id')
             ->filter()
@@ -231,19 +279,26 @@ class PackageController extends Controller
             ->values()
             ->toArray();
 
-        // Fetch all activity details in one query
+        // ✅ Fetch details for only DB-based activities
         $activitiesWithDetails = Activity::whereIn('id', $activityIds)
             ->select('id', 'description')
             ->get()
             ->keyBy('id');
 
-        // Merge descriptions back into the original structure
+        // ✅ Merge fetched descriptions into activities
         $activities = collect($activities)->map(function ($item) use ($activitiesWithDetails) {
             if (isset($item['id']) && $activitiesWithDetails->has($item['id'])) {
                 $item['description'] = $activitiesWithDetails[$item['id']]->description;
             }
             return $item;
         })->toArray();
+
+        // ✅ Finally merge static + dynamic activities
+        $activities = array_merge($staticActivities, $activities);
+
+
+        // dd($activities);
+
 
         // dd($activities);
 
