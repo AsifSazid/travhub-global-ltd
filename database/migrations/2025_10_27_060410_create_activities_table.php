@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->uuid('uuid')->unique();
             $table->string('title', 255);
-            $table->char('description')->nullable();
+            $table->text('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->json('price')->nullable();
 

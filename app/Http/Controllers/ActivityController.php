@@ -75,9 +75,10 @@ class ActivityController extends Controller
                 'city_id' => $city->id,
                 'city_uuid' => $city->uuid,
                 'city_title' => $city->title,
+                'currency_id' => $currency?->id,
                 'currency_uuid' => $currency?->uuid,
                 'currency_title' => $currency?->title,
-                'price_json' => json_encode($priceData),
+                'price' => json_encode($priceData),
                 'created_by' => Auth::id(),
             ]);
 

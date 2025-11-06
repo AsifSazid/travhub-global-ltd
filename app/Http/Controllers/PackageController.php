@@ -206,12 +206,53 @@ class PackageController extends Controller
 
     public function stepFive($uuid, $step)
     {
-        $activites = Activity::get();
+        $packDesDetails = PackDestinationInfo::where('package_uuid', $uuid)->first();
+        $cities = json_decode($packDesDetails->cities) ?? [];
+        if (is_string($cities)) {
+            $decoded = json_decode($cities, true);
+            if (is_string($decoded)) {
+                $cities = json_decode($decoded, true);
+            } else {
+                $cities = $decoded;
+            }
+        }
+        $activities = json_decode($packDesDetails->activities, true) ?? [];
+
+        // Handle double JSON encoding cases
+        if (is_string($activities)) {
+            $activities = json_decode($activities, true) ?? [];
+        }
+
+        // Extract all activity IDs at once
+        $activityIds = collect($activities)
+            ->pluck('id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Fetch all activity details in one query
+        $activitiesWithDetails = Activity::whereIn('id', $activityIds)
+            ->select('id', 'description')
+            ->get()
+            ->keyBy('id');
+
+        // Merge descriptions back into the original structure
+        $activities = collect($activities)->map(function ($item) use ($activitiesWithDetails) {
+            if (isset($item['id']) && $activitiesWithDetails->has($item['id'])) {
+                $item['description'] = $activitiesWithDetails[$item['id']]->description;
+            }
+            return $item;
+        })->toArray();
+
+        // dd($activities);
+
         $packQuatDetails = PackQuatDetail::where('package_uuid', $uuid)->first();
         $title = "Itinerary Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 5;
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activites', 'packQuatDetails', 'title', 'completedStep'));
+        // dd($packQuatDetails, $package);
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activities', 'cities', 'packQuatDetails', 'title', 'completedStep'));
     }
 
     public function stepSix($uuid, $step)

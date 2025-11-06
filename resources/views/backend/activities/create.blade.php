@@ -65,12 +65,26 @@
                 </select>
             </div>
 
-            <div class="mb-4">
+            {{-- <div class="mb-4">
                 <label for="city_uuid"
                     class="block text-sm font-medium text-gray-700">{{ __('Details/Description') }}</label>
                 <textarea name="description" id="description" rows="4"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div> --}}
+
+            <div class="mb-4">
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+
+                <!-- Hidden textarea for form submission -->
+                <textarea name="description" id="description" hidden>{{ old('description', $activity->description ?? '') }}</textarea>
+
+                <!-- Quill editor container -->
+                <div class="quill-editor border rounded p-2" data-target-textarea="description"
+                    style="min-height: 200px;">
+                    {!! old('description', $activity->description ?? '') !!}
+                </div>
             </div>
+
 
             <!-- Prices block -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
@@ -122,6 +136,46 @@
     @push('js')
         <script>
             document.addEventListener("DOMContentLoaded", () => {
+
+                document.querySelectorAll('.quill-editor').forEach(editorDiv => {
+                    const targetTextareaId = editorDiv.dataset.targetTextarea;
+                    const hiddenTextarea = document.getElementById(targetTextareaId);
+
+                    // Initialize Quill
+                    const quill = new Quill(editorDiv, {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline'],
+                                [{
+                                    'font': []
+                                }],
+                                [{
+                                    'align': []
+                                }],
+                                [{
+                                    'list': 'ordered'
+                                }, {
+                                    'list': 'bullet'
+                                }]
+                            ]
+                        }
+                    });
+
+                    // Set initial content from hidden textarea if available
+                    if (hiddenTextarea.value) {
+                        quill.root.innerHTML = hiddenTextarea.value;
+                    }
+
+                    // On form submit: copy Quill content to hidden textarea
+                    const form = editorDiv.closest('form');
+                    if (form) {
+                        form.addEventListener('submit', () => {
+                            hiddenTextarea.value = quill.root.innerHTML;
+                        });
+                    }
+                });
+
                 // for country-city dynamic select
                 const countrySelect = document.getElementById('country_uuid');
                 const citySelect = document.getElementById('city_uuid');
