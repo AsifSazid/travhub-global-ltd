@@ -351,18 +351,18 @@ class PackageController extends Controller
         $pkgItenaries = PackItenaries::where('package_uuid', $uuid)->firstOrFail();
         $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->firstOrFail();
 
-        dd($pkg, $pkgDesInfo, $pkgQuatDetail, $pkgAccomoDetail, $pkgPrice, $pkgItenaries, $pkgInclusions);
+        // dd($pkg, $pkgDesInfo, $pkgQuatDetail, $pkgAccomoDetail, $pkgPrice, $pkgItenaries, $pkgInclusions);
         $title = "Itinerary Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 7;
 
         return view('backend.packages.pkg-details', [
             'package' => $pkg,
-            'pkgDesInfo' => $pkgDesInfo,
-            'pkgQuatDetail' => $pkgQuatDetail,
-            'pkgAccomoDetail' => $pkgAccomoDetail,
-            'pkgPrice' => $pkgPrice,
-            'pkgItenaries' => $pkgItenaries,
+            'packDestinationInfo' => $pkgDesInfo,
+            'packQuatDetail' => $pkgQuatDetail,
+            'packAccomoDetail' => $pkgAccomoDetail,
+            'packPrice' => $pkgPrice,
+            'packItenaries' => $pkgItenaries,
             'pkgInclusions' => $pkgInclusions,
             'title' => $title,
             'completedStep' => $completedStep

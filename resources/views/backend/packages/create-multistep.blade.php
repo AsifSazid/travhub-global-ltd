@@ -106,6 +106,7 @@
 
 
             @if ($step == 7)
+                @include('backend.packages.step-seven')
             @endif
 
             {{-- Navigation --}}
