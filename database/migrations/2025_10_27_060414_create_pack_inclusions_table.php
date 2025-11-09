@@ -30,10 +30,8 @@ return new class extends Migration
             // Reference fields
             $table->uuid('package_uuid')->nullable();
             $table->string('package_title', 255)->nullable();
-            $table->uuid('activity_uuid')->nullable();
-            $table->string('activity_title', 255)->nullable();
-            $table->uuid('inclusion_uuid')->nullable();
-            $table->string('inclusion_title', 255)->nullable();
+            
+            $table->json('inclusions')->nullable();
 
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();

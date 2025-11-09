@@ -308,12 +308,37 @@ class PackageController extends Controller
 
     public function stepSix($uuid, $step)
     {
-        // dd($uuid, $step);
-        $activities = Activity::with('inclusions')->get();
+        $inclusions = [
+            [
+                'title' => 'Airport Transfers',
+                'icons' => 'fa-solid fa-plane-arrival',
+                'sub_title' => ['1' => 'Airport transfers on arrival and departure', '2' => 'All inter-city transfers'],
+            ],
+            [
+                'title' => 'Accommodation',
+                'icons' => 'fa-solid fa-hotel',
+                'sub_title' => ['1' => '7 nights in selected hotels', '2' => 'Daily breakfast included', '3' => 'Room upgrades available'],
+            ],
+            [
+                'title' => 'Meals',
+                'icons' => 'fa-solid fa-utensils',
+                'sub_title' => ['1' => 'Daily breakfast', '2' => '3 lunches as specified', '3' => '2 dinners as specified'],
+            ],
+            [
+                'title' => 'Tours & Excursions',
+                'icons' => 'fa-solid fa-map-marked-alt',
+                'sub_title' => ['1' => 'All tours mentioned in itinerary', '2' => 'Entrance fees to attractions', '3' => 'English-speaking guides'],
+            ],
+            [
+                'title' => 'Professional Services',
+                'icons' => 'fa-solid fa-user-tie',
+                'sub_title' => ['1' => 'Professional Services', '2' => 'Dedicated tour manager'],
+            ],
+        ];
         $title = "Inclusion Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 6;
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activities', 'title', 'completedStep'));
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'inclusions', 'title', 'completedStep'));
     }
 
     protected function stepSeven($uuid, $step)
@@ -324,9 +349,9 @@ class PackageController extends Controller
         $pkgAccomoDetail = PackAccomoDetail::where('package_uuid', $uuid)->firstOrFail();
         $pkgPrice = PackPrice::where('package_uuid', $uuid)->firstOrFail();
         $pkgItenaries = PackItenaries::where('package_uuid', $uuid)->firstOrFail();
-        $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->get();
+        $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->firstOrFail();
 
-        // dd($pkg, $pkgDesInfo, $pkgQuatDetail, $pkgAccomoDetail, $pkgPrice, $pkgItenaries, $pkgInclusions);
+        dd($pkg, $pkgDesInfo, $pkgQuatDetail, $pkgAccomoDetail, $pkgPrice, $pkgItenaries, $pkgInclusions);
         $title = "Itinerary Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 7;
@@ -563,7 +588,7 @@ class PackageController extends Controller
             $pkg = Package::where('uuid', $uuid)->firstOrFail();
 
             foreach ($itenaries as $item) {
-                PackItenaries::create([
+                PackItenaries::updateOrCreate([
                     'uuid' => Str::uuid(),
                     'title' => $item['title'] ?? null,
                     'description' => $item['title'] ?? null, // চাইলে অন্য description ফিল্ড দিতে পারো
@@ -607,48 +632,16 @@ class PackageController extends Controller
             $pkg = Package::where('uuid', $uuid)->firstOrFail();
             $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
 
-            // Existing inclusions
-            $selectedInclusions = $request->input('inclusions', []);
+            PackInclusion::updateOrCreate([
+                'uuid' => Str::uuid(),
+                'title' => $formatted_title,
+                'package_uuid' => $uuid,
+                'inclusions' => json_encode($request->inclusions),
+                'package_id' => $pkg['id'] ?? null,
+                'package_uuid' => $pkg['uuid'] ?? null,
+                'package_title' => $pkg['title'] ?? null,
 
-            // Custom inclusions
-            $customInclusions = $request->input('custom_inclusions', []);
-
-            // Example: Save to DB
-            foreach ($selectedInclusions as $activityId => $inclusionIds) {
-                foreach ($inclusionIds as $id) {
-                    PackInclusion::create([
-                        'uuid' => Str::uuid(),
-                        'title' => $formatted_title,
-                        'package_uuid' => $uuid,
-                        'activity_id'  => $activityId,
-                        'inclusion_id' => $id,
-                        'package_id' => $pkg['id'] ?? null,
-                        'package_title' => $pkg['title'] ?? null,
-
-                    ]);
-                }
-            }
-
-            // Handle custom inclusions (new user-defined texts)
-            foreach ($customInclusions as $activityId => $titles) {
-                foreach ($titles as $title) {
-                    $new = Inclusion::create([
-                        'uuid' => Str::uuid(),
-                        'activity_id' => $activityId,
-                        'title'       => $title,
-                    ]);
-
-                    PackInclusion::create([
-                        'uuid' => Str::uuid(),
-                        'title' => $formatted_title,
-                        'package_uuid' => $uuid,
-                        'activity_id'  => $activityId,
-                        'inclusion_id' => $new->id,
-                        'package_id' => $pkg['id'] ?? null,
-                        'package_title' => $pkg['title'] ?? null,
-                    ]);
-                }
-            }
+            ]);
 
             $pkg->update(['progress_step' => $step]);
 

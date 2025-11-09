@@ -2,7 +2,7 @@
 
 <div class="max-w-5xl mx-auto">
     <header class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Itinerary Builder</h1>
+        <h1 class="text-2xl font-semibold text-gray-800"></h1>
         <div class="flex items-center gap-3">
             <button id="add-day-btn" type="button"
                 class="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700">
