@@ -110,7 +110,9 @@ class ActivityController extends Controller
             ->where('uuid', $uuid)
             ->firstOrFail(); // throws ModelNotFoundException if not found
 
-        return view('backend.activities.show', compact('activity'));
+        $prices = json_decode($activity->price);
+
+        return view('backend.activities.show', compact('activity', 'prices'));
     }
 
     // Edit Activity
@@ -126,6 +128,7 @@ class ActivityController extends Controller
     // Update Activity
     public function update(Request $request, $uuid)
     {
+        // dd($request->all());
         $activity = Activity::where('uuid', $uuid)->firstOrFail();
 
         // Validation
