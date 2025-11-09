@@ -230,43 +230,39 @@ class PackageController extends Controller
             [
                 'id' => null,
                 'title' => 'Airport Pick',
-                'description' => '<ul>' .
-                    '<li>Airport Name: </li>' .
-                    '<li>Terminal/Gate: </li>' .
-                    '<li>Drop off location: </li>' .
-                    '<li>Pickup Time: </li>' .
-                    '<li>Vehicles Use: </li>' .
-                    '<li>Flight No: </li>' .
-                    '</ul>',
+                'description' => '',
+                'Airport Name' => '',
+                'Terminal/Gate' => '',
+                'Drop off location' => '',
+                'Pickup Time' => '',
+                'Vehicles Use' => '',
+                'Flight No' => ''
             ],
             [
                 'id' => null,
                 'title' => 'Domestic Connecting Flight',
-                'description' => '<ul>' .
-                    '<li>Self Transfer: </li>' .
-                    '<li>Specific Instructions: </li>' .
-                    '<li>Add next flight details: </li>' .
-                    '</ul>',
+                'description' => '',
+                'Self Transfer' => '',
+                'Specific Instructions' => '',
+                'Add next flight details' =>   ''
             ],
             [
                 'id' => null,
                 'title' => 'Car Transfer',
-                'description' => '<ul>' .
-                    '<li>Start: </li>' .
-                    '<li>End: </li>' .
-                    '<li>Enroute activities: </li>' .
-                    '<li>Vehicles Use: </li>' .
-                    '</ul>',
+                'description' => '',
+                'Start' => '',
+                'End' => '',
+                'Enroute activities' => '',
+                'Vehicles Use' => ''
             ],
             [
                 'id' => null,
                 'title' => 'Airport Drop',
-                'description' => '<ul>' .
-                    '<li>Hotel/Location: </li>' .
-                    '<li>Airport: </li>' .
-                    '<li>Pickup time: </li>' .
-                    '<li>Vehicles Use: </li>' .
-                    '</ul>',
+                'description' => '',
+                'Hotel/Location' => '',
+                'Airport' => '',
+                'Pickup time' => '',
+                'Vehicles Use' => ''
             ],
         ];
 
@@ -313,7 +309,7 @@ class PackageController extends Controller
     public function stepSix($uuid, $step)
     {
         // dd($uuid, $step);
-        $activities = Activity::where('activity_category_id', 3)->with('inclusions')->get();
+        $activities = Activity::with('inclusions')->get();
         $title = "Inclusion Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 6;
@@ -584,7 +580,9 @@ class PackageController extends Controller
                     'activities' => json_encode($item['activities'] ?? []),
 
                     // Meals array থেকে প্রথম meal বা join করে string বানানো
-                    'meal' => isset($item['meals']) ? strtolower($item['meals'][0]) : null,
+                    'meal' => (isset($item['meals']) && is_array($item['meals']) && count($item['meals']) > 0)
+                        ? strtolower($item['meals'][0])
+                        : null,
 
                     // Extra info
                     'date' => $item['date'] ?? null,
