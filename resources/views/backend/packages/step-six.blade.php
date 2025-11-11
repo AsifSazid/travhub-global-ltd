@@ -66,22 +66,22 @@
 
             // Update input names to be under sub_title
             label.innerHTML = `
-        <input type="checkbox"
-               name="inclusions[${activityIndex}][sub_title][${nextIndex}][selected]"
-               value="1"
-               class="text-blue-600 rounded"
-               checked>
-        <input type="hidden"
-               name="inclusions[${activityIndex}][sub_title][${nextIndex}][text]"
-               value="${value}">
-        <input type="hidden"
-               name="inclusions[${activityIndex}][sub_title][${nextIndex}][number]"
-               value="${nextIndex + 1}">
-        <input type="hidden"
-               name="inclusions[${activityIndex}][sub_title][${nextIndex}][type]"
-               value="custom">
-        <span class="text-gray-700">${value}</span>
-    `;
+                    <input type="checkbox"
+                        name="inclusions[${activityIndex}][sub_title][${nextIndex}][selected]"
+                        value="1"
+                        class="text-blue-600 rounded"
+                        checked>
+                    <input type="hidden"
+                        name="inclusions[${activityIndex}][sub_title][${nextIndex}][text]"
+                        value="${value}">
+                    <input type="hidden"
+                        name="inclusions[${activityIndex}][sub_title][${nextIndex}][number]"
+                        value="${nextIndex + 1}">
+                    <input type="hidden"
+                        name="inclusions[${activityIndex}][sub_title][${nextIndex}][type]"
+                        value="custom">
+                    <span class="text-gray-700">${value}</span>
+                `;
 
             list.appendChild(label);
 

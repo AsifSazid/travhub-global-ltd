@@ -365,7 +365,8 @@ class PackageController extends Controller
             'packItenaries' => $pkgItenaries,
             'packInclusion' => $pkgInclusions,
             'title' => $title,
-            'completedStep' => $completedStep
+            'completedStep' => $completedStep,
+            'uuid' => $uuid
         ])->with('success', 'Package completed successfully.');
     }
 

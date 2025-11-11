@@ -1,5 +1,6 @@
 @php
     use App\Models\City; // এই লাইনটা Blade ফাইলের একদম শুরুর দিকে রাখো (PHP ট্যাগের ভেতরে)
+    use App\Models\Country; // এই লাইনটা Blade ফাইলের একদম শুরুর দিকে রাখো (PHP ট্যাগের ভেতরে)
 @endphp
 <x-backend.layouts.master>
     <x-slot name="header">
@@ -82,7 +83,11 @@
 
                 <!-- Destination Info -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
-                    <h2 class="text-xl font-semibold mb-4">Destination Info</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Destination Info</h2>
+                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '1']) }}"
+                            class="text-blue-600 hover:underline text-sm">Edit</a>
+                    </div>
                     {{-- <p><strong>Title:</strong> {{ $packDestinationInfo['title'] }}</p> --}}
                     <p><strong>Country:</strong> {{ $packDestinationInfo['country_title'] }}</p>
                     <p><strong>Cities:</strong></p>
@@ -118,7 +123,11 @@
 
                 <!-- Quotation Detail -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
-                    <h2 class="text-xl font-semibold mb-4">Quotation Detail</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Quotation Detail</h2>
+                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '2']) }}"
+                            class="text-blue-600 hover:underline text-sm">Edit</a>
+                    </div>
                     <p><strong>Duration:</strong> {{ $packQuatDetail['duration'] }} days
                         ({{ format_ddmmyyyy($packQuatDetail['start_date']) }} to
                         {{ format_ddmmyyyy($packQuatDetail['end_date']) }})</p>
@@ -140,7 +149,11 @@
 
                 <!-- Accommodation Detail -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
-                    <h2 class="text-xl font-semibold mb-4">Accommodation</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Accommodation</h2>
+                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '3']) }}"
+                            class="text-blue-600 hover:underline text-sm">Edit</a>
+                    </div>
                     @php
                         $hotels = json_decode($packAccomoDetail['hotels'], true);
                     @endphp
@@ -156,7 +169,11 @@
 
                 <!-- Price Details -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
-                    <h2 class="text-xl font-semibold mb-4">Price Details</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Price Details</h2>
+                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '4']) }}"
+                            class="text-blue-600 hover:underline text-sm">Edit</a>
+                    </div>
 
                     <p><strong>Currency:</strong> {{ $packPrice['currency_title'] ?? 'N/A' }}</p>
 
@@ -347,10 +364,13 @@
                     </div>
                 </div>
 
-
                 <!-- Itineraries -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
-                    <h2 class="text-xl font-semibold mb-4">Itineraries</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Itineraries</h2>
+                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
+                            class="text-blue-600 hover:underline text-sm">Edit</a>
+                    </div>
                     @foreach ($packItenaries as $itenary)
                         @if ($itenary)
                             <div class="border-b border-gray-200 mb-4 pb-4">
@@ -381,13 +401,37 @@
                                                     @if (!empty($a['data']))
                                                         <ul class="list-disc list-inside mt-2 px-6">
                                                             @foreach ($a['data'] as $key => $aData)
-                                                                <li>
-                                                                    {{-- প্রথমে কী (key) দেখান --}}
-                                                                    <strong>{{ $key }}:</strong>
+                                                                @if ($key == 'city_id')
+                                                                    @php
+                                                                        $cityModel = City::find($aData);
+                                                                        $aData = $cityModel ? $cityModel->title : ' - ';
+                                                                        $key = 'City';
+                                                                    @endphp
+                                                                    <li>
+                                                                        <strong>{{ $key }}:</strong>
 
-                                                                    {{-- এরপর $aData empty কি না চেক করুন এবং ফাঁকা হলে ' - ' দেখান --}}
-                                                                    {{ !empty($aData) ? $aData : ' - ' }}
-                                                                </li>
+                                                                        {{ !empty($aData) ? $aData : ' - ' }}
+                                                                    </li>
+                                                                @elseif($key == 'country_id')
+                                                                    @php
+                                                                        $countryModel = Country::find($aData);
+                                                                        $aData = $countryModel ? $countryModel->title : ' - ';
+                                                                        $key = 'Country';
+                                                                    @endphp
+                                                                    <li>
+                                                                        <strong>{{ $key }}:</strong>
+
+                                                                        {{ !empty($aData) ? $aData : ' - ' }}
+                                                                    </li>
+                                                                @else
+                                                                    <li>
+                                                                        {{-- প্রথমে কী (key) দেখান --}}
+                                                                        <strong>{{ $key }}:</strong>
+
+                                                                        {{-- এরপর $aData empty কি না চেক করুন এবং ফাঁকা হলে ' - ' দেখান --}}
+                                                                        {{ !empty($aData) ? $aData : ' - ' }}
+                                                                    </li>
+                                                                @endif
                                                             @endforeach
                                                         </ul>
                                                     @endif
@@ -408,7 +452,11 @@
 
                 <!-- Inclusions -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
-                    <h2 class="text-xl font-semibold mb-4">Inclusions</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Inclusions</h2>
+                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
+                            class="text-blue-600 hover:underline text-sm">Edit</a>
+                    </div>
 
                     @php
                         $inclusions = [];
@@ -463,7 +511,6 @@
                         <p class="text-gray-500">No inclusions found.</p>
                     @endif
                 </div>
-
 
             </div>
 
