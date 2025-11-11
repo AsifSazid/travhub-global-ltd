@@ -30,7 +30,7 @@
                         @endif
                     </p>
                     <p><strong>Completion Status:</strong>
-                        @if ($package['completion_status'] === 'complete')
+                        @if ($package['completion_status'] === 'completed')
                             <span class="text-green-600 font-semibold">Complete</span>
                         @else
                             <span class="text-red-600 font-semibold">Incomplete</span>
@@ -101,9 +101,7 @@
 
                         @foreach ($cities as $city)
                             <li>
-                                {{ $city['title'] }}@if (!$loop->last)
-                                    ,
-                                @endif
+                                {{ $city['title'] }}
                             </li>
                         @endforeach
                     </ul>
@@ -415,7 +413,9 @@
                                                                 @elseif($key == 'country_id')
                                                                     @php
                                                                         $countryModel = Country::find($aData);
-                                                                        $aData = $countryModel ? $countryModel->title : ' - ';
+                                                                        $aData = $countryModel
+                                                                            ? $countryModel->title
+                                                                            : ' - ';
                                                                         $key = 'Country';
                                                                     @endphp
                                                                     <li>
@@ -512,7 +512,26 @@
                     @endif
                 </div>
 
+                <form action="{{ route('packages.step', ['uuid' => $uuid, 'step' => 7]) }}" method="POST">
+                    @csrf
+
+                    <div class="mt-6 flex items-center justify-between">
+                        <!-- Radio / Checkbox -->
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="confirm" class="form-checkbox h-5 w-5 text-primary" />
+                            <span class="text-gray-700 text-sm">I confirm everything is correct</span>
+                        </label>
+
+                        <!-- Submit button -->
+                        <button type="submit" id="submitBtn"
+                            class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md bg-gray-600 border border-gray-300 cursor-not-allowed"
+                            disabled>
+                            {{ __('Finish') }}
+                        </button>
+                    </div>
+                </form>
             </div>
+
 
             <div class="px-4 py-2 bg-gray-100 border-t text-sm text-gray-500 flex justify-between items-center">
                 <div>
@@ -531,7 +550,25 @@
         </div>
     </div>
 
+
     @push('js')
-        <script></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const confirmCheckbox = document.getElementById('confirm');
+                const submitBtn = document.getElementById('submitBtn');
+
+                confirmCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('bg-gray-600', 'cursor-not-allowed');
+                        submitBtn.classList.add('bg-primary');
+                    } else {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('bg-gray-600', 'cursor-not-allowed');
+                        submitBtn.classList.remove('bg-primary');
+                    }
+                });
+            });
+        </script>
     @endpush
 </x-backend.layouts.master>

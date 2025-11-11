@@ -303,7 +303,7 @@ class PackageController extends Controller
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 5;
         // dd($packQuatDetails, $package);
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activities', 'cities', 'packQuatDetails', 'title', 'completedStep'));
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activities', 'cities', 'packDesDetails', 'packQuatDetails', 'title', 'completedStep'));
     }
 
     public function stepSix($uuid, $step)
@@ -352,11 +352,11 @@ class PackageController extends Controller
         $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->firstOrFail();
 
         // dd($pkg, $pkgDesInfo, $pkgQuatDetail, $pkgAccomoDetail, $pkgPrice, $pkgItenaries, $pkgInclusions);
-        $title = "Itinerary Details";
+        $title = "Final Look & Submit";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 7;
 
-        return view('backend.packages.pkg-details', [
+        return view('backend.packages.create-multistep', [
             'package' => $pkg,
             'packDestinationInfo' => $pkgDesInfo,
             'packQuatDetail' => $pkgQuatDetail,
@@ -366,6 +366,7 @@ class PackageController extends Controller
             'packInclusion' => $pkgInclusions,
             'title' => $title,
             'completedStep' => $completedStep,
+            'step' => $step,
             'uuid' => $uuid
         ])->with('success', 'Package completed successfully.');
     }
@@ -387,7 +388,7 @@ class PackageController extends Controller
             case 6:
                 return $this->stepSixStore($request, $uuid, $step);
             case 7:
-                return $this->stepSeven($uuid, $step);
+                return $this->stepSevenStore($request, $uuid, $step);
             default:
                 return redirect()->back()->withErrors(['Invalid step']);
         }
@@ -684,6 +685,50 @@ class PackageController extends Controller
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
+    }
+
+    public function stepSevenStore($request, $uuid, $step)
+    {
+        try {
+            $pkg = Package::where('uuid', $uuid)->firstOrFail();
+            $pkg->update([
+                'progress_step' => $step,
+                'completion_status' => 'completed',
+                'status' => 'active'
+            ]);
+
+            return redirect()->route('packages.index')->with('success', 'Package completed successfully.');
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function show($uuid)
+    {
+        $pkg = Package::where('uuid', $uuid)->firstOrFail();
+        $pkgDesInfo = PackDestinationInfo::where('package_uuid', $uuid)->firstOrFail();
+        $pkgQuatDetail = PackQuatDetail::where('package_uuid', $uuid)->firstOrFail();
+        $pkgAccomoDetail = PackAccomoDetail::where('package_uuid', $uuid)->firstOrFail();
+        $pkgPrice = PackPrice::where('package_uuid', $uuid)->firstOrFail();
+        $pkgItenaries = PackItenaries::where('package_uuid', $uuid)->get();
+        $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->firstOrFail();
+
+        $title = "Itinerary Details";
+        $package = $this->getPackageInfo($uuid);
+        $completedStep = $package->progress_step ?? 7;
+
+        return view('backend.packages.pkg-details', [
+            'package' => $pkg,
+            'packDestinationInfo' => $pkgDesInfo,
+            'packQuatDetail' => $pkgQuatDetail,
+            'packAccomoDetail' => $pkgAccomoDetail,
+            'packPrice' => $pkgPrice,
+            'packItenaries' => $pkgItenaries,
+            'packInclusion' => $pkgInclusions,
+            'title' => $title,
+            'completedStep' => $completedStep,
+            'uuid' => $uuid
+        ])->with('success', 'Package completed successfully.');
     }
 
     public function packagePdf()

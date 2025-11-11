@@ -111,16 +111,20 @@
 
             {{-- Navigation --}}
             <div class="mt-6 flex justify-between">
-                @if ($step > 1)
+                @if ($step == 7)
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="confirm" class="form-checkbox h-5 w-5 text-primary" />
+                        <span class="text-gray-700 text-sm">I confirm everything is correct</span>
+                    </label>
+                @else
                     {{-- <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => $step - 1]) }}"
                         class="px-4 py-2 border rounded hover:bg-gray-100">Back</a> --}}
                     <span></span>
-                @else
-                    <span></span>
                 @endif
 
-                <button type="submit"
-                    class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md bg-primary border border-gray-300 dark:bg-white dark:border-gray-200 hover:bg-primary-dark focus:outline-none focus:ring focus:ring-primary-dark focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark">
+                <button type="submit" id="submitBtn"
+                    class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md border border-gray-300 dark:bg-white dark:border-gray-200 focus:outline-none focus:ring focus:ring-primary-dark focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark {{ $step == 7 ? 'bg-gray-600 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark' }}"
+                    {{ $step == 7 ? 'disabled' : '' }}>
                     {{ $step < 7 ? 'Save & Next' : 'Finish' }}
                 </button>
             </div>
@@ -128,5 +132,24 @@
     </div>
 
     @push('js')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const confirmCheckbox = document.getElementById('confirm');
+                const submitBtn = document.getElementById('submitBtn');
+
+                confirmCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('bg-gray-600', 'cursor-not-allowed');
+                        submitBtn.classList.add('bg-primary');
+                    } else {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('bg-gray-600', 'cursor-not-allowed');
+                        submitBtn.classList.remove('bg-primary');
+                    }
+                });
+            });
+        </script>
     @endpush
 </x-backend.layouts.master>
+

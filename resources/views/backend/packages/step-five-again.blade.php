@@ -46,6 +46,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const cities = @json($cities);
+            const packDesDetails = @json($packDesDetails);
             const startDate = @json($packQuatDetails->start_date);
             const maxDays = @json($packQuatDetails->duration);
             const presetActivities = @json($activities);
@@ -142,7 +143,19 @@
             <div class="font-medium text-gray-800">${escapeHtml(activity.title)}</div>
             <div class="text-sm text-gray-600 mt-1 break-words">
                 ${escapeHtml(descPreview)}
-                ${activity.data ? `<div class="mt-1 text-xs text-gray-500">${Object.entries(activity.data).map(([k,v])=>`${escapeHtml(k)}: ${escapeHtml(v)}`).join(', ')}</div>` : ''}
+        ${activity.data ? `
+        <div class="mt-1 text-xs text-gray-500">
+            ${Object.entries(activity.data).map(([k, v]) => {
+                if (k === 'city_id') {
+                    const city = cities.find(c => c.id == v);
+                    return `City: ${escapeHtml(city ? city.title : v)}`;
+                } else if (k === 'country_id') {
+                    return `Country: ${escapeHtml(packDesDetails.country_title ?? v)}`;
+                } else {
+                    return `${escapeHtml(k)}: ${escapeHtml(v)}`;
+                }
+            }).join(', ')}
+        </div>` : ''}
             </div>
             ${activity.time ? `<div class="text-xs text-gray-500 mt-1">Time: ${escapeHtml(activity.time)}</div>` : ''}
         </div>
@@ -183,10 +196,10 @@
                         <span class="text-sm">Check All</span>
                     </label>
                     ${mealOptions.map(m=>`
-                                <label class="inline-flex items-center space-x-2">
-                                    <input type="checkbox" data-day-id="${day.id}" class="meal-checkbox ml-1" value="${escapeHtml(m)}" ${day.meals.includes(m)?'checked':''}/>
-                                    <span class="text-sm text-gray-700">${escapeHtml(m)}</span>
-                                </label>`).join('')}
+                                        <label class="inline-flex items-center space-x-2">
+                                            <input type="checkbox" data-day-id="${day.id}" class="meal-checkbox ml-1" value="${escapeHtml(m)}" ${day.meals.includes(m)?'checked':''}/>
+                                            <span class="text-sm text-gray-700">${escapeHtml(m)}</span>
+                                        </label>`).join('')}
                 </div>
             </div>
         </div>
@@ -198,9 +211,9 @@
 
         <div class="mt-4 flex flex-wrap gap-2">
             ${presetActivities.map(a=>`
-                        <button type="button" data-day-id="${day.id}" data-activity-title="${escapeHtml(a.title)}" class="add-preset-btn px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
-                            + ${escapeHtml(a.title)}
-                        </button>`).join('')}
+                                <button type="button" data-day-id="${day.id}" data-activity-title="${escapeHtml(a.title)}" class="add-preset-btn px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                                    + ${escapeHtml(a.title)}
+                                </button>`).join('')}
         </div>
         `;
 
@@ -362,9 +375,27 @@
                             const val = (activity.data && activity.data[key]) ? activity.data[key] : preset[
                                 key] ?? '';
                             const wrapper = document.createElement('div');
-                            wrapper.innerHTML =
-                                `<label class="block text-sm font-medium">${escapeHtml(key)}</label>
-                    <input data-static-field="${escapeHtml(key)}" class="mt-1 block w-full border rounded px-3 py-2 break-words" value="${escapeHtml(val)}"/>`;
+
+                            let fieldHTML = '';
+
+                            if (key === 'city_id') {
+                                const options = cities.map(c =>
+                                    `<option value="${c.id}" ${val == c.id ? 'selected' : ''}>${escapeHtml(c.title)}</option>`
+                                ).join('');
+                                fieldHTML = `
+                                            <label class="block text-sm font-medium">City</label>
+                                            <select data-static-field="city_id" class="mt-1 block w-full border rounded px-3 py-2">
+                                                <option value="">Select a city</option>
+                                                ${options}
+                                            </select>`;
+                            } else {
+                                fieldHTML =
+                                    `
+                                    <label class="block text-sm font-medium">${escapeHtml(key)}</label>
+                                    <input data-static-field="${escapeHtml(key)}" class="mt-1 block w-full border rounded px-3 py-2 break-words" value="${escapeHtml(val)}"/>`;
+                            }
+
+                            wrapper.innerHTML = fieldHTML;
                             gridWrapper.appendChild(wrapper);
                         }
                     });
