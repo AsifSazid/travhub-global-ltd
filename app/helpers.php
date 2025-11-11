@@ -21,9 +21,15 @@ function getNavigations()
     // return [];
 }
 
+if (!function_exists('format_ddmmyyyy')) {
+    function format_ddmmyyyy($date) {
+        return date('d-m-Y', strtotime($date));
+    }
+}
+
 if (!function_exists('format_mmddyyyy')) {
     function format_mmddyyyy($date) {
-        return date('m-d-Y', strtotime($date));
+        return date('d-m-Y', strtotime($date));
     }
 }
 

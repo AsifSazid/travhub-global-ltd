@@ -2546,3 +2546,27 @@ select {
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     }
 }
+
+/* Bullet style list (same as Tailwind's list-disc) */
+.list-disc {
+    list-style-type: disc;
+    /* Bullet dot */
+}
+
+/* Bullet inside alignment (same as Tailwind's list-inside) */
+.list-inside {
+    list-style-position: inside;
+    /* Bullet comes inside text area */
+}
+
+/* ঐচ্ছিক: যদি তুমি একটু gap, color বা font দিতে চাও */
+.list-disc li {
+    margin-bottom: 4px;
+    /* প্রতিটি আইটেমের মধ্যে সামান্য ফাঁক */
+    color: #374151;
+    /* Tailwind-এর text-gray-700 */
+    font-size: 15px;
+    /* হালকা readable font size */
+    line-height: 1.5;
+    /* সুন্দর line spacing */
+}

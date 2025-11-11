@@ -348,7 +348,7 @@ class PackageController extends Controller
         $pkgQuatDetail = PackQuatDetail::where('package_uuid', $uuid)->firstOrFail();
         $pkgAccomoDetail = PackAccomoDetail::where('package_uuid', $uuid)->firstOrFail();
         $pkgPrice = PackPrice::where('package_uuid', $uuid)->firstOrFail();
-        $pkgItenaries = PackItenaries::where('package_uuid', $uuid)->firstOrFail();
+        $pkgItenaries = PackItenaries::where('package_uuid', $uuid)->get();
         $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->firstOrFail();
 
         // dd($pkg, $pkgDesInfo, $pkgQuatDetail, $pkgAccomoDetail, $pkgPrice, $pkgItenaries, $pkgInclusions);
@@ -363,7 +363,7 @@ class PackageController extends Controller
             'packAccomoDetail' => $pkgAccomoDetail,
             'packPrice' => $pkgPrice,
             'packItenaries' => $pkgItenaries,
-            'pkgInclusions' => $pkgInclusions,
+            'packInclusion' => $pkgInclusions,
             'title' => $title,
             'completedStep' => $completedStep
         ])->with('success', 'Package completed successfully.');
@@ -588,33 +588,51 @@ class PackageController extends Controller
             $pkg = Package::where('uuid', $uuid)->firstOrFail();
 
             foreach ($itenaries as $item) {
-                PackItenaries::updateOrCreate([
-                    'uuid' => Str::uuid(),
-                    'title' => $item['title'] ?? null,
-                    'description' => $item['title'] ?? null, // চাইলে অন্য description ফিল্ড দিতে পারো
-                    'status' => 'active',
-                    'icon' => null,
+                $input_meals_array = (isset($item['meals']) && is_array($item['meals']) && count($item['meals']) > 0)
+                    ? $item['meals']
+                    : [];
 
-                    // Foreign key info
-                    'package_id' => $pkg['id'] ?? null,
-                    'package_uuid' => $pkg['uuid'] ?? null,
-                    'package_title' => $pkg['title'] ?? null,
+                $meal_string = null;
 
-                    // JSON data
-                    'cities' => json_encode([$item['overnightStay'] ?? null]), // overnightStay কে cities হিসেবে রাখছি
-                    'activities' => json_encode($item['activities'] ?? []),
+                if (!empty($input_meals_array)) {
+                    // 1. অ্যারের প্রতিটি উপাদানকে ছোট হাতের করে তারপর প্রথম অক্ষর বড় করা (ucfirst) 
+                    //    যাতে ইনপুট যেমনই আসুক ("BREAKFAST" বা "breakfast"), আউটপুট "Breakfast" হয়।
+                    $capitalized_meals = array_map(function ($meal) {
+                        return ucfirst(strtolower($meal));
+                    }, $input_meals_array);
 
-                    // Meals array থেকে প্রথম meal বা join করে string বানানো
-                    'meal' => (isset($item['meals']) && is_array($item['meals']) && count($item['meals']) > 0)
-                        ? strtolower($item['meals'][0])
-                        : null,
+                    // 2. অ্যারেটিকে কমা এবং স্পেস দিয়ে যুক্ত করে একটি স্ট্রিং-এ পরিণত করা 
+                    //    যেমন: "Breakfast, Lunch, Dinner, Snacks"
+                    $meal_string = implode(', ', $capitalized_meals);
+                }
 
-                    // Extra info
-                    'date' => $item['date'] ?? null,
-                    'day_number' => $item['dayNumber'] ?? null,
+                PackItenaries::updateOrCreate(
+                    ['title' => $item['title'], 'package_id' => $pkg['id']],
+                    [
+                        'uuid' => Str::uuid(),
+                        'title' => $item['title'] ?? null,
+                        'description' => $item['description'] ?? null, // চাইলে অন্য description ফিল্ড দিতে পারো
+                        'status' => 'active',
+                        'icon' => null,
 
-                    'created_by' => Auth::id(),
-                ]);
+                        // Foreign key info
+                        'package_id' => $pkg['id'] ?? null,
+                        'package_uuid' => $pkg['uuid'] ?? null,
+                        'package_title' => $pkg['title'] ?? null,
+
+                        // JSON data
+                        'cities' => json_encode([$item['overnightStay'] ?? null]), // overnightStay কে cities হিসেবে রাখছি
+                        'activities' => json_encode($item['activities'] ?? []),
+
+                        'meals' => $meal_string,
+
+                        // Extra info
+                        'date' => $item['date'] ?? null,
+                        'day_number' => $item['dayNumber'] ?? null,
+
+                        'created_by' => Auth::id(),
+                    ]
+                );
             }
 
             $pkg->update(['progress_step' => $step]);
@@ -628,20 +646,36 @@ class PackageController extends Controller
     public function stepSixStore($request, $uuid, $step)
     {
         try {
-            // dd($request->all());
             $pkg = Package::where('uuid', $uuid)->firstOrFail();
+
             $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
 
-            PackInclusion::updateOrCreate([
-                'uuid' => Str::uuid(),
-                'title' => $formatted_title,
-                'package_uuid' => $uuid,
-                'inclusions' => json_encode($request->inclusions),
-                'package_id' => $pkg['id'] ?? null,
-                'package_uuid' => $pkg['uuid'] ?? null,
-                'package_title' => $pkg['title'] ?? null,
+            $inclusions = $request->input('inclusions', []);
 
-            ]);
+            foreach ($inclusions as $catIndex => $category) {
+                if (isset($category['sub_title']) && is_array($category['sub_title'])) {
+                    $filteredSubs = [];
+                    foreach ($category['sub_title'] as $sub) {
+                        // Include only if selected exists or save all
+                        if (!isset($sub['selected']) || $sub['selected'] == '1') {
+                            $filteredSubs[] = $sub;
+                        }
+                    }
+                    $inclusions[$catIndex]['sub_title'] = $filteredSubs;
+                }
+            }
+
+            PackInclusion::updateOrCreate(
+                ['package_uuid' => $uuid], // Update if already exists
+                [
+                    'uuid' => Str::uuid(),
+                    'title' => $formatted_title,
+                    'package_uuid' => $uuid,
+                    'inclusions' => json_encode($inclusions, JSON_UNESCAPED_UNICODE),
+                    'package_id' => $pkg->id,
+                    'package_title' => $pkg->title,
+                ]
+            );
 
             $pkg->update(['progress_step' => $step]);
 

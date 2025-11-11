@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('package_title', 255)->nullable();
             $table->json('cities')->nullable();
             $table->json('activities')->nullable();
-            $table->enum('meal', ['breakfast', 'lunch', 'dinner', 'snacks'])->nullable();
+            $table->text('meals')->nullable();
 
             // Newly added
             $table->string('date', 32)->nullable();
