@@ -96,7 +96,7 @@
 
             {{-- Step 5: Itineraries & Inclusions --}}
             @if ($step == 5)
-                @include('backend.packages.step-five-again')
+                @include('backend.packages.step-five')
             @endif
 
             {{-- Step 6: Confirm --}}

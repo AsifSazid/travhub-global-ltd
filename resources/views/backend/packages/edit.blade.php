@@ -11,13 +11,13 @@
 
         {{-- Show Validation Errors --}}
         @if ($errors->any())
-        <div class="mb-4 text-red-600">
-            <ul class="list-disc pl-5">
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
+            <div class="mb-4 text-red-600">
+                <ul class="list-disc pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
         @endif
 
         <form action="{{ route('packages.update', $pkg->uuid) }}" method="POST" enctype="multipart/form-data">
@@ -26,16 +26,29 @@
 
             <div class="mb-4">
                 <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                <input type="text"
-                    name="title"
-                    id="title"
-                    value="{{ old('title', $pkg->title) }}"
-                    required
+                <input type="text" name="title" id="title" value="{{ old('title', $pkg->title) }}" required
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm
                               focus:ring-blue-500 focus:border-blue-500">
             </div>
 
-            <div class="mt-6 flex justify-between">
+            <div class="mb-4 flex items-center gap-2">
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <div id="statusToggle"
+                    class="relative w-10 h-5 rounded-full bg-gray-300 cursor-pointer transition-colors">
+                    <div id="toggleKnob"
+                        class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all">
+                    </div>
+                </div>
+
+                <span id="statusText" class="text-xs font-medium text-gray-700">
+                    {{ $pkg->status === 'active' ? 'Active' : 'Inactive' }}
+                </span>
+
+                <input type="hidden" name="status" id="status"
+                    value="{{ $pkg->status === 'active' ? '1' : '0' }}">
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
                 <a href="{{ route('packages.index') }}"
                     class="px-4 py-2 text-sm rounded-md border bg-gray-100 hover:bg-gray-200">
                     Back
@@ -54,5 +67,37 @@
     </div>
 
     @push('js')
+        <script>
+            const toggle = document.getElementById('statusToggle');
+            const knob = document.getElementById('toggleKnob');
+            const statusInput = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+
+            // Initialize position
+            if (statusInput.value === '1') {
+                knob.style.transform = 'translateX(24px)';
+                toggle.style.backgroundColor = '#22c55e'; // Green
+            } else {
+                knob.style.transform = 'translateX(0px)';
+                toggle.style.backgroundColor = '#6b7280'; // Gray
+            }
+
+            // Click event
+            toggle.addEventListener('click', () => {
+                if (statusInput.value === '1') {
+                    // Switch to inactive
+                    statusInput.value = '0';
+                    statusText.textContent = 'Inactive';
+                    knob.style.transform = 'translateX(0px)';
+                    toggle.style.backgroundColor = '#6b7280';
+                } else {
+                    // Switch to active
+                    statusInput.value = '1';
+                    statusText.textContent = 'Active';
+                    knob.style.transform = 'translateX(24px)';
+                    toggle.style.backgroundColor = '#22c55e';
+                }
+            });
+        </script>
     @endpush
 </x-backend.layouts.master>

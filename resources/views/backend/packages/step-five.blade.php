@@ -2,7 +2,7 @@
 
 <div class="max-w-5xl mx-auto">
     <header class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Itinerary Builder</h1>
+        <h1 class="text-2xl font-semibold text-gray-800"></h1>
         <div class="flex items-center gap-3">
             <button id="add-day-btn" type="button"
                 class="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700">
@@ -24,49 +24,20 @@
     </div>
 </div>
 
-<!-- Activity Modal -->
-<div id="activity-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+<!-- Edit Activity Modal -->
+<div id="activity-edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 transform transition-transform scale-95"
-        style="width: 90%; height: 80%; overflow-y: auto;">
+        style="width: 90%; max-height: 90%; overflow-y: auto;">
         <div class="flex items-center justify-between mb-4">
-            <h3 id="modal-heading" class="text-lg font-semibold text-gray-800">Add Activity</h3>
-            <button id="modal-close" type="button" class="text-gray-500 hover:text-gray-700">✕</button>
+            <h3 id="edit-modal-heading" class="text-lg font-semibold text-gray-800">Edit Activity</h3>
+            <button id="edit-modal-close" type="button" class="text-gray-500 hover:text-gray-700">✕</button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Activity Title</label>
-                <input id="activity-title" type="text" class="mt-1 block w-full border rounded px-3 py-2"
-                    placeholder="e.g., City tour" />
+        <div id="edit-form" class="space-y-4"></div>
 
-                <label class="block text-sm font-medium text-gray-700 mt-3">Description</label>
-                <div id="activity-desc" class="quill-editor border rounded p-2" style="max-height: 40% !important;">
-                </div>
-
-                <label class="block text-sm font-medium text-gray-700 mt-3">Time (optional)</label>
-                <input id="activity-time" type="time" class="mt-1 block w-full border rounded px-3 py-2" />
-
-                <div class="mt-4">
-                    <button id="save-activity-btn" type="button"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:scale-110 hover:brightness-110">+
-                        Add</button>
-                </div>
-            </div>
-
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-medium text-gray-700">Choose from presets</h4>
-                    <button id="refresh-presets" type="button"
-                        class="text-sm text-gray-500 hover:text-gray-700">Refresh</button>
-                </div>
-
-                <div id="presets-list" class="space-y-2 max-h-60 overflow-auto p-2 border rounded bg-gray-50"></div>
-
-                <div class="mt-4 flex justify-end gap-2">
-                    <button id="add-selected-presets" type="button"
-                        class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add Selected</button>
-                </div>
-            </div>
+        <div class="mt-4 flex justify-end gap-2">
+            <button id="edit-cancel" type="button" class="px-4 py-2 border rounded">Cancel</button>
+            <button id="edit-save" type="button" class="px-4 py-2 bg-blue-600 text-white rounded">Save Changes</button>
         </div>
     </div>
 </div>
@@ -75,7 +46,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const cities = @json($cities);
+            const packDesDetails = @json($packDesDetails);
             const startDate = @json($packQuatDetails->start_date);
+            const maxDays = @json($packQuatDetails->duration);
             const presetActivities = @json($activities);
             let itenary = [];
 
@@ -86,24 +59,21 @@
             const exportBtn = document.getElementById('export-json-btn');
             const itineraryInput = document.getElementById('itenary-input');
 
-            // Initialize Quill for activity description
-            const quillActivity = new Quill('#activity-desc', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline'],
-                        [{
-                            'list': 'ordered'
-                        }, {
-                            'list': 'bullet'
-                        }],
-                        [{
-                            'align': []
-                        }],
-                        ['clean']
-                    ]
-                }
-            });
+            const editModal = document.getElementById('activity-edit-modal');
+            const editForm = document.getElementById('edit-form');
+            const editSaveBtn = document.getElementById('edit-save');
+            const editCancelBtn = document.getElementById('edit-cancel');
+            const editCloseX = document.getElementById('edit-modal-close');
+            const editModalHeading = document.getElementById('edit-modal-heading');
+
+            function escapeHtml(unsafe) {
+                return String(unsafe || '')
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll("'", "&#039;");
+            }
 
             function updateItineraryField() {
                 itineraryInput.value = JSON.stringify(itenary);
@@ -120,10 +90,10 @@
             function addDays(dateStr, days) {
                 const base = parseLocalDateTime(dateStr);
                 base.setDate(base.getDate() + days);
-                const year = base.getFullYear();
-                const month = String(base.getMonth() + 1).padStart(2, '0');
-                const day = String(base.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
+                const y = base.getFullYear();
+                const m = String(base.getMonth() + 1).padStart(2, '0');
+                const d = String(base.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
             }
 
             function formatDateInfo(dateStr) {
@@ -148,7 +118,7 @@
                     dayName
                 } = formatDateInfo(nextDate);
                 return {
-                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    id: Date.now() + Math.floor(Math.random() * 1000) + index,
                     dayNumber: index,
                     title: `Day ${index}: Title || ${formatted} (${dayName})`,
                     date: nextDate,
@@ -158,12 +128,39 @@
                 };
             }
 
-            function renderAll() {
-                daysContainer.innerHTML = '';
-                itenary.forEach((day, idx) => {
-                    daysContainer.appendChild(createDayCard(day, idx + 1));
-                });
-                updateItineraryField();
+            function renderActivityHtml(dayId, activity, index) {
+                const descPreview = activity.description ? activity.description : '';
+                return `
+    <div class="p-4 border rounded bg-gray-50 flex flex-col gap-2 break-words" data-day-id="${dayId}" data-act-index="${index}">
+        <!-- Buttons on top left -->
+        <div class="flex justify-end gap-2">
+            <button type="button" class="edit-activity-btn text-blue-600 hover:text-blue-800 font-semibold" data-day-id="${dayId}" data-activity-index="${index}">✎ Edit</button>
+            <button type="button" class="delete-activity-btn text-red-600 hover:text-red-800 font-semibold" data-day-id="${dayId}" data-activity-index="${index}">🗑 Delete</button>
+        </div>
+
+        <!-- Content below buttons -->
+        <div class="mt-2 break-words">
+            <div class="font-medium text-gray-800">${escapeHtml(activity.title)}</div>
+            <div class="text-sm text-gray-600 mt-1 break-words">
+                ${escapeHtml(descPreview)}
+        ${activity.data ? `
+        <div class="mt-1 text-xs text-gray-500">
+            ${Object.entries(activity.data).map(([k, v]) => {
+                if (k === 'city_id') {
+                    const city = cities.find(c => c.id == v);
+                    return `City: ${escapeHtml(city ? city.title : v)}`;
+                } else if (k === 'country_id') {
+                    return `Country: ${escapeHtml(packDesDetails.country_title ?? v)}`;
+                } else {
+                    return `${escapeHtml(k)}: ${escapeHtml(v)}`;
+                }
+            }).join(', ')}
+        </div>` : ''}
+            </div>
+            ${activity.time ? `<div class="text-xs text-gray-500 mt-1">Time: ${escapeHtml(activity.time)}</div>` : ''}
+        </div>
+    </div>
+        `;
             }
 
             function createDayCard(day, displayIndex) {
@@ -188,7 +185,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700">Overnight Stay</label>
                 <select data-day-id="${day.id}" class="overnight-select mt-1 block w-full border rounded px-3 py-2">
-                    ${cities.map(c => `<option value="${c.id}" ${day.overnightStay == c.id ? 'selected':''}>${escapeHtml(c.title)}</option>`).join('')}
+                    ${cities.map(c=>`<option value="${c.id}" ${day.overnightStay==c.id?'selected':''}>${escapeHtml(c.title)}</option>`).join('')}
                 </select>
             </div>
             <div>
@@ -198,26 +195,29 @@
                         <input type="checkbox" data-day-id="${day.id}" class="meal-check-all ml-1" />
                         <span class="text-sm">Check All</span>
                     </label>
-                    ${mealOptions.map(m => `
-                            <label class="inline-flex items-center space-x-2">
-                                <input type="checkbox" data-day-id="${day.id}" class="meal-checkbox ml-1" value="${escapeHtml(m)}" ${day.meals.includes(m)?'checked':''}/>
-                                <span class="text-sm text-gray-700">${escapeHtml(m)}</span>
-                            </label>`).join('')}
+                    ${mealOptions.map(m=>`
+                                        <label class="inline-flex items-center space-x-2">
+                                            <input type="checkbox" data-day-id="${day.id}" class="meal-checkbox ml-1" value="${escapeHtml(m)}" ${day.meals.includes(m)?'checked':''}/>
+                                            <span class="text-sm text-gray-700">${escapeHtml(m)}</span>
+                                        </label>`).join('')}
                 </div>
             </div>
         </div>
 
         <h3 class="mt-6 mb-3 font-semibold text-gray-800">Activities</h3>
         <div class="space-y-3" id="activities-area-${day.id}">
-            ${day.activities.map((a, i) => renderActivityHtml(day.id, a, i)).join('')}
+            ${day.activities.map((a,i)=>renderActivityHtml(day.id,a,i)).join('')}
         </div>
 
-        <div class="mt-4 flex gap-2">
-            <button type="button" data-day-id="${day.id}" class="add-activity-btn px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">+ Add Activity</button>
+        <div class="mt-4 flex flex-wrap gap-2">
+            ${presetActivities.map(a=>`
+                                <button type="button" data-day-id="${day.id}" data-activity-title="${escapeHtml(a.title)}" class="add-preset-btn px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                                    + ${escapeHtml(a.title)}
+                                </button>`).join('')}
         </div>
         `;
 
-                // Event listeners
+                // Event listeners...
                 wrapper.querySelector('.day-title').addEventListener('input', e => {
                     const d = itenary.find(x => x.id == e.target.dataset.dayId);
                     if (d) {
@@ -243,9 +243,7 @@
                         }
                     });
                 });
-                // Handle "Check All" meals
-                const checkAll = wrapper.querySelector('.meal-check-all');
-                checkAll.addEventListener('change', e => {
+                wrapper.querySelector('.meal-check-all').addEventListener('change', e => {
                     const d = itenary.find(x => x.id == e.target.dataset.dayId);
                     const checkboxes = wrapper.querySelectorAll('.meal-checkbox');
                     if (d) {
@@ -259,188 +257,237 @@
                         updateItineraryField();
                     }
                 });
-
                 wrapper.querySelector('.delete-day-btn').addEventListener('click', () => {
                     if (!confirm('Delete this day?')) return;
                     itenary = itenary.filter(d => d.id !== day.id);
                     itenary.forEach((d, i) => d.dayNumber = i + 1);
                     renderAll();
                 });
-                wrapper.querySelector('.add-activity-btn').addEventListener('click', () => openActivityModal('add',
-                    day.id));
 
                 return wrapper;
             }
 
-            function renderActivityHtml(dayId, activity, index) {
-                return `
-        <div class="p-4 border rounded bg-gray-50 flex items-start justify-between">
-            <div>
-                <div class="font-medium text-gray-800">${escapeHtml(activity.title)}</div>
-                <div class="text-sm text-gray-600 mt-1">${activity.description || ''}</div>
-                ${activity.time?`<div class="text-xs text-gray-500 mt-1">Time: ${escapeHtml(activity.time)}</div>`:''}
-            </div>
-            <button type="button" data-day-id="${dayId}" data-activity-index="${index}" 
-                class="edit-activity-btn text-blue-600 hover:text-blue-800 font-semibold ml-4">
-                ✎ Edit
-            </button>
-        </div>`;
+            function renderAll() {
+                daysContainer.innerHTML = '';
+                itenary.forEach((day, idx) => daysContainer.appendChild(createDayCard(day, idx + 1)));
+                updateItineraryField();
             }
 
-            /* =========================
-               Activity Modal Logic
-            ==========================*/
-            const activityModal = document.getElementById('activity-modal');
-            const modalClose = document.getElementById('modal-close');
-            const activityTitle = document.getElementById('activity-title');
-            const activityTime = document.getElementById('activity-time');
-            const saveActivityBtn = document.getElementById('save-activity-btn');
-            const presetsList = document.getElementById('presets-list');
-            const addSelectedPresetsBtn = document.getElementById('add-selected-presets');
-            const refreshPresetsBtn = document.getElementById('refresh-presets');
-
-            let modalMode = 'add';
-            let targetDayId = null;
-            let targetActivityIndex = null;
-
-            function openActivityModal(mode, dayId, activityIndex = null) {
-                modalMode = mode;
-                targetDayId = dayId;
-                targetActivityIndex = activityIndex;
-                if (mode === 'edit') {
+            // Delegated listeners for add/edit/delete activity
+            daysContainer.addEventListener('click', e => {
+                // Add preset
+                if (e.target.classList.contains('add-preset-btn')) {
+                    const dayId = e.target.dataset.dayId;
+                    const title = e.target.dataset.activityTitle;
                     const day = itenary.find(d => d.id == dayId);
-                    const activity = day.activities[activityIndex];
-                    activityTitle.value = activity.title;
-                    quillActivity.root.innerHTML = activity.description || '';
-                    activityTime.value = activity.time || '';
-                    document.getElementById('modal-heading').textContent = 'Edit Activity';
-                    saveActivityBtn.textContent = 'Save Changes';
-                } else {
-                    activityTitle.value = '';
-                    activityTime.value = '';
-                    quillActivity.root.innerHTML = '';
-                    document.getElementById('modal-heading').textContent = 'Add Activity';
-                    saveActivityBtn.textContent = '+ Add';
-                }
-                populatePresets();
-                activityModal.classList.remove('hidden');
-                activityModal.classList.add('flex');
-            }
-
-            function closeActivityModal() {
-                activityModal.classList.add('hidden');
-                targetDayId = null;
-                targetActivityIndex = null;
-            }
-
-            saveActivityBtn.addEventListener('click', () => {
-                const title = activityTitle.value.trim();
-                if (!title) return alert('Add a title');
-                const desc = quillActivity.root.innerHTML.trim();
-                const time = activityTime.value || '';
-                const day = itenary.find(d => d.id == targetDayId);
-
-                if (modalMode === 'edit' && targetActivityIndex !== null) {
-                    day.activities[targetActivityIndex] = {
-                        title,
-                        description: desc,
-                        time
-                    };
-                } else {
+                    if (itenary.length > maxDays) {
+                        alert('Maximum days reached');
+                        return;
+                    }
+                    const template = presetActivities.find(a => a.title === title);
+                    if (!day || !template) return;
+                    const data = {};
+                    Object.keys(template).forEach(k => {
+                        if (!['id', 'title', 'description'].includes(k)) {
+                            data[k] = template[k];
+                        }
+                    });
                     day.activities.push({
-                        title,
-                        description: desc,
-                        time
+                        title: template.title,
+                        description: template.description || '',
+                        time: '',
+                        data
+                    });
+                    renderAll();
+                }
+
+                // Edit activity
+                if (e.target.classList.contains('edit-activity-btn')) {
+                    const dayId = e.target.dataset.dayId;
+                    const idx = Number(e.target.dataset.activityIndex);
+                    const day = itenary.find(d => d.id == dayId);
+                    if (!day) return;
+                    const activity = day.activities[idx];
+                    openEditModal(dayId, idx, activity);
+                }
+
+                // Delete activity
+                if (e.target.classList.contains('delete-activity-btn')) {
+                    const dayId = e.target.dataset.dayId;
+                    const idx = Number(e.target.dataset.activityIndex);
+                    const day = itenary.find(d => d.id == dayId);
+                    if (!day) return;
+                    if (!confirm('Delete this activity?')) return;
+                    day.activities.splice(idx, 1);
+                    renderAll();
+                }
+            });
+
+            // Modal logic
+            let currentEdit = {
+                dayId: null,
+                idx: null
+            };
+
+            function isPresetStatic(preset) {
+                if (!preset) return false;
+                return Object.keys(preset).some(k => !['id', 'title', 'description'].includes(k));
+            }
+
+            function openEditModal(dayId, idx, activity) {
+                editForm.innerHTML = '';
+                currentEdit = {
+                    dayId,
+                    idx
+                };
+
+                const preset = presetActivities.find(p => p.title === activity.title);
+                const staticMode = isPresetStatic(preset);
+                editModalHeading.textContent = `Edit Activity — ${activity.title || ''}`;
+
+                // Title
+                const titleWrapper = document.createElement('div');
+                titleWrapper.innerHTML =
+                    `<label class="block text-sm font-medium">Title</label>
+        <input id="modal-edit-title" class="mt-1 block w-full border rounded px-3 py-2" value="${escapeHtml(activity.title)}" />`;
+                editForm.appendChild(titleWrapper);
+
+                // Description
+                const descWrapper = document.createElement('div');
+                descWrapper.innerHTML =
+                    `<label class="block text-sm font-medium">Description</label>
+        <textarea id="modal-edit-desc" rows="4" class="mt-1 block w-full border rounded px-3 py-2 resize-y break-words">${escapeHtml(activity.description||'')}</textarea>`;
+                editForm.appendChild(descWrapper);
+
+                // Static fields
+                if (staticMode) {
+                    const note = document.createElement('div');
+                    note.className = 'text-sm text-gray-600 mb-2';
+                    note.textContent = 'Fill the predefined fields for this activity:';
+                    editForm.appendChild(note);
+
+                    const gridWrapper = document.createElement('div');
+                    gridWrapper.className = 'grid grid-cols-1 md:grid-cols-3 gap-4';
+                    editForm.appendChild(gridWrapper);
+
+                    Object.keys(preset).forEach(key => {
+                        if (!['id', 'title', 'description'].includes(key)) {
+                            const val = (activity.data && activity.data[key]) ? activity.data[key] : preset[
+                                key] ?? '';
+                            const wrapper = document.createElement('div');
+
+                            let fieldHTML = '';
+
+                            if (key === 'city_id') {
+                                const options = cities.map(c =>
+                                    `<option value="${c.id}" ${val == c.id ? 'selected' : ''}>${escapeHtml(c.title)}</option>`
+                                ).join('');
+                                fieldHTML = `
+                                            <label class="block text-sm font-medium">City</label>
+                                            <select data-static-field="city_id" class="mt-1 block w-full border rounded px-3 py-2">
+                                                <option value="">Select a city</option>
+                                                ${options}
+                                            </select>`;
+                            } else {
+                                fieldHTML =
+                                    `
+                                    <label class="block text-sm font-medium">${escapeHtml(key)}</label>
+                                    <input data-static-field="${escapeHtml(key)}" class="mt-1 block w-full border rounded px-3 py-2 break-words" value="${escapeHtml(val)}"/>`;
+                            }
+
+                            wrapper.innerHTML = fieldHTML;
+                            gridWrapper.appendChild(wrapper);
+                        }
                     });
                 }
 
-                closeActivityModal();
-                renderAll();
-            });
+                // Time
+                const timeWrapper = document.createElement('div');
+                timeWrapper.innerHTML =
+                    `<label class="block text-sm font-medium">Time (optional)</label>
+        <input id="modal-edit-time" type="time" class="mt-1 block w-full border rounded px-3 py-2" value="${escapeHtml(activity.time||'')}" />`;
+                editForm.appendChild(timeWrapper);
 
-            function populatePresets() {
-                presetsList.innerHTML = '';
-                presetActivities.forEach((preset, i) => {
-                    const item = document.createElement('div');
-                    item.className =
-                        'cursor-pointer p-2 bg-white rounded border hover:bg-blue-50 transition';
-                    item.innerHTML = `
-            <div class="font-medium text-gray-800">${escapeHtml(preset.title)}</div>
-            <div class="text-sm text-gray-500">${escapeHtml(preset.description || '')}</div>`;
-                    item.addEventListener('click', () => {
-                        activityTitle.value = preset.title;
-                        quillActivity.root.innerHTML = preset.description || '';
-                        document.querySelectorAll('#presets-list .selected').forEach(el => el
-                            .classList.remove('selected'));
-                        item.classList.add('selected');
-                    });
-                    presetsList.appendChild(item);
-                });
+                editModal.classList.remove('hidden');
+                editModal.classList.add('flex');
             }
 
-            addSelectedPresetsBtn.addEventListener('click', () => {
-                if (!targetDayId) return alert('No target day');
-                const day = itenary.find(d => d.id == targetDayId);
-                const selected = document.querySelector('#presets-list .selected');
-                if (!selected) return alert('Select a preset first');
-                const preset = presetActivities.find(p => p.title === activityTitle.value);
-                if (preset) day.activities.push({
-                    ...preset
-                });
-                closeActivityModal();
+            function closeEditModal() {
+                editModal.classList.add('hidden');
+                editModal.classList.remove('flex');
+                editForm.innerHTML = '';
+                currentEdit = {
+                    dayId: null,
+                    idx: null
+                };
+            }
+
+            editCloseX.addEventListener('click', closeEditModal);
+            editCancelBtn.addEventListener('click', closeEditModal);
+            editModal.addEventListener('click', e => {
+                if (e.target === editModal) closeEditModal();
+            });
+
+            editSaveBtn.addEventListener('click', () => {
+                const {
+                    dayId,
+                    idx
+                } = currentEdit;
+                if (dayId === null || idx === null) return closeEditModal();
+                const day = itenary.find(d => d.id == dayId);
+                if (!day) return closeEditModal();
+                const activity = day.activities[idx];
+                if (!activity) return closeEditModal();
+
+                activity.title = document.getElementById('modal-edit-title').value.trim() || activity.title;
+                activity.description = document.getElementById('modal-edit-desc').value.trim();
+                activity.time = document.getElementById('modal-edit-time').value || '';
+
+                const staticInputs = editForm.querySelectorAll('[data-static-field]');
+                if (staticInputs.length > 0) {
+                    activity.data = activity.data || {};
+                    staticInputs.forEach(inp => {
+                        const fieldName = inp.dataset.staticField || inp.getAttribute(
+                            'data-static-field');
+                        activity.data[fieldName] = inp.value;
+                    });
+                }
+
+                closeEditModal();
                 renderAll();
             });
 
-            modalClose.addEventListener('click', closeActivityModal);
-            activityModal.addEventListener('click', e => {
-                if (e.target === activityModal) closeActivityModal();
-            });
-            refreshPresetsBtn.addEventListener('click', populatePresets);
-
+            // Add day button
             addDayBtn.addEventListener('click', () => {
+                if (itenary.length >= maxDays) {
+                    alert('Maximum days reached');
+                    return;
+                }
                 const newDay = createEmptyDay(itenary.length + 1);
                 itenary.push(newDay);
                 renderAll();
             });
 
+            // Export JSON
             exportBtn.addEventListener('click', () => {
-                const blob = new Blob([JSON.stringify(itenary, null, 2)], {
-                    type: 'application/json'
+                const dataStr = JSON.stringify(itenary, null, 2);
+                const blob = new Blob([dataStr], {
+                    type: "application/json"
                 });
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = 'itenary.json';
+                a.href = url;
+                a.download = "itinerary.json";
                 a.click();
-                URL.revokeObjectURL(a.href);
+                URL.revokeObjectURL(url);
             });
 
-            function escapeHtml(unsafe) {
-                return String(unsafe || '')
-                    .replaceAll('&', '&amp;')
-                    .replaceAll('<', '&lt;')
-                    .replaceAll('>', '&gt;')
-                    .replaceAll('"', '&quot;')
-                    .replaceAll("'", "&#039;");
+            // Initial render
+            if (itenary.length === 0) {
+                const firstDay = createEmptyDay(1);
+                itenary.push(firstDay);
             }
-
-            // Handle edit button clicks (delegated)
-            daysContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('edit-activity-btn')) {
-                    const dayId = e.target.dataset.dayId;
-                    const actIndex = e.target.dataset.activityIndex;
-                    openActivityModal('edit', dayId, actIndex);
-                }
-            });
-
-            // initialize
-            (function init() {
-                if (startDate) {
-                    const first = createEmptyDay(1);
-                    first.activities = [];
-                    itenary.push(first);
-                    renderAll();
-                }
-            })();
+            renderAll();
         });
     </script>
 @endpush

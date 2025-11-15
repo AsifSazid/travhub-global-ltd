@@ -791,7 +791,7 @@ class PackageController extends Controller
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 7;
 
-        return view('backend.packages.pkg-details', [
+        return view('backend.packages.show', [
             'package' => $pkg,
             'packDestinationInfo' => $pkgDesInfo,
             'packQuatDetail' => $pkgQuatDetail,
