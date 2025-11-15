@@ -8,6 +8,7 @@
     </x-slot>
 
     <div class="overflow-x-auto">
+        {{-- Validation Errors --}}
         @if ($errors->any())
             <div class="mb-4 text-red-600">
                 <ul class="list-disc pl-5">
@@ -18,15 +19,36 @@
             </div>
         @endif
 
-        <form action="{{ route('packages.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('backend.packages.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
+            {{-- Title --}}
             <div class="mb-4">
                 <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
                 <input type="text" name="title" id="title" required
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
+            {{-- Image Upload --}}
+            <div class="mb-4">
+                <label for="image" class="block text-sm font-medium text-gray-700">Package Image</label>
+                <input type="file" name="image" id="image" onchange="previewImage(event)"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2">
+                @error('image')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Image Preview with Close Button --}}
+            <div class="mb-4 relative w-64">
+                <img id="image-preview" src="#" alt="Image Preview"
+                    class="hidden w-full h-auto rounded-md shadow-md">
+                <button type="button" id="remove-image"
+                    class="absolute top-0 right-0 mt-2 mr-2 bg-white text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-sm hidden"
+                    onclick="removeImage()">&times;</button>
+            </div>
+
+            {{-- Submit Button --}}
             <div class="mt-6 flex justify-between">
                 <span></span>
                 <button type="submit"
@@ -37,7 +59,37 @@
         </form>
     </div>
 
+    {{-- JS for Image Preview + Remove --}}
     @push('js')
+        <script>
+            function previewImage(event) {
+                const input = event.target;
+                const preview = document.getElementById('image-preview');
+                const removeBtn = document.getElementById('remove-image');
 
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.classList.remove('hidden'); // Show image
+                        removeBtn.classList.remove('hidden'); // Show cross button
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                } else {
+                    removeImage();
+                }
+            }
+
+            function removeImage() {
+                const input = document.getElementById('image');
+                const preview = document.getElementById('image-preview');
+                const removeBtn = document.getElementById('remove-image');
+
+                input.value = "";
+                preview.src = "#";
+                preview.classList.add('hidden');
+                removeBtn.classList.add('hidden');
+            }
+        </script>
     @endpush
 </x-backend.layouts.master>

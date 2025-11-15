@@ -9,7 +9,7 @@
 
     <div class="overflow-x-auto">
 
-        {{-- Show Validation Errors --}}
+        {{-- Validation Errors --}}
         @if ($errors->any())
             <div class="mb-4 text-red-600">
                 <ul class="list-disc pl-5">
@@ -20,84 +20,80 @@
             </div>
         @endif
 
-        <form action="{{ route('packages.update', $pkg->uuid) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('backend.packages.update', $package->uuid) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
+            {{-- Title --}}
             <div class="mb-4">
                 <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                <input type="text" name="title" id="title" value="{{ old('title', $pkg->title) }}" required
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm
-                              focus:ring-blue-500 focus:border-blue-500">
+                <input type="text" name="title" id="title" value="{{ $package->title }}"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
-            <div class="mb-4 flex items-center gap-2">
-                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                <div id="statusToggle"
-                    class="relative w-10 h-5 rounded-full bg-gray-300 cursor-pointer transition-colors">
-                    <div id="toggleKnob"
-                        class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all">
-                    </div>
-                </div>
-
-                <span id="statusText" class="text-xs font-medium text-gray-700">
-                    {{ $pkg->status === 'active' ? 'Active' : 'Inactive' }}
-                </span>
-
-                <input type="hidden" name="status" id="status"
-                    value="{{ $pkg->status === 'active' ? '1' : '0' }}">
+            {{-- Image Upload --}}
+            <div class="mb-4">
+                <label for="image" class="block text-sm font-medium text-gray-700">Package Image</label>
+                <input type="file" name="image" id="image" onchange="previewImage(event)"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2">
+                @error('image')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
-            <div class="mt-6 flex justify-end gap-3">
-                <a href="{{ route('packages.index') }}"
-                    class="px-4 py-2 text-sm rounded-md border bg-gray-100 hover:bg-gray-200">
-                    Back
-                </a>
+            {{-- Image Preview --}}
+            <div class="mb-4 relative w-64">
+                <img id="image-preview"
+                    src="{{ $package->images->first() ? asset('storage/images/packages/' . $package->images->first()->url) : '#' }}"
+                    class="{{ $package->images->first() ? '' : 'hidden' }} w-full h-auto rounded-md shadow-md">
 
+                <button type="button" id="remove-image"
+                    class="absolute top-0 right-0 mt-2 mr-2 bg-white text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-sm {{ $package->images->first() ? '' : 'hidden' }}"
+                    onclick="removeImage()">&times;</button>
+            </div>
+
+            {{-- Submit --}}
+            <div class="mt-6 flex justify-between">
+                <span></span>
                 <button type="submit"
-                    class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md
-                           bg-primary border border-gray-300 dark:bg-white dark:border-gray-200
-                           hover:bg-primary-dark focus:outline-none focus:ring
-                           focus:ring-primary-dark focus:ring-offset-1 focus:ring-offset-white
-                           dark:focus:ring-offset-dark">
+                    class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md bg-primary border border-gray-300 dark:bg-white dark:border-gray-200 hover:bg-primary-dark focus:outline-none focus:ring focus:ring-primary-dark focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark">
                     Update Package
                 </button>
             </div>
         </form>
     </div>
 
+    {{-- JS --}}
     @push('js')
         <script>
-            const toggle = document.getElementById('statusToggle');
-            const knob = document.getElementById('toggleKnob');
-            const statusInput = document.getElementById('status');
-            const statusText = document.getElementById('statusText');
+            function previewImage(event) {
+                const input = event.target;
+                const preview = document.getElementById('image-preview');
+                const removeBtn = document.getElementById('remove-image');
 
-            // Initialize position
-            if (statusInput.value === '1') {
-                knob.style.transform = 'translateX(24px)';
-                toggle.style.backgroundColor = '#22c55e'; // Green
-            } else {
-                knob.style.transform = 'translateX(0px)';
-                toggle.style.backgroundColor = '#6b7280'; // Gray
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.classList.remove('hidden');
+                        removeBtn.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                } else {
+                    removeImage();
+                }
             }
 
-            // Click event
-            toggle.addEventListener('click', () => {
-                if (statusInput.value === '1') {
-                    // Switch to inactive
-                    statusInput.value = '0';
-                    statusText.textContent = 'Inactive';
-                    knob.style.transform = 'translateX(0px)';
-                    toggle.style.backgroundColor = '#6b7280';
-                } else {
-                    // Switch to active
-                    statusInput.value = '1';
-                    statusText.textContent = 'Active';
-                    knob.style.transform = 'translateX(24px)';
-                    toggle.style.backgroundColor = '#22c55e';
-                }
-            });
+            function removeImage() {
+                const input = document.getElementById('image');
+                const preview = document.getElementById('image-preview');
+                const removeBtn = document.getElementById('remove-image');
+
+                input.value = "";
+                preview.src = "#";
+                preview.classList.add('hidden');
+                removeBtn.classList.add('hidden');
+            }
         </script>
     @endpush
 </x-backend.layouts.master>

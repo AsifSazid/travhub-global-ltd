@@ -39,7 +39,8 @@
                 </div>
             </div>
             <div class="max-w-7xl mx-auto p-6 space-y-8">
-
+                <img id="image-preview" src="{{ asset('storage/images/packages').'/'.$package->images->first()->url }}" alt="Image Preview"
+                    class="rounded-md shadow-md" width="360">
                 <!-- Package Info -->
                 {{-- <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
                     <h2 class="text-xl font-semibold mb-4">Package Info</h2>
@@ -85,291 +86,333 @@
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold">Destination Info</h2>
-                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '1']) }}"
+                        <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '1']) }}"
                             class="text-blue-600 hover:underline text-sm">Edit</a>
                     </div>
-                    {{-- <p><strong>Title:</strong> {{ $packDestinationInfo['title'] }}</p> --}}
-                    <p><strong>Country:</strong> {{ $packDestinationInfo['country_title'] }}</p>
-                    <p><strong>Cities:</strong></p>
-                    <ul class="list-disc list-inside text-gray-700 px-4">
-                        @php
-                            $cities = json_decode($packDestinationInfo['cities'], true);
-                            if (is_string($cities)) {
-                                $cities = json_decode($cities, true);
-                            }
-                        @endphp
+                    @if ($packDestinationInfo === 'No Data Found')
+                        <p class="text-gray-500">No destinations found.</p>
+                    @else
+                        {{-- <p><strong>Title:</strong> {{ $packDestinationInfo['title'] }}</p> --}}
+                        <p><strong>Country:</strong> {{ $packDestinationInfo['country_title'] }}</p>
+                        <p><strong>Cities:</strong></p>
+                        <ul class="list-disc list-inside text-gray-700 px-4">
+                            @php
+                                $cities = json_decode($packDestinationInfo['cities'], true);
+                                if (is_string($cities)) {
+                                    $cities = json_decode($cities, true);
+                                }
+                            @endphp
 
-                        @foreach ($cities as $city)
-                            <li>
-                                {{ $city['title'] }}
-                            </li>
-                        @endforeach
-                    </ul>
-                    <p><strong>Activities:</strong></p>
-                    <ul class="list-disc list-inside text-gray-700 px-4">
-                        @php
-                            $activities = json_decode($packDestinationInfo['activities'], true);
-                            if (is_string($activities)) {
-                                $activities = json_decode($activities, true);
-                            }
-                        @endphp
-                        @foreach ($activities as $act)
-                            <li>{{ $act['title'] ?? ' - ' }}</li>
-                        @endforeach
-                    </ul>
+                            @foreach ($cities as $city)
+                                <li>
+                                    {{ $city['title'] }}
+                                </li>
+                            @endforeach
+                        </ul>
+                        <p><strong>Activities:</strong></p>
+                        <ul class="list-disc list-inside text-gray-700 px-4">
+                            @php
+                                $activities = json_decode($packDestinationInfo['activities'], true);
+                                if (is_string($activities)) {
+                                    $activities = json_decode($activities, true);
+                                }
+                            @endphp
+                            @foreach ($activities as $act)
+                                <li>{{ $act['title'] ?? ' - ' }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
 
                 <!-- Quotation Detail -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold">Quotation Detail</h2>
-                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '2']) }}"
+                        <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '2']) }}"
                             class="text-blue-600 hover:underline text-sm">Edit</a>
                     </div>
-                    <p><strong>Duration:</strong> {{ $packQuatDetail['duration'] }} days
-                        ({{ format_ddmmyyyy($packQuatDetail['start_date']) }} to
-                        {{ format_ddmmyyyy($packQuatDetail['end_date']) }})</p>
-                    <p><strong>Tour Started From:</strong> {{ format_MM_ddyyyy($packQuatDetail['start_date']) }}</p>
-                    <p><strong>Tour Ended In:</strong> {{ format_MM_ddyyyy($packQuatDetail['end_date']) }}</p>
-                    <p><strong>No of Pax:</strong></p>
-                    <ul class="list-disc list-inside text-gray-700 px-4">
-                        @php
-                            $pax = json_decode($packQuatDetail['no_of_pax'], true);
-                            if (is_string($pax)) {
-                                $pax = json_decode($pax, true);
-                            }
-                        @endphp
-                        @foreach ($pax as $p)
-                            <li>{{ ucfirst($p['type']) }}: {{ $p['count'] }}</li>
-                        @endforeach
-                    </ul>
+                    @if ($packQuatDetail === 'No Data Found')
+                        <p class="text-gray-500">No quotations found.</p>
+                    @else
+                        <p><strong>Duration:</strong> {{ $packQuatDetail['duration'] }} days
+                            ({{ format_ddmmyyyy($packQuatDetail['start_date']) }} to
+                            {{ format_ddmmyyyy($packQuatDetail['end_date']) }})</p>
+                        <p><strong>Tour Started From:</strong> {{ format_MM_ddyyyy($packQuatDetail['start_date']) }}
+                        </p>
+                        <p><strong>Tour Ended In:</strong> {{ format_MM_ddyyyy($packQuatDetail['end_date']) }}</p>
+                        <p><strong>No of Pax:</strong></p>
+                        <ul class="list-disc list-inside text-gray-700 px-4">
+                            @php
+                                $pax = json_decode($packQuatDetail['no_of_pax'], true);
+                                if (is_string($pax)) {
+                                    $pax = json_decode($pax, true);
+                                }
+                            @endphp
+                            @foreach ($pax as $p)
+                                <li>{{ ucfirst($p['type']) }}: {{ $p['count'] }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
 
                 <!-- Accommodation Detail -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold">Accommodation</h2>
-                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '3']) }}"
+                        <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '3']) }}"
                             class="text-blue-600 hover:underline text-sm">Edit</a>
                     </div>
-                    @php
-                        $hotels = json_decode($packAccomoDetail['hotels'], true);
-                    @endphp
-                    <ul class="list-disc list-inside text-gray-700 px-4">
-                        @foreach ($hotels as $hotel)
-                            @php
-                                $city = \App\Models\City::findOrFail($hotel['city_id']);
-                            @endphp
-                            <li>{{ $hotel['title'] }} (in {{ $city->title }})</li>
-                        @endforeach
-                    </ul>
+                    @if ($packAccomoDetail === 'No Data Found')
+                        <p class="text-gray-500">No accommodation details found.</p>
+                    @else
+                        @php
+                            $hotels = json_decode($packAccomoDetail['hotels'], true);
+                        @endphp
+                        <ul class="list-disc list-inside text-gray-700 px-4">
+                            @foreach ($hotels as $hotel)
+                                @php
+                                    $city = \App\Models\City::findOrFail($hotel['city_id']);
+                                @endphp
+                                <li>{{ $hotel['title'] }} (in {{ $city->title }})</li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
 
                 <!-- Price Details -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold">Price Details</h2>
-                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '4']) }}"
+                        <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '4']) }}"
                             class="text-blue-600 hover:underline text-sm">Edit</a>
                     </div>
 
-                    <p><strong>Currency:</strong> {{ $packPrice['currency_title'] ?? 'N/A' }}</p>
+                    @if ($packPrice == 'No Data Found')
+                        <p class="text-gray-500">No prices found.</p>
+                    @else
+                        <p><strong>Currency:</strong> {{ $packPrice['currency_title'] ?? 'N/A' }}</p>
 
-                    @php
-                        // Decode safely
-                        $prices = json_decode($packPrice['pack_price'] ?? '[]', true);
-                        if (is_string($prices)) {
-                            $prices = json_decode($prices, true);
-                        }
+                        @php
+                            // Decode safely
+                            $prices = json_decode($packPrice['pack_price'] ?? '[]', true);
+                            if (is_string($prices)) {
+                                $prices = json_decode($prices, true);
+                            }
 
-                        // Safe display helper
-                        function safe($val)
-                        {
-                            return !empty($val) ? $val : ' - ';
-                        }
-                    @endphp
+                            // Safe display helper
+                            function safe($val)
+                            {
+                                return !empty($val) ? $val : ' - ';
+                            }
+                        @endphp
 
-                    {{-- ---------- FORMAT 1 ---------- --}}
-                    @if (isset($prices['format1']) && is_array($prices['format1']))
-                        @foreach ($prices['format1'] as $item)
-                            <div class="mb-6">
-                                <h3 class="font-medium mb-2">{{ safe($item['title'] ?? '') }}</h3>
-                                <table class="w-full text-left border border-gray-300 text-sm">
-                                    <thead class="bg-gray-100">
-                                        <tr>
-                                            <th class="border px-2 py-1">Particular</th>
-                                            <th class="border px-2 py-1">Twin/Double</th>
-                                            <th class="border px-2 py-1">Triple</th>
-                                            <th class="border px-2 py-1">Single</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td class="border px-2 py-1">Land Package</td>
-                                            <td class="border px-2 py-1">{{ safe($item['land_double'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">{{ safe($item['land_triple'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">{{ safe($item['land_single'] ?? '') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="border px-2 py-1">Air Ticket</td>
-                                            <td colspan="3" class="border px-2 py-1">
-                                                {{ safe($item['ticket_fare'] ?? '') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="border px-2 py-1">Visa</td>
-                                            <td colspan="3" class="border px-2 py-1">{{ safe($item['visa'] ?? '') }}
-                                            </td>
-                                        </tr>
-                                        <tr class="bg-gray-100 font-semibold">
-                                            <td class="border px-2 py-1">Total</td>
-                                            <td class="border px-2 py-1">{{ safe($item['total_double'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">{{ safe($item['total_triple'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">{{ safe($item['total_single'] ?? '') }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endforeach
-                    @endif
-
-                    {{-- ---------- FORMAT 2 ---------- --}}
-                    @if (isset($prices['format2']) && is_array($prices['format2']))
-                        @foreach ($prices['format2'] as $item)
-                            <div class="mb-6">
-                                <h3 class="font-medium mb-2">{{ safe($item['title'] ?? '') }}</h3>
-                                <table class="w-full text-left border border-gray-300 text-sm">
-                                    <thead class="bg-gray-100">
-                                        <tr>
-                                            <th class="border px-2 py-1">Particular</th>
-                                            <th class="border px-2 py-1">Adult</th>
-                                            <th class="border px-2 py-1">Child (Bed)</th>
-                                            <th class="border px-2 py-1">Child (No Bed)</th>
-                                            <th class="border px-2 py-1">Infant</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td class="border px-2 py-1">Land Package</td>
-                                            <td class="border px-2 py-1">{{ safe($item['land']['adult'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">{{ safe($item['land']['child_bed'] ?? '') }}
-                                            </td>
-                                            <td class="border px-2 py-1">
-                                                {{ safe($item['land']['child_no_bed'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">{{ safe($item['land']['infant'] ?? '') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="border px-2 py-1">Air Ticket</td>
-                                            <td class="border px-2 py-1">{{ safe($item['air_ticket']['adult'] ?? '') }}
-                                            </td>
-                                            <td colspan="2" class="border px-2 py-1">
-                                                {{ safe($item['air_ticket']['child'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">
-                                                {{ safe($item['air_ticket']['infant'] ?? '') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="border px-2 py-1">Visa</td>
-                                            <td class="border px-2 py-1">{{ safe($item['visa']['adult'] ?? '') }}</td>
-                                            <td colspan="2" class="border px-2 py-1">
-                                                {{ safe($item['visa']['child'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">{{ safe($item['visa']['infant'] ?? '') }}</td>
-                                        </tr>
-                                        <tr class="bg-gray-100 font-semibold">
-                                            <td class="border px-2 py-1">Total</td>
-                                            <td class="border px-2 py-1">{{ safe($item['total']['adult'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">{{ safe($item['total']['child_bed'] ?? '') }}
-                                            </td>
-                                            <td class="border px-2 py-1">
-                                                {{ safe($item['total']['child_no_bed'] ?? '') }}</td>
-                                            <td class="border px-2 py-1">{{ safe($item['total']['infant'] ?? '') }}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endforeach
-                    @endif
-
-                    {{-- ---------- FORMAT 3 ---------- --}}
-                    @if (isset($prices['format3']) && is_array($prices['format3']))
-                        <div class="space-y-6 mt-2">
-                            {{-- Activities --}}
-                            @if (!empty($prices['format3']['activities']))
-                                <div>
-                                    <h3 class="font-medium mb-2">Activities</h3>
+                        {{-- ---------- FORMAT 1 ---------- --}}
+                        @if (isset($prices['format1']) && is_array($prices['format1']))
+                            @foreach ($prices['format1'] as $item)
+                                <div class="mb-6">
+                                    <h3 class="font-medium mb-2">{{ safe($item['title'] ?? '') }}</h3>
                                     <table class="w-full text-left border border-gray-300 text-sm">
                                         <thead class="bg-gray-100">
                                             <tr>
-                                                <th class="border px-2 py-1">Activity</th>
+                                                <th class="border px-2 py-1">Particular</th>
+                                                <th class="border px-2 py-1">Twin/Double</th>
+                                                <th class="border px-2 py-1">Triple</th>
+                                                <th class="border px-2 py-1">Single</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border px-2 py-1">Land Package</td>
+                                                <td class="border px-2 py-1">{{ safe($item['land_double'] ?? '') }}
+                                                </td>
+                                                <td class="border px-2 py-1">{{ safe($item['land_triple'] ?? '') }}
+                                                </td>
+                                                <td class="border px-2 py-1">{{ safe($item['land_single'] ?? '') }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border px-2 py-1">Air Ticket</td>
+                                                <td colspan="3" class="border px-2 py-1">
+                                                    {{ safe($item['ticket_fare'] ?? '') }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border px-2 py-1">Visa</td>
+                                                <td colspan="3" class="border px-2 py-1">
+                                                    {{ safe($item['visa'] ?? '') }}
+                                                </td>
+                                            </tr>
+                                            <tr class="bg-gray-100 font-semibold">
+                                                <td class="border px-2 py-1">Total</td>
+                                                <td class="border px-2 py-1">{{ safe($item['total_double'] ?? '') }}
+                                                </td>
+                                                <td class="border px-2 py-1">{{ safe($item['total_triple'] ?? '') }}
+                                                </td>
+                                                <td class="border px-2 py-1">{{ safe($item['total_single'] ?? '') }}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endforeach
+                        @endif
+
+                        {{-- ---------- FORMAT 2 ---------- --}}
+                        @if (isset($prices['format2']) && is_array($prices['format2']))
+                            @foreach ($prices['format2'] as $item)
+                                <div class="mb-6">
+                                    <h3 class="font-medium mb-2">{{ safe($item['title'] ?? '') }}</h3>
+                                    <table class="w-full text-left border border-gray-300 text-sm">
+                                        <thead class="bg-gray-100">
+                                            <tr>
+                                                <th class="border px-2 py-1">Particular</th>
                                                 <th class="border px-2 py-1">Adult</th>
-                                                <th class="border px-2 py-1">Child</th>
+                                                <th class="border px-2 py-1">Child (Bed)</th>
+                                                <th class="border px-2 py-1">Child (No Bed)</th>
                                                 <th class="border px-2 py-1">Infant</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($prices['format3']['activities'] as $act)
-                                                <tr>
-                                                    <td class="border px-2 py-1">{{ safe($act['name'] ?? '') }}</td>
-                                                    <td class="border px-2 py-1">{{ safe($act['adult'] ?? '') }}</td>
-                                                    <td class="border px-2 py-1">{{ safe($act['child'] ?? '') }}</td>
-                                                    <td class="border px-2 py-1">{{ safe($act['infant'] ?? '') }}</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @endif
-
-                            {{-- Hotels --}}
-                            @if (!empty($prices['format3']['hotels']))
-                                <div>
-                                    <h3 class="font-medium mb-2">Hotels</h3>
-                                    <table class="w-full text-left border border-gray-300 text-sm">
-                                        <thead class="bg-gray-100">
                                             <tr>
-                                                <th class="border px-2 py-1">Location</th>
-                                                <th class="border px-2 py-1">Hotel</th>
-                                                <th class="border px-2 py-1">Room</th>
-                                                <th class="border px-2 py-1">Price/Night</th>
-                                                <th class="border px-2 py-1">Extra Bed</th>
+                                                <td class="border px-2 py-1">Land Package</td>
+                                                <td class="border px-2 py-1">{{ safe($item['land']['adult'] ?? '') }}
+                                                </td>
+                                                <td class="border px-2 py-1">
+                                                    {{ safe($item['land']['child_bed'] ?? '') }}
+                                                </td>
+                                                <td class="border px-2 py-1">
+                                                    {{ safe($item['land']['child_no_bed'] ?? '') }}</td>
+                                                <td class="border px-2 py-1">{{ safe($item['land']['infant'] ?? '') }}
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($prices['format3']['hotels'] as $hotel)
-                                                <tr>
-                                                    <td class="border px-2 py-1">{{ safe($hotel['location'] ?? '') }}
-                                                    </td>
-                                                    <td class="border px-2 py-1">{{ safe($hotel['name'] ?? '') }}</td>
-                                                    <td class="border px-2 py-1">{{ safe($hotel['room'] ?? '') }}</td>
-                                                    <td class="border px-2 py-1">{{ safe($hotel['price'] ?? '') }}
-                                                    </td>
-                                                    <td class="border px-2 py-1">{{ safe($hotel['extra_bed'] ?? '') }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
+                                            <tr>
+                                                <td class="border px-2 py-1">Air Ticket</td>
+                                                <td class="border px-2 py-1">
+                                                    {{ safe($item['air_ticket']['adult'] ?? '') }}
+                                                </td>
+                                                <td colspan="2" class="border px-2 py-1">
+                                                    {{ safe($item['air_ticket']['child'] ?? '') }}</td>
+                                                <td class="border px-2 py-1">
+                                                    {{ safe($item['air_ticket']['infant'] ?? '') }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border px-2 py-1">Visa</td>
+                                                <td class="border px-2 py-1">{{ safe($item['visa']['adult'] ?? '') }}
+                                                </td>
+                                                <td colspan="2" class="border px-2 py-1">
+                                                    {{ safe($item['visa']['child'] ?? '') }}</td>
+                                                <td class="border px-2 py-1">{{ safe($item['visa']['infant'] ?? '') }}
+                                                </td>
+                                            </tr>
+                                            <tr class="bg-gray-100 font-semibold">
+                                                <td class="border px-2 py-1">Total</td>
+                                                <td class="border px-2 py-1">{{ safe($item['total']['adult'] ?? '') }}
+                                                </td>
+                                                <td class="border px-2 py-1">
+                                                    {{ safe($item['total']['child_bed'] ?? '') }}
+                                                </td>
+                                                <td class="border px-2 py-1">
+                                                    {{ safe($item['total']['child_no_bed'] ?? '') }}</td>
+                                                <td class="border px-2 py-1">
+                                                    {{ safe($item['total']['infant'] ?? '') }}
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                            @endif
+                            @endforeach
+                        @endif
+
+                        {{-- ---------- FORMAT 3 ---------- --}}
+                        @if (isset($prices['format3']) && is_array($prices['format3']))
+                            <div class="space-y-6 mt-2">
+                                {{-- Activities --}}
+                                @if (!empty($prices['format3']['activities']))
+                                    <div>
+                                        <h3 class="font-medium mb-2">Activities</h3>
+                                        <table class="w-full text-left border border-gray-300 text-sm">
+                                            <thead class="bg-gray-100">
+                                                <tr>
+                                                    <th class="border px-2 py-1">Activity</th>
+                                                    <th class="border px-2 py-1">Adult</th>
+                                                    <th class="border px-2 py-1">Child</th>
+                                                    <th class="border px-2 py-1">Infant</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($prices['format3']['activities'] as $act)
+                                                    <tr>
+                                                        <td class="border px-2 py-1">{{ safe($act['name'] ?? '') }}
+                                                        </td>
+                                                        <td class="border px-2 py-1">{{ safe($act['adult'] ?? '') }}
+                                                        </td>
+                                                        <td class="border px-2 py-1">{{ safe($act['child'] ?? '') }}
+                                                        </td>
+                                                        <td class="border px-2 py-1">{{ safe($act['infant'] ?? '') }}
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+
+                                {{-- Hotels --}}
+                                @if (!empty($prices['format3']['hotels']))
+                                    <div>
+                                        <h3 class="font-medium mb-2">Hotels</h3>
+                                        <table class="w-full text-left border border-gray-300 text-sm">
+                                            <thead class="bg-gray-100">
+                                                <tr>
+                                                    <th class="border px-2 py-1">Location</th>
+                                                    <th class="border px-2 py-1">Hotel</th>
+                                                    <th class="border px-2 py-1">Room</th>
+                                                    <th class="border px-2 py-1">Price/Night</th>
+                                                    <th class="border px-2 py-1">Extra Bed</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($prices['format3']['hotels'] as $hotel)
+                                                    <tr>
+                                                        <td class="border px-2 py-1">
+                                                            {{ safe($hotel['location'] ?? '') }}
+                                                        </td>
+                                                        <td class="border px-2 py-1">{{ safe($hotel['name'] ?? '') }}
+                                                        </td>
+                                                        <td class="border px-2 py-1">{{ safe($hotel['room'] ?? '') }}
+                                                        </td>
+                                                        <td class="border px-2 py-1">{{ safe($hotel['price'] ?? '') }}
+                                                        </td>
+                                                        <td class="border px-2 py-1">
+                                                            {{ safe($hotel['extra_bed'] ?? '') }}
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+
+                        {{-- ---------- AIR TICKET DETAILS ---------- --}}
+                        <div class="mt-4">
+                            <p class="font-semibold mb-1">Air Ticket Details:</p>
+                            <div class="prose leading-relaxed text-gray-700">
+                                {!! $packPrice['air_ticket_details'] ?? ' - ' !!}
+                            </div>
                         </div>
                     @endif
-
-                    {{-- ---------- AIR TICKET DETAILS ---------- --}}
-                    <div class="mt-4">
-                        <p class="font-semibold mb-1">Air Ticket Details:</p>
-                        <div class="prose leading-relaxed text-gray-700">
-                            {!! $packPrice['air_ticket_details'] ?? ' - ' !!}
-                        </div>
-                    </div>
                 </div>
+
 
                 <!-- Itineraries -->
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold">Itineraries</h2>
-                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
+                        <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
                             class="text-blue-600 hover:underline text-sm">Edit</a>
                     </div>
-                    @foreach ($packItenaries as $itenary)
+                    @forelse ($packItenaries as $itenary)
                         @if ($itenary)
                             <div class="border-b border-gray-200 mb-4 pb-4">
                                 <h3>{{ $itenary['title'] ?? 'Untitled' }}</h3>
@@ -446,7 +489,9 @@
                                 @endif
                             </div>
                         @endif
-                    @endforeach
+                    @empty
+                        <p class="text-gray-500">No inclusions found.</p>
+                    @endforelse
 
                 </div>
 
@@ -454,7 +499,7 @@
                 <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold">Inclusions</h2>
-                        <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
+                        <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
                             class="text-blue-600 hover:underline text-sm">Edit</a>
                     </div>
 
@@ -512,10 +557,11 @@
                     @endif
                 </div>
 
-                @if($package->status === 'active' && $package->completion_status === 'completed')
+                @if ($package->status === 'active' && $package->completion_status === 'completed')
                     <p class="text-red-500">This package is ACTIVE and COMPLETED.</p>
                 @else
-
+                    <p class="text-red-500">This package is INACTIVE and INCOMPLETE. To show full data, please complete
+                        the full process of application for package. Thank You!</p>
                 @endif
 
             </div>
@@ -527,10 +573,10 @@
                     <span class="px-4">Updated on: {{ $package->updated_at->format('d-M-Y H:i') }}</span>
                 </div>
                 <div>
-                    <a href="{{ route('packages.index') }}" class="inline-block text-blue-600 hover:underline px-2">←
+                    <a href="{{ route('backend.packages.index') }}" class="inline-block text-blue-600 hover:underline px-2">←
                         Back
                         to list</a>
-                    <a href="{{ route('packages.edit', $package->uuid) }}"
+                    <a href="{{ route('backend.packages.edit', $package->uuid) }}"
                         class="text-blue-600 hover:underline px-2">Edit</a>
                     <button class="text-blue-600 hover:underline px-2">Delete</button>
                 </div>

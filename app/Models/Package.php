@@ -50,4 +50,9 @@ class Package extends Model
     {
         return $this->hasMany(PackInclusion::class, 'package_id');
     }
+
+    public function images()
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
 }

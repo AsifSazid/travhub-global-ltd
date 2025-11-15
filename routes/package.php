@@ -5,29 +5,28 @@ use App\Http\Controllers\PackageController;
 use Illuminate\Support\Facades\Route;
 
 // Package
-Route::get('/packages', [PackageController::class, 'index'])->name('packages.index'); // list page
-Route::get('/packages/{package}/edit', [PackageController::class, 'edit'])->name('packages.edit'); // Edit Page
-Route::get('/packages/{package}/show', [PackageController::class, 'show'])->name('packages.show'); // Show Page
-Route::get('/packages/list', [PackageController::class, 'getData'])->name('packages.getData');
-Route::get('/packages/trash', [PackageController::class, 'trash'])->name('packages.trash');
+Route::get('/admin/packages', [PackageController::class, 'index'])->name('backend.packages.index'); // list page
+Route::get('/admin/packages/{package}/edit', [PackageController::class, 'edit'])->name('backend.packages.edit'); // Edit Page
+Route::get('/admin/packages/{package}/show', [PackageController::class, 'show'])->name('backend.packages.show'); // Show Page
+Route::get('/admin/packages/list', [PackageController::class, 'getData'])->name('backend.packages.getData');
+Route::get('/admin/packages/trash', [PackageController::class, 'trash'])->name('backend.packages.trash');
 
 Route::get('/api/countries/{id}/cities', [CountryController::class, 'getCities']);
 
 // Multi Form end
 
 // Package
-Route::get('/packages/download/pdf', [PackageController::class, 'downloadPdf'])->name('packages.download.pdf');
-Route::get('/packages/download/pdf/package', [PackageController::class, 'packagePdf'])->name('packages.package.pdf');
-Route::post('/packages/{id}/restore', [PackageController::class, 'restore'])->name('packages.restore');
-Route::delete('/packages/{id}/force-delete', [PackageController::class, 'forceDelete'])->name('packages.forceDelete');
+Route::get('/admin/packages/download/pdf', [PackageController::class, 'downloadPdf'])->name('backend.packages.download.pdf');
+Route::get('/admin/packages/download/pdf/package', [PackageController::class, 'packagePdf'])->name('backend.packages.package.pdf');
+Route::post('/admin/packages/{id}/restore', [PackageController::class, 'restore'])->name('backend.packages.restore');
+Route::delete('/admin/packages/{id}/force-delete', [PackageController::class, 'forceDelete'])->name('backend.packages.forceDelete');
 
 
-
-
-Route::prefix('packages/')->name('packages.')->group(function () {
+Route::prefix('admin/packages/')->name('backend.packages.')->group(function () {
     Route::get('create', [PackageController::class, 'create'])->name('create');
     Route::put('{uuid}/update', [PackageController::class, 'update'])->name('update');
     Route::post('store', [PackageController::class, 'store'])->name('store');
     Route::get('{uuid}/step/{step}', [PackageController::class, 'step'])->name('step');
     Route::post('{uuid}/step/{step}', [PackageController::class, 'stepForStore'])->name('step');
+    Route::delete('/{uuid}', [PackageController::class, 'destroy'])->name('destroy');
 });

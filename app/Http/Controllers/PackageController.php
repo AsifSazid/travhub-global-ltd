@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 use App\Models\{
     Activity,
     Package,
@@ -59,23 +60,39 @@ class PackageController extends Controller
     {
         $pkg = Package::where('uuid', $uuid)->first();
         // dd($pkg);
-        return view('backend.packages.edit', compact('pkg'));
+        return view('backend.packages.edit',([
+            'package' => $pkg
+        ]));
     }
 
     public function store(Request $request)
     {
         try {
+            // Validation
             $request->validate([
                 'title' => 'required|string',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
 
+            // Package creation
             $pkg = Package::create([
                 'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
                 'created_by' => Auth::user()->id,
             ]);
 
-            return redirect()->route('packages.step', ['uuid' => $pkg->uuid, 'step' => 1])->with('success', 'Package creatation started successfully!');
+            // Image Upload & polymorphic save
+            if ($request->hasFile('image')) {
+                $file_name = $this->uploadFile($request->file('image'), $pkg->id);
+
+                // Save to images table
+                $pkg->images()->create([
+                    'url' => $file_name
+                ]);
+            }
+
+            return redirect()->route('backend.packages.step', ['uuid' => $pkg->uuid, 'step' => 1])
+                ->with('success', 'Package creation started successfully!');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -84,21 +101,66 @@ class PackageController extends Controller
     public function update(Request $request, $uuid)
     {
         try {
-            $pkg = package::where('uuid', $uuid)->first();
-
+            // Validation
             $request->validate([
                 'title' => 'required|string',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             ]);
 
+            // Package find
+            $pkg = Package::where('uuid', $uuid)->firstOrFail();
+
+            // Update title
             $pkg->update([
                 'title' => $request->title,
-                'updated_by' => Auth::user()->id,
             ]);
 
-            return redirect()->route('packages.step', ['uuid' => $pkg->uuid, 'step' => 1])->with('success', 'Package "Basic Info" updated successfully!');
+            // If new image uploaded
+            if ($request->hasFile('image')) {
+
+                // DELETE old image (file + db record)
+                if ($pkg->images()->exists()) {
+
+                    $oldImage = $pkg->images()->first();
+
+                    $oldPath = storage_path("app/public/images/packages/" . $oldImage->url);
+
+                    if (file_exists($oldPath)) {
+                        @unlink($oldPath);
+                    }
+
+                    $oldImage->delete();
+                }
+
+                // Upload new image
+                $file_name = $this->uploadFile($request->file('image'), $pkg->id);
+
+                // Save new to DB
+                $pkg->images()->create([
+                    'url' => $file_name,
+                ]);
+            }
+
+            return redirect()->route('backend.packages.index')
+                ->with('success', 'Package updated successfully!');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
+    }
+
+    private function uploadFile($file, $name)
+    {
+        $folder = storage_path('app/public/images/packages');
+
+        if (!File::exists($folder)) {
+            File::makeDirectory($folder, 0775, true, true);
+        }
+
+        $timestamp = str_replace([' ', ':', '-'], '', now());
+        $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+        $file->move($folder, $file_name);
+
+        return $file_name;
     }
 
     public function step($uuid, $step)
@@ -486,7 +548,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('backend.packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -525,7 +587,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('backend.packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -591,7 +653,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('packages.step', [
+            return redirect()->route('backend.packages.step', [
                 'uuid' => $uuid,
                 'step' => $step + 1
             ])->with('success', 'Step ' . $step . ' saved successfully.');
@@ -646,7 +708,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('packages.step', [
+            return redirect()->route('backend.packages.step', [
                 'uuid' => $uuid,
                 'step' => $step + 1,
             ])->with('success', 'Step ' . $step . ' saved.');
@@ -713,7 +775,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('backend.packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -755,7 +817,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('backend.packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -771,7 +833,7 @@ class PackageController extends Controller
                 'status' => 'active'
             ]);
 
-            return redirect()->route('packages.index')->with('success', 'Package completed successfully.');
+            return redirect()->route('backend.packages.index')->with('success', 'Package completed successfully.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -780,12 +842,13 @@ class PackageController extends Controller
     public function show($uuid)
     {
         $pkg = Package::where('uuid', $uuid)->firstOrFail();
-        $pkgDesInfo = PackDestinationInfo::where('package_uuid', $uuid)->firstOrFail();
-        $pkgQuatDetail = PackQuatDetail::where('package_uuid', $uuid)->firstOrFail();
-        $pkgAccomoDetail = PackAccomoDetail::where('package_uuid', $uuid)->firstOrFail();
-        $pkgPrice = PackPrice::where('package_uuid', $uuid)->firstOrFail();
+
+        $pkgDesInfo = PackDestinationInfo::where('package_uuid', $uuid)->first();
+        $pkgQuatDetail = PackQuatDetail::where('package_uuid', $uuid)->first();
+        $pkgAccomoDetail = PackAccomoDetail::where('package_uuid', $uuid)->first();
+        $pkgPrice = PackPrice::where('package_uuid', $uuid)->first();
         $pkgItenaries = PackItenaries::where('package_uuid', $uuid)->get();
-        $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->firstOrFail();
+        $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->first();
 
         $title = "Itinerary Details";
         $package = $this->getPackageInfo($uuid);
@@ -793,12 +856,12 @@ class PackageController extends Controller
 
         return view('backend.packages.show', [
             'package' => $pkg,
-            'packDestinationInfo' => $pkgDesInfo,
-            'packQuatDetail' => $pkgQuatDetail,
-            'packAccomoDetail' => $pkgAccomoDetail,
-            'packPrice' => $pkgPrice,
-            'packItenaries' => $pkgItenaries,
-            'packInclusion' => $pkgInclusions,
+            'packDestinationInfo' => $pkgDesInfo ?? 'No Data Found',
+            'packQuatDetail' => $pkgQuatDetail ?? 'No Data Found',
+            'packAccomoDetail' => $pkgAccomoDetail ?? 'No Data Found',
+            'packPrice' => $pkgPrice ?? 'No Data Found',
+            'packItenaries' => $pkgItenaries ?? [],
+            'packInclusion' => $pkgInclusions ?? 'No Data Found',
             'title' => $title,
             'completedStep' => $completedStep,
             'uuid' => $uuid
@@ -819,5 +882,20 @@ class PackageController extends Controller
     {
         $package = Package::where('uuid', $uuid)->firstOrFail();
         return $package;
+    }
+
+    public function destroy($uuid)
+    {
+        $package = Package::where('uuid', $uuid);
+        $package->delete(); // this is soft delete
+
+        return redirect()->route('backend.packages.index')->with('success', 'Packages moved to trash.');
+    }
+
+    public function trash()
+    {
+        $trashedCollection = Package::onlyTrashed()->latest();
+        $trashed = $trashedCollection->paginate(10);
+        return view('backend.packages.trash', compact('trashed'));
     }
 }

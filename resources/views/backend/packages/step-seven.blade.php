@@ -33,7 +33,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Destination Info</h2>
-            <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '1']) }}"
+            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '1']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
         {{-- <p><strong>Title:</strong> {{ $packDestinationInfo['title'] }}</p> --}}
@@ -71,7 +71,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Quotation Detail</h2>
-            <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '2']) }}"
+            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '2']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
         <p><strong>Duration:</strong> {{ $packQuatDetail['duration'] }} days
@@ -97,7 +97,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Accommodation</h2>
-            <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '3']) }}"
+            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '3']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
         @php
@@ -117,7 +117,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Price Details</h2>
-            <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '4']) }}"
+            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '4']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
 
@@ -314,7 +314,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Itineraries</h2>
-            <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
+            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
         @foreach ($packItenaries as $itenary)
@@ -400,7 +400,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Inclusions</h2>
-            <a href="{{ route('packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
+            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
 
