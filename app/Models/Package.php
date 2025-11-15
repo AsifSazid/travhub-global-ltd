@@ -26,17 +26,17 @@ class Package extends Model
         return $this->hasOne(PackDestinationInfo::class, 'package_id');
     }
 
-    public function PackQuatDetails()
+    public function packQuatDetails()
     {
         return $this->hasOne(PackQuatDetail::class, 'package_id');
     }
 
-    public function PackAccomoDetails()
+    public function packAccomoDetails()
     {
         return $this->hasOne(PackAccomoDetail::class, 'package_id');
     }
 
-    public function PackPrices()
+    public function packPrices()
     {
         return $this->hasOne(PackPrice::class, 'package_id');
     }
@@ -55,4 +55,5 @@ class Package extends Model
     {
         return $this->morphMany(Image::class, 'imageable');
     }
+
 }

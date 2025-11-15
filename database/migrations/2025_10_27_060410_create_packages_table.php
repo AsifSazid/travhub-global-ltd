@@ -20,6 +20,7 @@ return new class extends Migration
             $table->boolean('is_complete')->default(false);
             $table->tinyInteger('progress_step')->nullable();
             $table->enum('completion_status', ['incomplete', 'completed'])->default('incomplete');
+            $table->string('rating', 255);
 
             $table->string('created_by', 255)->nullable();
             $table->string('updated_by', 255)->nullable();

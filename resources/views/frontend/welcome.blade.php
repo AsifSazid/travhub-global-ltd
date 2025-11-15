@@ -96,59 +96,31 @@
             <h2 class="section-title">Popular Packages</h2>
 
             <div class="packages-grid">
-                <div class="package-card" data-package="bangkok-phuket">
-                    <div class="package-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
-                        <div class="package-price">BDT ‌‌44999</div>
-                    </div>
-                    <div class="package-content">
-                        <h3>5 Nights 6 Days Bangkok & Phuket Honeymoon Tour</h3>
-                        <div class="package-meta">
-                            <span><i class="fas fa-clock"></i> 6 Days</span>
-                            <span><i class="fas fa-map-marker-alt"></i> Thailand</span>
-                            <span><i class="fas fa-star"></i> 4.8</span>
+                @forelse ($packages as $package)
+                    @php
+                        $imageUrl = $package->images->first()?->url ?? 'default_image_url.jpg';
+                    @endphp
+                    <div class="package-card" data-package="bangkok-phuket">
+                        <div class="package-image"
+                            style="background-image: url('{{ asset('storage/images/packages') . '/' . $imageUrl }}');">
+                            <div class="package-price">{{$package->packPrices->currency->currency_code}} {{$package->packPrices->overall_price}}</div>
                         </div>
-                        <p>Experience the perfect blend of vibrant city life and tropical paradise on this romantic
-                            Thailand honeymoon.</p>
-                        <a href="#" class="package-btn view-details">View Details</a>
-                    </div>
-                </div>
-
-                <div class="package-card" data-package="dubai-luxury">
-                    <div class="package-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1534008897995-27a23e859048?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
-                        <div class="package-price">BDT 59999</div>
-                    </div>
-                    <div class="package-content">
-                        <h3>Dubai Luxury Experience</h3>
-                        <div class="package-meta">
-                            <span><i class="fas fa-clock"></i> 5 Days</span>
-                            <span><i class="fas fa-map-marker-alt"></i> Dubai</span>
-                            <span><i class="fas fa-star"></i> 4.9</span>
+                        <div class="package-content">
+                            <h3>{{ $package->title }}</h3>
+                            <div class="package-meta">
+                                <span><i class="fas fa-clock"></i> {{ $package->packQuatDetails->duration }} Days</span>
+                                <span><i class="fas fa-map-marker-alt"></i>
+                                    {{ $package->packDestinationInfos->country_title }}</span>
+                                <span><i class="fas fa-star"></i> {{ $package->rating }}</span>
+                            </div>
+                            <p>Experience the perfect blend of vibrant city life and tropical paradise on this romantic
+                                Thailand honeymoon.</p>
+                            <a href="#" class="package-btn view-details">View Details</a>
                         </div>
-                        <p>Indulge in luxury with desert safaris, Burj Khalifa visits, and premium shopping experiences.
-                        </p>
-                        <a href="#" class="package-btn view-details">View Details</a>
                     </div>
-                </div>
-
-                <div class="package-card" data-package="bali-paradise">
-                    <div class="package-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1528164344705-47542687000d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
-                        <div class="package-price">BDT 29999</div>
-                    </div>
-                    <div class="package-content">
-                        <h3>Bali Tropical Paradise</h3>
-                        <div class="package-meta">
-                            <span><i class="fas fa-clock"></i> 6 Days</span>
-                            <span><i class="fas fa-map-marker-alt"></i> Bali</span>
-                            <span><i class="fas fa-star"></i> 4.7</span>
-                        </div>
-                        <p>Relax in Bali's beautiful beaches, rice terraces, and spiritual temples in this tropical
-                            getaway.</p>
-                        <a href="#" class="package-btn view-details">View Details</a>
-                    </div>
-                </div>
+                @empty
+                    <p class="">No Packages Found!</p>
+                @endforelse
             </div>
         </div>
     </section>

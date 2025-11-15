@@ -25,4 +25,9 @@ class PackPrice extends Model
     {
         return $this->belongsTo(Package::class, 'package_id', 'id');
     }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'currency_id', 'id');
+    }
 }

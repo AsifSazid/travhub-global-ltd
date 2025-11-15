@@ -1762,7 +1762,7 @@
                 <ul>
                     {{-- <li><a href="#" style="color:var(--secondary)">Home</a></li> --}}
                     <li><a href="{{ route('home') }}">Home</a></li>
-                    <li><a href="{{ route('packages') }}">Packages</a></li>
+                    <li><a href="{{ route('fn.packages') }}">Packages</a></li>
                     <li><a href="#">Visa</a></li>
                     <li><a href="#">Activities</a></li>
                     <li><a href="#">Umrah</a></li>

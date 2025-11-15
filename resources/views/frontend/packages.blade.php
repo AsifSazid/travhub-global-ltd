@@ -62,6 +62,32 @@
         <div class="container">
             <h2 class="section-title">Our Packages</h2>
             <div class="packages-grid">
+                @forelse ($packages as $package)
+                    @php
+                        $imageUrl = $package->images->first()?->url ?? 'default_image_url.jpg';
+                    @endphp
+                    <div class="package-card" data-package="bangkok-phuket">
+                        <div class="package-image"
+                            style="background-image: url('{{ asset('storage/images/packages') . '/' . $imageUrl }}');">
+                            <div class="package-price">{{ $package->packPrices->currency->currency_code }}
+                                {{ $package->packPrices->overall_price }}</div>
+                        </div>
+                        <div class="package-content">
+                            <h3>{{ $package->title }}</h3>
+                            <div class="package-meta">
+                                <span><i class="fas fa-clock"></i> {{ $package->packQuatDetails->duration }} Days</span>
+                                <span><i class="fas fa-map-marker-alt"></i>
+                                    {{ $package->packDestinationInfos->country_title }}</span>
+                                <span><i class="fas fa-star"></i> {{ $package->rating }}</span>
+                            </div>
+                            <p>Experience the perfect blend of vibrant city life and tropical paradise on this romantic
+                                Thailand honeymoon.</p>
+                            <a href="#" class="package-btn view-details">View Details</a>
+                        </div>
+                    </div>
+                @empty
+                    <p class="">No Packages Found!</p>
+                @endforelse
                 <div class="package-card" data-package="bangkok-phuket">
                     <div class="package-image"
                         style="background-image: url('https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
@@ -574,7 +600,7 @@
                 e.preventDefault();
                 alert(
                     'Thank you for your booking! Our travel consultant will contact you shortly to confirm your reservation.'
-                    );
+                );
                 packageModal.classList.remove('active');
                 document.body.style.overflow = 'auto';
             });
@@ -604,7 +630,7 @@
                 // In a real implementation, you would filter the packages based on these criteria
                 alert(
                     `Filtering packages for destination: ${destination || 'All'}, duration: ${duration || 'Any'}, price range: ${priceRange || 'Any'}, travel date: ${travelDate || 'Any'}`
-                    );
+                );
             });
         </script>
     @endpush

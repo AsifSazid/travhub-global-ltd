@@ -1,17 +1,16 @@
 <?php
 
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PackageController;
 use Illuminate\Support\Facades\Route;
 
 // FRONTEND
-Route::get('/packages', function () {
-    return view('frontend.packages');
-})->name('packages');
-
 Route::get('/package-details', function () {
     return view('frontend.package-details');
 })->name('package.details');
+
+Route::get('/packages', [HomeController::class, 'packages'])->name('fn.packages');
 
 // Package
 Route::get('/admin/packages', [PackageController::class, 'index'])->name('backend.packages.index'); // list page

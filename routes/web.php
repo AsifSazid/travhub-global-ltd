@@ -6,6 +6,7 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CurrentRateController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\InclusionController;
 use App\Http\Controllers\NavigationController;
@@ -14,9 +15,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('frontend.welcome');
-})->name('home');
+Route::get('/', [HomeController::class, 'home'])->name('home');
 
 // Activity Category
 Route::get('/activity-categories/list', [ActivityCategoryController::class, 'getData'])->name('activity-categories.getData');

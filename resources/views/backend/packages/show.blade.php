@@ -38,8 +38,12 @@
                     </p>
                 </div>
             </div>
+            @php
+                $imageUrl = $package->images->first()?->url ?? 'default_image_url.jpg';
+            @endphp
             <div class="max-w-7xl mx-auto p-6 space-y-8">
-                <img id="image-preview" src="{{ asset('storage/images/packages').'/'.$package->images->first()->url }}" alt="Image Preview"
+                <p><strong>Image Title: </strong>{{$imageUrl}}</p>
+                <img id="image-preview" src="{{ asset('storage/images/packages').'/'.$imageUrl }}" alt="Image Preview {{$imageUrl}}"
                     class="rounded-md shadow-md" width="360">
                 <!-- Package Info -->
                 {{-- <div class="bg-white rounded-xl shadow p-6 border border-gray-200">

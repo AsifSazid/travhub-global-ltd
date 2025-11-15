@@ -37,6 +37,7 @@ return new class extends Migration
 
             // JSON field
             $table->json('pack_price')->nullable();
+            $table->string('overall_price')->nullable();
             $table->json('air_ticket_details')->nullable();
 
             $table->string('created_by', 255)->nullable();

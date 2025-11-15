@@ -35,4 +35,9 @@ class Currency extends Model
     {
         return $this->hasMany(Activity::class, 'currency_id', 'id');
     }
+
+    public function packages()
+    {
+        return $this->hasMany(Package::class, 'currency_id', 'id');
+    }
 }

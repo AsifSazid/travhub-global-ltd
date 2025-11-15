@@ -20,6 +20,8 @@
                 <tr>
                     <th class="px-6 py-4">Sl No.</th>
                     <th class="px-6 py-4">Package Name</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4">Completed Step</th>
                     <th class="px-6 py-4">Created By</th>
                     <th class="px-6 py-4">Action</th>
                 </tr>
@@ -82,12 +84,14 @@
                                 <tr>
                                     <td class="px-6 py-4">${index + 1}</td>
                                     <td class="px-6 py-4">${package.title}</td>
+                                    <td class="px-6 py-4">${package.status}</td>
+                                    <td class="px-6 py-4">${package.progress_step}</td>
                                     <td class="px-6 py-4">${package.createdBy?.title ?? 'N/A'}</td>
                                     <td class="px-6 py-4">
                                         <div class="flex justify-center">
-                                            <a href="/packages/${package.uuid}/show" class="px-1 text-blue-500 hover:text-blue-700" title="View"><i class="fas fa-eye"></i></a>
-                                            <a href="/packages/${package.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit"><i class="fas fa-edit"></i></a>
-                                            <form action="/packages/${package.uuid}" method="POST" onsubmit="return confirm('Move to trash?')">
+                                            <a href="/admin/packages/${package.uuid}/show" class="px-1 text-blue-500 hover:text-blue-700" title="View"><i class="fas fa-eye"></i></a>
+                                            <a href="/admin/packages/${package.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit"><i class="fas fa-edit"></i></a>
+                                            <form action="/admin/packages/${package.uuid}" method="POST" onsubmit="return confirm('Move to trash?')">
                                                 <input type="hidden" name="_token" value="${csrfToken}">
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 <button type="submit" class="px-1 text-red-500 hover:text-red-700" title="Destroy">
