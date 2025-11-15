@@ -1,91 +1,58 @@
 <x-frontend.layouts.master>
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1>Discover Amazing Destinations</h1>
-            <p>Explore the world with our curated travel packages, visa services, and exciting activities. Your perfect
-                journey starts here.</p>
 
-            <div class="search-container">
-                <form class="search-form">
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Travel Packages</h1>
+            <p>Discover our carefully curated travel packages to exotic destinations around the world. Find your perfect
+                getaway today!</p>
+        </div>
+    </section>
+
+    <!-- Packages Filter Section -->
+    <section class="packages-filter">
+        <div class="container">
+            <div class="filter-container">
+                <form class="filter-form">
                     <div class="form-group">
                         <label for="destination">Destination</label>
                         <select id="destination">
-                            <option value="">Select Destination</option>
+                            <option value="">All Destinations</option>
                             <option value="thailand">Thailand</option>
                             <option value="malaysia">Malaysia</option>
                             <option value="dubai">Dubai</option>
                             <option value="singapore">Singapore</option>
                             <option value="bali">Bali</option>
+                            <option value="europe">Europe</option>
+                            <option value="usa">USA</option>
                         </select>
                     </div>
-
                     <div class="form-group">
-                        <label for="service-type">Service Type</label>
-                        <select id="service-type">
-                            <option value="">Select Service</option>
-                            <option value="package">Package Tour</option>
-                            <option value="visa">Visa Service</option>
-                            <option value="activities">Activities</option>
-                            <option value="umrah">Umrah Package</option>
+                        <label for="duration">Duration</label>
+                        <select id="duration">
+                            <option value="">Any Duration</option>
+                            <option value="1-3">1-3 Days</option>
+                            <option value="4-7">4-7 Days</option>
+                            <option value="8-14">8-14 Days</option>
+                            <option value="15+">15+ Days</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label for="travel-date">Travel Date</label>
                         <input type="date" id="travel-date">
                     </div>
-
-                    <button type="submit" class="search-btn">Search</button>
+                    <div class="form-group">
+                        <label for="price-range">Price Range</label>
+                        <select id="price-range">
+                            <option value="">Any Price</option>
+                            <option value="0-20000">Under BDT 20,000</option>
+                            <option value="20000-40000">BDT 20,000 - 40,000</option>
+                            <option value="40000-60000">BDT 40,000 - 60,000</option>
+                            <option value="60000+">BDT 60,000+</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="filter-btn">Filter Packages</button>
                 </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section class="services">
-        <div class="container">
-            <h2 class="section-title">Our Services</h2>
-
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">🏝️</div>
-                    <div class="service-content">
-                        <h3>Package Tours</h3>
-                        <p>All-inclusive travel packages to exotic destinations with accommodation, transfers, and
-                            guided tours.</p>
-                        <a href="#" class="service-link">Explore Packages <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-
-                <div class="service-card">
-                    <div class="service-icon">🛂</div>
-                    <div class="service-content">
-                        <h3>Visa Services</h3>
-                        <p>Hassle-free visa processing with expert guidance and high success rate for various countries.
-                        </p>
-                        <a href="#" class="service-link">Apply Now <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-
-                <div class="service-card">
-                    <div class="service-icon">🎯</div>
-                    <div class="service-content">
-                        <h3>Activities</h3>
-                        <p>Book exciting activities and experiences to make your trip memorable and adventurous.</p>
-                        <a href="#" class="service-link">Find Activities <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-
-                <div class="service-card">
-                    <div class="service-icon">🕌</div>
-                    <div class="service-content">
-                        <h3>Umrah Packages</h3>
-                        <p>Spiritual journeys with comprehensive Umrah packages including flights, hotels, and guidance.
-                        </p>
-                        <a href="#" class="service-link">View Packages <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -93,8 +60,7 @@
     <!-- Packages Section -->
     <section class="packages">
         <div class="container">
-            <h2 class="section-title">Popular Packages</h2>
-
+            <h2 class="section-title">Our Packages</h2>
             <div class="packages-grid">
                 <div class="package-card" data-package="bangkok-phuket">
                     <div class="package-image"
@@ -149,6 +115,59 @@
                         <a href="#" class="package-btn view-details">View Details</a>
                     </div>
                 </div>
+
+                <div class="package-card" data-package="europe-tour">
+                    <div class="package-image"
+                        style="background-image: url('https://images.unsplash.com/photo-1467269204594-9661b134dd2b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                        <div class="package-price">BDT 89999</div>
+                    </div>
+                    <div class="package-content">
+                        <h3>European Highlights Tour</h3>
+                        <div class="package-meta">
+                            <span><i class="fas fa-clock"></i> 10 Days</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Europe</span>
+                            <span><i class="fas fa-star"></i> 4.9</span>
+                        </div>
+                        <p>Explore the iconic cities of Paris, Rome, and Amsterdam in this comprehensive European tour.
+                        </p>
+                        <a href="#" class="package-btn view-details">View Details</a>
+                    </div>
+                </div>
+
+                <div class="package-card" data-package="malaysia-explorer">
+                    <div class="package-image"
+                        style="background-image: url('https://images.unsplash.com/photo-1596422846543-75e6d59b35e1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                        <div class="package-price">BDT 34999</div>
+                    </div>
+                    <div class="package-content">
+                        <h3>Malaysia Explorer</h3>
+                        <div class="package-meta">
+                            <span><i class="fas fa-clock"></i> 7 Days</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Malaysia</span>
+                            <span><i class="fas fa-star"></i> 4.6</span>
+                        </div>
+                        <p>Discover the vibrant culture, stunning landscapes, and delicious cuisine of Malaysia.</p>
+                        <a href="#" class="package-btn view-details">View Details</a>
+                    </div>
+                </div>
+
+                <div class="package-card" data-package="singapore-family">
+                    <div class="package-image"
+                        style="background-image: url('https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                        <div class="package-price">BDT 39999</div>
+                    </div>
+                    <div class="package-content">
+                        <h3>Singapore Family Fun</h3>
+                        <div class="package-meta">
+                            <span><i class="fas fa-clock"></i> 5 Days</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Singapore</span>
+                            <span><i class="fas fa-star"></i> 4.8</span>
+                        </div>
+                        <p>Perfect for families with visits to Sentosa Island, Universal Studios, and Gardens by the
+                            Bay.</p>
+                        <a href="#" class="package-btn view-details">View Details</a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -159,7 +178,6 @@
             <div class="close-modal" id="closeModal">
                 <i class="fas fa-times"></i>
             </div>
-
             <div class="package-hero" id="packageHero">
                 <div class="package-hero-content">
                     <h1 id="packageTitle">5 Nights 6 Days Bangkok & Phuket Honeymoon Tour</h1>
@@ -170,7 +188,6 @@
                     <div class="price" id="packagePrice">BDT ‌‌44999</div>
                 </div>
             </div>
-
             <div class="package-body">
                 <div class="package-tabs">
                     <div class="tab active" data-tab="overview">Overview</div>
@@ -182,9 +199,9 @@
                 <div class="tab-content active" id="overview">
                     <div class="overview-content">
                         <h2>About the Tour</h2>
-                        <p>This 5 nights 6 days Thailand honeymoon package offers the perfect blend of vibrant city life
-                            and tropical paradise. Experience the bustling streets of Bangkok and the serene beaches of
-                            Phuket on this romantic journey designed for newlyweds.</p>
+                        <p id="packageDescription">This 5 nights 6 days Thailand honeymoon package offers the perfect
+                            blend of vibrant city life and tropical paradise. Experience the bustling streets of Bangkok
+                            and the serene beaches of Phuket on this romantic journey designed for newlyweds.</p>
 
                         <h2>Tour Highlights</h2>
                         <div class="highlights">
@@ -270,42 +287,36 @@
 
                 <div class="tab-content" id="itinerary">
                     <h2>Detailed Itinerary</h2>
-
                     <div class="itinerary-day">
                         <h3>Day 1: Arrival in Bangkok</h3>
                         <p>Arrive at Bangkok airport, meet our representative and transfer to your hotel. Check-in and
                             relax. In the evening, enjoy a romantic dinner cruise along the Chao Phraya River with
                             stunning views of Bangkok's illuminated temples and skyline.</p>
                     </div>
-
                     <div class="itinerary-day">
                         <h3>Day 2: Bangkok City Tour</h3>
                         <p>After breakfast, visit the Grand Palace and Wat Phra Kaew (Temple of the Emerald Buddha).
                             Continue to Wat Arun (Temple of Dawn) and enjoy a traditional Thai lunch. In the evening,
                             explore the vibrant Khao San Road or enjoy a couple's spa treatment.</p>
                     </div>
-
                     <div class="itinerary-day">
                         <h3>Day 3: Flight to Phuket</h3>
                         <p>After breakfast, transfer to the airport for your flight to Phuket. Upon arrival, check into
                             your beachfront resort. Spend the rest of the day relaxing on the beach or by the pool.
                             Enjoy a romantic seaside dinner in the evening.</p>
                     </div>
-
                     <div class="itinerary-day">
                         <h3>Day 4: Phi Phi Island Tour</h3>
                         <p>Embark on a full-day speedboat tour to the stunning Phi Phi Islands. Visit Maya Bay (featured
                             in the movie "The Beach"), go snorkeling in crystal-clear waters, and enjoy a beachside
                             lunch. Return to Phuket in the evening.</p>
                     </div>
-
                     <div class="itinerary-day">
                         <h3>Day 5: James Bond Island & Phang Nga Bay</h3>
                         <p>Take a canoe tour through the limestone caves and mangroves of Phang Nga Bay. Visit James
                             Bond Island, famous for its appearance in "The Man with the Golden Gun." Enjoy a sunset view
                             from Promthep Cape in the evening.</p>
                     </div>
-
                     <div class="itinerary-day">
                         <h3>Day 6: Departure</h3>
                         <p>After breakfast, check out from your hotel. Depending on your flight schedule, you may have
@@ -351,7 +362,6 @@
                                 <span>All taxes and service charges</span>
                             </div>
                         </div>
-
                         <div style="flex: 1;">
                             <h2>Exclusions</h2>
                             <div class="exclusion-item">
@@ -409,18 +419,15 @@
                         <div class="price">BDT ‌‌44999</div>
                         <div class="per-person">per person</div>
                     </div>
-
                     <form class="booking-form">
                         <div class="form-group">
                             <label for="checkin">Check-in Date</label>
                             <input type="date" id="checkin" required>
                         </div>
-
                         <div class="form-group">
                             <label for="checkout">Check-out Date</label>
                             <input type="date" id="checkout" required>
                         </div>
-
                         <div class="form-group">
                             <label for="travelers">Number of Travelers</label>
                             <select id="travelers" required>
@@ -431,7 +438,6 @@
                                 <option value="5">5 Travelers</option>
                             </select>
                         </div>
-
                         <div class="form-group">
                             <label for="room-type">Room Type</label>
                             <select id="room-type" required>
@@ -440,47 +446,16 @@
                                 <option value="suite">Suite</option>
                             </select>
                         </div>
-
                         <div class="form-group full-width">
                             <label for="special-requests">Special Requests</label>
                             <textarea id="special-requests" rows="3" placeholder="Any special requests or requirements..."></textarea>
                         </div>
-
                         <button type="submit" class="book-now-btn">Book Now</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials">
-        <div class="container">
-            <h2 class="section-title">What Our Customers Say</h2>
-
-            <div class="testimonials-container">
-                <div class="testimonial-slide">
-                    <p class="testimonial-text">"TravHub made our Thailand trip absolutely seamless. The package was
-                        well-organized, and their visa service was quick and efficient. Highly recommended!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-image">
-                            <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Sarah Johnson">
-                        </div>
-                        <div class="author-info">
-                            <h4>Sarah Johnson</h4>
-                            <p>Thailand Tour</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="testimonial-nav">
-                    <div class="testimonial-dot active"></div>
-                    <div class="testimonial-dot"></div>
-                    <div class="testimonial-dot"></div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     @push('js')
         <script>
@@ -503,9 +478,30 @@
                 'bali-paradise': {
                     title: 'Bali Tropical Paradise',
                     location: 'Bali, Indonesia',
-                    price: 'BDT 299999',
+                    price: 'BDT 29999',
                     image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
                     description: 'Relax in Bali\'s beautiful beaches, rice terraces, and spiritual temples in this tropical getaway perfect for couples and families.'
+                },
+                'europe-tour': {
+                    title: 'European Highlights Tour',
+                    location: 'Europe',
+                    price: 'BDT 89999',
+                    image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+                    description: 'Explore the iconic cities of Paris, Rome, and Amsterdam in this comprehensive European tour covering the best of Western Europe.'
+                },
+                'malaysia-explorer': {
+                    title: 'Malaysia Explorer',
+                    location: 'Malaysia',
+                    price: 'BDT 34999',
+                    image: 'https://images.unsplash.com/photo-1596422846543-75e6d59b35e1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+                    description: 'Discover the vibrant culture, stunning landscapes, and delicious cuisine of Malaysia with visits to Kuala Lumpur, Penang, and Langkawi.'
+                },
+                'singapore-family': {
+                    title: 'Singapore Family Fun',
+                    location: 'Singapore',
+                    price: 'BDT 39999',
+                    image: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+                    description: 'Perfect for families with visits to Sentosa Island, Universal Studios, Gardens by the Bay, and other family-friendly attractions in Singapore.'
                 }
             };
 
@@ -516,6 +512,7 @@
             const packageTitle = document.getElementById('packageTitle');
             const packageLocation = document.getElementById('packageLocation');
             const packagePrice = document.getElementById('packagePrice');
+            const packageDescription = document.getElementById('packageDescription');
             const viewDetailsButtons = document.querySelectorAll('.view-details');
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
@@ -532,7 +529,11 @@
                     packageTitle.textContent = packageData.title;
                     packageLocation.textContent = packageData.location;
                     packagePrice.textContent = packageData.price;
+                    packageDescription.textContent = packageData.description;
                     packageHero.style.backgroundImage = `url('${packageData.image}')`;
+
+                    // Update booking price
+                    document.querySelector('.booking-price .price').textContent = packageData.price;
 
                     // Show modal
                     packageModal.classList.add('active');
@@ -573,7 +574,7 @@
                 e.preventDefault();
                 alert(
                     'Thank you for your booking! Our travel consultant will contact you shortly to confirm your reservation.'
-                );
+                    );
                 packageModal.classList.remove('active');
                 document.body.style.overflow = 'auto';
             });
@@ -584,18 +585,6 @@
                 nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
             });
 
-            // Testimonial slider
-            const dots = document.querySelectorAll('.testimonial-dot');
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', function() {
-                    // Remove active class from all dots
-                    dots.forEach(d => d.classList.remove('active'));
-                    // Add active class to clicked dot
-                    this.classList.add('active');
-                    // In a real implementation, you would change the testimonial content here
-                });
-            });
-
             // Newsletter form submission
             document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -604,20 +593,18 @@
                 this.reset();
             });
 
-            // Search form submission
-            document.querySelector('.search-form').addEventListener('submit', function(e) {
+            // Filter form submission
+            document.querySelector('.filter-form').addEventListener('submit', function(e) {
                 e.preventDefault();
                 const destination = document.getElementById('destination').value;
-                const serviceType = document.getElementById('service-type').value;
+                const duration = document.getElementById('duration').value;
                 const travelDate = document.getElementById('travel-date').value;
+                const priceRange = document.getElementById('price-range').value;
 
-                if (!destination || !serviceType) {
-                    alert('Please select destination and service type to search.');
-                    return;
-                }
-
-                // In a real implementation, you would redirect to search results page
-                alert(`Searching for ${serviceType} in ${destination} on ${travelDate || 'any date'}...`);
+                // In a real implementation, you would filter the packages based on these criteria
+                alert(
+                    `Filtering packages for destination: ${destination || 'All'}, duration: ${duration || 'Any'}, price range: ${priceRange || 'Any'}, travel date: ${travelDate || 'Any'}`
+                    );
             });
         </script>
     @endpush

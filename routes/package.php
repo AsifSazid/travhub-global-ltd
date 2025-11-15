@@ -4,6 +4,15 @@ use App\Http\Controllers\CountryController;
 use App\Http\Controllers\PackageController;
 use Illuminate\Support\Facades\Route;
 
+// FRONTEND
+Route::get('/packages', function () {
+    return view('frontend.packages');
+})->name('packages');
+
+Route::get('/package-details', function () {
+    return view('frontend.package-details');
+})->name('package.details');
+
 // Package
 Route::get('/admin/packages', [PackageController::class, 'index'])->name('backend.packages.index'); // list page
 Route::get('/admin/packages/{package}/edit', [PackageController::class, 'edit'])->name('backend.packages.edit'); // Edit Page
