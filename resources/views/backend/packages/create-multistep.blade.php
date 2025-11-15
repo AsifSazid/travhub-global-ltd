@@ -7,7 +7,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
             <h2 class="text-2xl font-semibold">
-                {{ __('Create Package: ') }} {{ $title ?? '' }}
+                {{ __('Package Details: ') }} {{ $stepTitles[$step - 1] ?? '' }}{{__(' Section')}}
             </h2>
         </div>
     </x-slot>

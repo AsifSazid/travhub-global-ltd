@@ -263,8 +263,6 @@ class PackageController extends Controller
         ]);
     }
 
-
-
     public function stepFive($uuid, $step)
     {
         $packDesDetails = PackDestinationInfo::where('package_uuid', $uuid)->first();
@@ -656,7 +654,6 @@ class PackageController extends Controller
             dd($e->getMessage());
         }
     }
-
 
     public function stepFiveStore($request, $uuid, $step)
     {
