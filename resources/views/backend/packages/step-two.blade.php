@@ -6,6 +6,7 @@
         <input type="number" id="duration" name="duration" value="{{ old('duration', $packQuatInfo->duration ?? '') }}"
             class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
             placeholder="e.g. 7" min="1">
+
         @error('duration')
             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
         @enderror
@@ -17,6 +18,7 @@
         <input type="date" id="start_date" name="start_date"
             value="{{ old('start_date', isset($packQuatInfo->start_date) ? date('Y-m-d', strtotime($packQuatInfo->start_date)) : '') }}"
             class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2">
+
         @error('start_date')
             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
         @enderror
@@ -26,9 +28,10 @@
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">End Date</label>
         <input type="date" id="end_date" name="end_date"
-            value="{{ old('start_date', isset($packQuatInfo->end_date) ? date('Y-m-d', strtotime($packQuatInfo->end_date)) : '') }}"
+            value="{{ old('end_date', isset($packQuatInfo->end_date) ? date('Y-m-d', strtotime($packQuatInfo->end_date)) : '') }}"
             class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 cursor-not-allowed px-3 py-2"
             readonly>
+
         @error('end_date')
             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
         @enderror
@@ -36,40 +39,46 @@
 
 </div>
 
+
+
+{{-- ========== PAX SECTION ========== --}}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+
     <div>
         <label class="block text-sm font-medium text-gray-700">Number of Pax</label>
 
         <div class="mt-2 space-y-2" id="pax-container">
-            <!-- Adult -->
+
+            {{-- Adult --}}
             <div class="flex items-center justify-between border rounded px-3 py-2">
                 <label class="flex items-center space-x-2">
-                    <input type="checkbox" id="adult-check" class="rounded text-indigo-600 focus:ring-indigo-500" checked>
+                    <input type="checkbox" id="adult-check" class="rounded text-indigo-600 focus:ring-indigo-500">
                     <span>Adult</span>
                 </label>
                 <input type="number" id="adult-count" class="w-20 border rounded px-2 py-1 text-center" min="0"
                     placeholder="0">
             </div>
 
-            <!-- Child -->
+            {{-- Child --}}
             <div class="flex items-center justify-between border rounded px-3 py-2">
                 <label class="flex items-center space-x-2">
-                    <input type="checkbox" id="child-check" class="rounded text-indigo-600 focus:ring-indigo-500" checked>
+                    <input type="checkbox" id="child-check" class="rounded text-indigo-600 focus:ring-indigo-500">
                     <span>Child</span>
                 </label>
                 <input type="number" id="child-count" class="w-20 border rounded px-2 py-1 text-center" min="0"
                     placeholder="0">
             </div>
 
-            <!-- Infant -->
+            {{-- Infant --}}
             <div class="flex items-center justify-between border rounded px-3 py-2">
                 <label class="flex items-center space-x-2">
-                    <input type="checkbox" id="infant-check" class="rounded text-indigo-600 focus:ring-indigo-500" checked>
+                    <input type="checkbox" id="infant-check" class="rounded text-indigo-600 focus:ring-indigo-500">
                     <span>Infant</span>
                 </label>
                 <input type="number" id="infant-count" class="w-20 border rounded px-2 py-1 text-center" min="0"
                     placeholder="0">
             </div>
+
         </div>
 
         <!-- Total -->
@@ -77,45 +86,37 @@
             Total Pax: <span id="total-pax">0</span>
         </div>
 
-        <!-- Hidden input to store array-of-objects JSON -->
+        {{-- ========== Hidden Input ========== --}}
         @php
-            // Start with old input
             $paxOld = old('no_of_pax');
 
-            if ($paxOld && is_string($paxOld)) {
-                // old() returns JSON string → decode it
+            if ($paxOld) {
                 $paxOld = json_decode($paxOld, true) ?? [];
-            }
-
-            if (!is_array($paxOld)) {
-                // fallback to database value (already decoded in controller)
+            } else {
                 $paxOld = $packQuatInfo->no_of_pax ?? [];
             }
         @endphp
 
         <input type="hidden" name="no_of_pax" id="no_of_pax" value='@json($paxOld)'>
 
-
-
         @error('no_of_pax')
             <p class="text-red-500 text-sm">{{ $message }}</p>
         @enderror
+
     </div>
+
 </div>
 
+
+
+{{-- ========== JS ========== --}}
 @push('js')
-    {{-- <script>
-        console.log("Hidden input value:", document.getElementById('no_of_pax').value);
-        console.log(document.getElementById('no_of_pax').value);
-    </script> --}}
-    <!-- Vanilla JS Logic -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const durationInput = document.getElementById('duration');
             const startDateInput = document.getElementById('start_date');
             const endDateInput = document.getElementById('end_date');
 
-            // Set minimum date = today
             const today = new Date().toISOString().split('T')[0];
             startDateInput.setAttribute('min', today);
 
@@ -137,12 +138,14 @@
             startDateInput.addEventListener('change', updateEndDate);
         });
     </script>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const paxInput = document.getElementById('no_of_pax'); // hidden input to store JSON
-            const totalDisplay = document.getElementById('total-pax'); // total display
 
-            // Define Pax types
+            const paxInput = document.getElementById('no_of_pax');
+            const totalDisplay = document.getElementById('total-pax');
+
             const paxTypes = [{
                     key: 'adult',
                     label: 'Adult'
@@ -157,7 +160,6 @@
                 }
             ];
 
-            // Function to update hidden JSON and total
             function updateJSON() {
                 const data = [];
                 let total = 0;
@@ -180,7 +182,7 @@
                 totalDisplay.textContent = total;
             }
 
-            // Preload old data if editing
+            // Preload Existing Data
             try {
                 const oldData = JSON.parse(paxInput.value || '[]');
                 oldData.forEach(item => {
@@ -192,26 +194,25 @@
                         countInput.value = item.count;
                     }
                 });
-                updateJSON(); // recalc total
+                updateJSON();
             } catch (e) {
-                console.warn('Invalid Pax JSON:', e);
+                console.warn("Invalid JSON:", e);
             }
 
-            // Add event listeners to checkboxes and number inputs
+            // Listeners
             paxTypes.forEach(pax => {
                 const checkbox = document.getElementById(`${pax.key}-check`);
                 const countInput = document.getElementById(`${pax.key}-count`);
 
-                // Enable/disable input based on checkbox
                 checkbox.addEventListener('change', function() {
                     countInput.disabled = !this.checked;
                     if (!this.checked) countInput.value = '';
                     updateJSON();
                 });
 
-                // Update JSON and total when number changes
                 countInput.addEventListener('input', updateJSON);
             });
+
         });
     </script>
 @endpush

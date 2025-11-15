@@ -77,15 +77,16 @@
                     }
 
                     packages.forEach((package, index) => {
+                    console.log(package);
                         const row = `
                                 <tr>
                                     <td class="px-6 py-4">${index + 1}</td>
                                     <td class="px-6 py-4">${package.title}</td>
-                                    <td class="px-6 py-4">${package.user?.title ?? 'N/A'}</td>
+                                    <td class="px-6 py-4">${package.createdBy?.title ?? 'N/A'}</td>
                                     <td class="px-6 py-4">
                                         <div class="flex justify-center">
                                             <a href="/packages/${package.uuid}" class="px-1 text-blue-500 hover:text-blue-700" title="View"><i class="fas fa-eye"></i></a>
-                                            <a href="/packages/${package.uuid}/step/1" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit"><i class="fas fa-edit"></i></a>
+                                            <a href="/packages/${package.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit"><i class="fas fa-edit"></i></a>
                                             <form action="/packages/${package.uuid}" method="POST" onsubmit="return confirm('Move to trash?')">
                                                 <input type="hidden" name="_token" value="${csrfToken}">
                                                 <input type="hidden" name="_method" value="DELETE">

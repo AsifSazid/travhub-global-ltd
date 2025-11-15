@@ -9,42 +9,62 @@
             </button>
         @endforeach
 
+        {{-- ADD CITY --}}
         <button id="openCityModal" type="button"
             class="flex items-center gap-1 bg-blue-600 text-white text-sm px-3 py-2 rounded-lg hover:bg-blue-700 transition">
             <i class="fa-solid fa-plus"></i> Add City
         </button>
     </div>
 
-    {{-- Content --}}
+    {{-- CITY CONTENT TABS --}}
     <div id="tabContentWrapper">
+
         @foreach ($cities as $city)
-            @php $hotels = \App\Models\Hotel::where('city_id', $city->id)->get(); @endphp
+            @php
+                $hotels = \App\Models\Hotel::where('city_id', $city->id)->get();
+
+                // Load saved DB hotels for this city
+                $savedForCity = collect($savedHotels)->where('city_id', $city->id)->values();
+            @endphp
 
             <div id="city_{{ $city->id }}" class="tab-content hidden">
 
+                {{-- Header --}}
                 <div class="flex items-center justify-between mb-3">
                     <h4 class="text-sm font-semibold text-gray-700">
                         Hotels in {{ $city->title }}
                     </h4>
                 </div>
 
+                {{-- HOTEL LIST --}}
                 <div id="hotel-list-{{ $city->id }}" class="hotel-list space-y-2">
-                    @forelse($hotels as $hotel)
+
+                    {{-- Default Hotels --}}
+                    @foreach ($hotels as $hotel)
+                        @php
+                            $isChecked = $savedForCity->where('id', $hotel->id)->count() > 0;
+                        @endphp
+
                         <label class="flex items-center gap-2 text-sm bg-gray-50 border rounded-lg px-3 py-2">
                             <input type="checkbox" name="hotels[{{ $city->id }}][{{ $hotel->id }}][id]"
-                                value="{{ $hotel->id }}" class="hotel-checkbox">
+                                value="{{ $hotel->id }}" {{ $isChecked ? 'checked' : '' }}>
+
                             <input type="hidden" name="hotels[{{ $city->id }}][{{ $hotel->id }}][title]"
                                 value="{{ $hotel->title }}">
+
                             <span>{{ $hotel->title }}</span>
                         </label>
-                    @empty
-                        <p class="text-gray-500 text-sm italic">No hotels found</p>
-                    @endforelse
+                    @endforeach
+
+
                 </div>
 
+
+                {{-- ADD NEW CUSTOM HOTEL --}}
                 <div class="flex gap-2 mt-4">
                     <input type="text" id="new-hotel-{{ $city->id }}" placeholder="Add new hotel"
                         class="w-full border-gray-300 rounded-md focus:ring focus:ring-blue-200">
+
                     <button type="button" onclick="addHotel({{ $city->id }})"
                         class="bg-green-500 text-white rounded-md px-4 hover:bg-green-600 flex items-center justify-center">
                         <i class="fa-solid fa-plus"></i>
@@ -53,21 +73,28 @@
 
             </div>
         @endforeach
+
     </div>
 </div>
 
-<!-- City Modal -->
+{{-- CITY MODAL --}}
 <div id="cityModal" class="fixed inset-0 flex items-center justify-center bg-gray-900/60 hidden z-[9999]">
+
     <div class="bg-white rounded-xl shadow-2xl border border-gray-300 max-w-md p-6 relative animate-fadeIn">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Add City</h3>
+
         <input id="country_id" type="hidden" value="{{ $cities->first()?->country_id }}">
+
         <input id="cityName" type="text"
             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="City Name">
 
         <div class="flex justify-end gap-3 mt-6">
             <button type="button" id="closeCityModal"
-                class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+                class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition">
+                Cancel
+            </button>
+
             <button type="button" id="saveCityBtn"
                 class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
                 Save
@@ -76,7 +103,6 @@
     </div>
 </div>
 
-<!-- CSRF Meta -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @push('css')
@@ -99,6 +125,7 @@
     </style>
 @endpush
 
+
 @push('js')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -108,27 +135,27 @@
             const cityModal = document.getElementById("cityModal");
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-            // ---- INIT TABS ----
+            // INITIALIZE TABS
             function initTabs() {
                 const tabButtons = document.querySelectorAll(".tab-btn");
                 const tabs = document.querySelectorAll(".tab-content");
 
                 if (tabButtons.length && !document.querySelector(".tab-btn.active")) {
-                    tabButtons.forEach(btn => btn.classList.remove("active", "border-blue-500", "text-blue-600"));
+                    tabButtons.forEach(btn => btn.classList.remove("active"));
                     tabs.forEach(tab => tab.classList.add("hidden"));
 
-                    tabButtons[0].classList.add("active", "border-blue-500", "text-blue-600");
+                    tabButtons[0].classList.add("active", "text-blue-600");
                     tabs[0].classList.remove("hidden");
                 }
 
                 tabButtons.forEach(button => {
                     button.onclick = () => {
                         const id = button.dataset.tab;
-                        tabButtons.forEach(b => b.classList.remove("active", "border-blue-500",
-                            "text-blue-600"));
+
+                        tabButtons.forEach(b => b.classList.remove("active", "text-blue-600"));
                         tabs.forEach(t => t.classList.add("hidden"));
 
-                        button.classList.add("active", "border-blue-500", "text-blue-600");
+                        button.classList.add("active", "text-blue-600");
                         document.getElementById(id).classList.remove("hidden");
                     };
                 });
@@ -136,13 +163,14 @@
 
             initTabs();
 
-            // ---- MODAL OPEN/CLOSE ----
+            // OPEN/CLOSE MODAL
             document.getElementById("openCityModal").onclick = () => cityModal.classList.remove("hidden");
             document.getElementById("closeCityModal").onclick = () => cityModal.classList.add("hidden");
 
-            // ---- SAVE CITY ----
+            // SAVE NEW CITY
             document.getElementById("saveCityBtn").onclick = async () => {
                 const cityName = document.getElementById("cityName").value.trim();
+
                 if (!cityName) {
                     alert("Please enter a city name!");
                     return;
@@ -158,29 +186,24 @@
                     const res = await fetch("{{ route('api.cities.store') }}", {
                         method: "POST",
                         headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'Accept': 'application/json'
                         },
-                        body: data,
-                        credentials: 'same-origin'
+                        body: data
                     });
-
-                    if (!res.ok) {
-                        const errData = await res.json();
-                        alert(errData.message || 'Error saving city');
-                        return;
-                    }
 
                     const city = await res.json();
 
+                    // Create new tab button
                     const newBtn = document.createElement("button");
                     newBtn.type = "button";
                     newBtn.dataset.tab = "city_" + city.id;
                     newBtn.className =
                         "tab-btn whitespace-nowrap px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition";
                     newBtn.textContent = city.title;
+
                     cityTabs.insertBefore(newBtn, document.getElementById("openCityModal"));
 
+                    // Create new content
                     const div = document.createElement("div");
                     div.id = "city_" + city.id;
                     div.className = "tab-content hidden";
@@ -203,18 +226,18 @@
                     tabContentWrapper.appendChild(div);
 
                     initTabs();
+
                     cityModal.classList.add("hidden");
                     document.getElementById("cityName").value = "";
 
                 } catch (err) {
-                    console.error(err);
-                    alert("Something went wrong!");
+                    alert("Error adding city");
                 }
             };
 
         });
 
-        // ---- ADD HOTEL ----
+        // ADD CUSTOM HOTEL
         function addHotel(cityId) {
             const input = document.getElementById(`new-hotel-${cityId}`);
             const value = input.value.trim();
@@ -228,6 +251,7 @@
         <input type="checkbox" name="custom_hotels[${cityId}][]" value="${value}" checked>
         <span>${value}</span>
     `;
+
             list.appendChild(label);
             input.value = '';
         }

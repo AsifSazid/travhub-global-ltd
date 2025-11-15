@@ -23,8 +23,9 @@ Route::delete('/packages/{id}/force-delete', [PackageController::class, 'forceDe
 
 
 
-Route::prefix('packages')->name('packages.')->group(function () {
+Route::prefix('packages/')->name('packages.')->group(function () {
     Route::get('create', [PackageController::class, 'create'])->name('create');
+    Route::put('{uuid}/update', [PackageController::class, 'update'])->name('update');
     Route::post('store', [PackageController::class, 'store'])->name('store');
     Route::get('{uuid}/step/{step}', [PackageController::class, 'step'])->name('step');
     Route::post('{uuid}/step/{step}', [PackageController::class, 'stepForStore'])->name('step');

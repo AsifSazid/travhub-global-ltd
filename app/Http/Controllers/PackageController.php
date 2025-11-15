@@ -55,9 +55,11 @@ class PackageController extends Controller
         return view('backend.packages.create');
     }
 
-    public function edit()
+    public function edit($uuid)
     {
-        dd('edit');
+        $pkg = Package::where('uuid', $uuid)->first();
+        // dd($pkg);
+        return view('backend.packages.edit', compact('pkg'));
     }
 
     public function store(Request $request)
@@ -74,6 +76,26 @@ class PackageController extends Controller
             ]);
 
             return redirect()->route('packages.step', ['uuid' => $pkg->uuid, 'step' => 1])->with('success', 'Package creatation started successfully!');
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function update(Request $request, $uuid)
+    {
+        try {
+            $pkg = package::where('uuid', $uuid)->first();
+
+            $request->validate([
+                'title' => 'required|string',
+            ]);
+
+            $pkg->update([
+                'title' => $request->title,
+                'updated_by' => Auth::user()->id,
+            ]);
+
+            return redirect()->route('packages.step', ['uuid' => $pkg->uuid, 'step' => 1])->with('success', 'Package "Basic Info" updated successfully!');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -113,6 +135,11 @@ class PackageController extends Controller
 
         $packDesInfo = PackDestinationInfo::where('package_uuid', $uuid)->first();
 
+        if ($packDesInfo) {
+            $packDesInfo->cities = json_decode(json_decode($packDesInfo->cities, true), true) ?? [];
+            $packDesInfo->activities = json_decode(json_decode($packDesInfo->activities, true), true) ?? [];
+        }
+
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 1;
 
@@ -132,7 +159,16 @@ class PackageController extends Controller
         $packQuatInfo = PackQuatDetail::where('package_uuid', $uuid)->first();
 
         if ($packQuatInfo && $packQuatInfo->no_of_pax) {
-            $packQuatInfo->no_of_pax = json_decode($packQuatInfo->no_of_pax, true);
+
+            // First decode wrapper string
+            $firstDecode = json_decode($packQuatInfo->no_of_pax, true);
+
+            // If still string → decode again
+            if (is_string($firstDecode)) {
+                $packQuatInfo->no_of_pax = json_decode($firstDecode, true);
+            } else {
+                $packQuatInfo->no_of_pax = $firstDecode;
+            }
         }
 
         $title = "Quatation Information";
@@ -152,21 +188,17 @@ class PackageController extends Controller
     {
         $packDestinationCities = PackDestinationInfo::where('package_uuid', $uuid)->first();
 
+        /* Already existing work (unchanged) */
         $cityIds = $packDestinationCities?->cities;
-
         if (is_string($cityIds)) {
             $decoded = json_decode($cityIds, true);
-            if (is_string($decoded)) {
-                $decoded = json_decode($decoded, true);
-            }
+            if (is_string($decoded)) $decoded = json_decode($decoded, true);
             $cityIds = $decoded;
         }
-
         $cityIds = Arr::flatten($cityIds);
 
         if (is_array($cityIds) && count($cityIds)) {
-            $cities = City::whereIn('id', $cityIds)
-                ->get(['id', 'uuid', 'title'])
+            $cities = City::whereIn('id', $cityIds)->get(['id', 'uuid', 'title'])
                 ->map(function ($city) use ($packDestinationCities) {
                     $city->country_id = $packDestinationCities->country_id;
                     return $city;
@@ -175,34 +207,63 @@ class PackageController extends Controller
             $cities = collect();
         }
 
+        /* NEW PART → old saved accommodation */
+        $accomo = PackAccomoDetail::where('package_uuid', $uuid)->first();
+
+        $savedHotels = [];
+        if ($accomo && $accomo->hotels) {
+            $savedHotels = json_decode($accomo->hotels, true);
+            if (!is_array($savedHotels)) $savedHotels = [];
+        }
+
         $title = "Accommodation Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 3;
 
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'cities', 'title', 'completedStep'));
+        return view(
+            'backend.packages.create-multistep',
+            compact('uuid', 'step', 'cities', 'savedHotels', 'title', 'completedStep')
+        );
     }
-
 
     public function stepFour($uuid, $step)
     {
         $currencies = Currency::where('status', 'active')->get();
+
         $pkgPrice = PackPrice::where('package_uuid', $uuid)->first();
+
+        // Decode old price data for Blade
+        $formatData = [];
+        if (!empty($pkgPrice->pack_price)) {
+            $formatData = json_decode($pkgPrice->pack_price, true);
+        }
+
+        // Accommodation
         $packAccomoDetails = PackAccomoDetail::where('package_uuid', $uuid)->first();
         $hotels = json_decode($packAccomoDetails->hotels) ?? [];
+
         foreach ($hotels as $hotel) {
             $city = City::find($hotel->city_id);
-            if ($city) {
-                $hotel->city_title = $city->title;
-            } else {
-                $hotel->city_title = 'City Not Found';
-            }
+            $hotel->city_title = $city ? $city->title : 'City Not Found';
         }
-        // dd($hotels);
+
         $title = "Pricing Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 4;
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'pkgPrice', 'currencies', 'hotels', 'title', 'completedStep'));
+
+        return view('backend.packages.create-multistep', [
+            'uuid' => $uuid,
+            'step' => $step,
+            'pkgPrice' => $pkgPrice,
+            'currencies' => $currencies,
+            'hotels' => $hotels,
+            'title' => $title,
+            'completedStep' => $completedStep,
+            'formatData' => $formatData, // ✅ pass old values
+        ]);
     }
+
+
 
     public function stepFive($uuid, $step)
     {
@@ -544,7 +605,7 @@ class PackageController extends Controller
     public function stepFourStore($request, $uuid, $step)
     {
         try {
-            // dd($request->all());
+
             $validated = $request->validate([
                 'currency_id' => 'required|exists:currencies,id',
                 'air_ticket_details' => 'nullable|string',
@@ -555,6 +616,14 @@ class PackageController extends Controller
 
             $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
 
+            $airTicket = $validated['air_ticket_details']
+                ? json_decode($validated['air_ticket_details'], true)
+                : null;
+
+            $packPriceData = $validated['format_data']
+                ? json_decode($validated['format_data'], true)
+                : null;
+
             $packPrice = PackPrice::updateOrCreate(
                 ['package_uuid' => $pkg->uuid],
                 [
@@ -563,23 +632,31 @@ class PackageController extends Controller
                     'package_id' => $pkg->id,
                     'package_uuid' => $pkg->uuid,
                     'package_title' => $pkg->title,
-                    'currency_id' => $validated['currency_id'] ?? null,
+
+                    'currency_id' => $validated['currency_id'],
                     'currency_uuid' => optional(Currency::find($validated['currency_id']))->uuid,
                     'currency_title' => optional(Currency::find($validated['currency_id']))->title,
-                    'air_ticket_details' => json_encode($validated['air_ticket_details']) ?? null,
-                    'pack_price' => json_encode($validated['format_data']),
+
+                    // ✔ real JSON (PHP array)
+                    'air_ticket_details' => $airTicket,
+                    'pack_price' => $packPriceData,
+
                     'status' => 'active',
-                    'created_by' => Auth::id()
+                    'created_by' => Auth::id(),
                 ]
             );
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('packages.step', [
+                'uuid' => $uuid,
+                'step' => $step + 1,
+            ])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
     }
+
 
     public function stepFiveStore($request, $uuid, $step)
     {
@@ -597,13 +674,13 @@ class PackageController extends Controller
                 $meal_string = null;
 
                 if (!empty($input_meals_array)) {
-                    // 1. অ্যারের প্রতিটি উপাদানকে ছোট হাতের করে তারপর প্রথম অক্ষর বড় করা (ucfirst) 
+                    // 1. অ্যারের প্রতিটি উপাদানকে ছোট হাতের করে তারপর প্রথম অক্ষর বড় করা (ucfirst)
                     //    যাতে ইনপুট যেমনই আসুক ("BREAKFAST" বা "breakfast"), আউটপুট "Breakfast" হয়।
                     $capitalized_meals = array_map(function ($meal) {
                         return ucfirst(strtolower($meal));
                     }, $input_meals_array);
 
-                    // 2. অ্যারেটিকে কমা এবং স্পেস দিয়ে যুক্ত করে একটি স্ট্রিং-এ পরিণত করা 
+                    // 2. অ্যারেটিকে কমা এবং স্পেস দিয়ে যুক্ত করে একটি স্ট্রিং-এ পরিণত করা
                     //    যেমন: "Breakfast, Lunch, Dinner, Snacks"
                     $meal_string = implode(', ', $capitalized_meals);
                 }

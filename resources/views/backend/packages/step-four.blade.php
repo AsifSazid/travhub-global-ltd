@@ -260,7 +260,7 @@
 
 </div>
 
-<div class="md:col-span-1">
+<div class="md:col-span-1 mt-4">
     <label for="air_ticket_details">Air Ticket Details</label>
 
     <!-- Hidden textarea for form submission -->
