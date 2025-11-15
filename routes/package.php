@@ -34,7 +34,7 @@ Route::prefix('admin/packages/')->name('backend.packages.')->group(function () {
     Route::get('create', [PackageController::class, 'create'])->name('create');
     Route::put('{uuid}/update', [PackageController::class, 'update'])->name('update');
     Route::post('store', [PackageController::class, 'store'])->name('store');
-    Route::get('{uuid}/step/{step}', [PackageController::class, 'step'])->name('step');
-    Route::post('{uuid}/step/{step}', [PackageController::class, 'stepForStore'])->name('step');
+    Route::get('{uuid}/step/{step}', [PackageController::class, 'step'])->name('step.show');
+    Route::post('{uuid}/step/{step}', [PackageController::class, 'stepForStore'])->name('step.store');
     Route::delete('/{uuid}', [PackageController::class, 'destroy'])->name('destroy');
 });
