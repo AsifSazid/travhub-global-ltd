@@ -139,15 +139,15 @@ class DatabaseSeeder extends Seeder
             'title' => 'City Tours',
             'country_id' => 1,
             'city_id' => 2,
-            'currency_id' => 3
-        ]); 
+            'currency_id' => 2
+        ]);
 
         Activity::create([
             'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'title' => 'Beach Activities',
             'country_id' => 2,
             'city_id' => 1,
-            'currency_id' => 3
+            'currency_id' => 2
         ]);
 
         Activity::create([
@@ -155,7 +155,7 @@ class DatabaseSeeder extends Seeder
             'title' => 'City Tours',
             'country_id' => 2,
             'city_id' => 2,
-            'currency_id' => 4
+            'currency_id' => 2
         ]);
 
         Activity::create([
@@ -165,32 +165,6 @@ class DatabaseSeeder extends Seeder
             'city_id' => 1,
             'currency_id' => 1
         ]);
-
-        // Activity::create([
-        //     'uuid' => (string) \Illuminate\Support\Str::uuid(),
-        //     'title' => 'Adventure Sports',
-        //     'activity_category_id' => 1
-        // ]);
-
-        // Activity::create([
-        //     'uuid' => (string) \Illuminate\Support\Str::uuid(),
-        //     'title' => 'Cooking Classes',
-        //     'activity_category_id' => 1
-        // ]);
-
-        // Activity::create([
-        //     'uuid' => (string) \Illuminate\Support\Str::uuid(),
-        //     'title' => 'Wine Tasting',
-        //     'activity_category_id' => 1
-        // ]);
-
-        // Activity::create([
-        //     'uuid' => (string) \Illuminate\Support\Str::uuid(),
-        //     'title' => 'Beach Activities',
-        //     'activity_category_id' => 1
-        // ]);
-
-
 
         Navigation::create([
             "uuid" => "46efcfb5-001c-41cd-a9d7-875ebd4f0484",
