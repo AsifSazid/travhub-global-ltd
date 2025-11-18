@@ -33,7 +33,7 @@
 
                         @if ($i <= $completedStep + 1)
                             <!-- Completed or current step: clickable -->
-                            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => $i]) }}">
+                            <a href="{{ route('backend.packages.step.show', ['uuid' => $uuid, 'step' => $i]) }}">
                                 <div
                                     class="relative flex items-center justify-center w-10 h-10 rounded-full text-white font-semibold shadow-md transition-all duration-300 cursor-pointer
                                 {{ $isCurrent ? 'bg-blue-600 scale-110' : 'bg-green-500 hover:scale-110 hover:brightness-110' }}">
@@ -71,7 +71,7 @@
             </div>
         </div>
 
-        <form action="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => $step]) }}" method="POST">
+        <form action="{{ route('backend.packages.step.store', ['uuid' => $uuid, 'step' => $step]) }}" method="POST">
             @csrf
 
             {{-- Step 1: Destination --}}
