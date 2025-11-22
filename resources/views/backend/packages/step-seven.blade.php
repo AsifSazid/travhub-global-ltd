@@ -33,7 +33,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Destination Info</h2>
-            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '1']) }}"
+            <a href="{{ route('backend.packages.step.show', ['uuid' => $uuid, 'step' => '1']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
         {{-- <p><strong>Title:</strong> {{ $packDestinationInfo['title'] }}</p> --}}
@@ -71,7 +71,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Quotation Detail</h2>
-            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '2']) }}"
+            <a href="{{ route('backend.packages.step.show', ['uuid' => $uuid, 'step' => '2']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
         <p><strong>Duration:</strong> {{ $packQuatDetail['duration'] }} days
@@ -97,7 +97,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Accommodation</h2>
-            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '3']) }}"
+            <a href="{{ route('backend.packages.step.show', ['uuid' => $uuid, 'step' => '3']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
         @php
@@ -117,20 +117,16 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Price Details</h2>
-            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '4']) }}"
+            <a href="{{ route('backend.packages.step.show', ['uuid' => $uuid, 'step' => '4']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
 
         <p><strong>Currency:</strong> {{ $packPrice['currency_title'] ?? 'N/A' }}</p>
+        <p><strong>Overall Price for frontend:</strong> {{ $packPrice['overall_price'] ?? 'N/A' }}</p>
 
         @php
-            // Decode safely
-            $prices = json_decode($packPrice['pack_price'] ?? '[]', true);
-            if (is_string($prices)) {
-                $prices = json_decode($prices, true);
-            }
+            $prices = $packPrice->pack_price ?? [];
 
-            // Safe display helper
             function safe($val)
             {
                 return !empty($val) ? $val : ' - ';
@@ -160,13 +156,11 @@
                             </tr>
                             <tr>
                                 <td class="border px-2 py-1">Air Ticket</td>
-                                <td colspan="3" class="border px-2 py-1">
-                                    {{ safe($item['ticket_fare'] ?? '') }}</td>
+                                <td colspan="3" class="border px-2 py-1">{{ safe($item['ticket_fare'] ?? '') }}</td>
                             </tr>
                             <tr>
                                 <td class="border px-2 py-1">Visa</td>
-                                <td colspan="3" class="border px-2 py-1">{{ safe($item['visa'] ?? '') }}
-                                </td>
+                                <td colspan="3" class="border px-2 py-1">{{ safe($item['visa'] ?? '') }}</td>
                             </tr>
                             <tr class="bg-gray-100 font-semibold">
                                 <td class="border px-2 py-1">Total</td>
@@ -199,37 +193,30 @@
                             <tr>
                                 <td class="border px-2 py-1">Land Package</td>
                                 <td class="border px-2 py-1">{{ safe($item['land']['adult'] ?? '') }}</td>
-                                <td class="border px-2 py-1">{{ safe($item['land']['child_bed'] ?? '') }}
-                                </td>
-                                <td class="border px-2 py-1">
-                                    {{ safe($item['land']['child_no_bed'] ?? '') }}</td>
+                                <td class="border px-2 py-1">{{ safe($item['land']['child_bed'] ?? '') }}</td>
+                                <td class="border px-2 py-1">{{ safe($item['land']['child_no_bed'] ?? '') }}</td>
                                 <td class="border px-2 py-1">{{ safe($item['land']['infant'] ?? '') }}</td>
                             </tr>
                             <tr>
                                 <td class="border px-2 py-1">Air Ticket</td>
-                                <td class="border px-2 py-1">{{ safe($item['air_ticket']['adult'] ?? '') }}
-                                </td>
+                                <td class="border px-2 py-1">{{ safe($item['air_ticket']['adult'] ?? '') }}</td>
                                 <td colspan="2" class="border px-2 py-1">
                                     {{ safe($item['air_ticket']['child'] ?? '') }}</td>
-                                <td class="border px-2 py-1">
-                                    {{ safe($item['air_ticket']['infant'] ?? '') }}</td>
+                                <td class="border px-2 py-1">{{ safe($item['air_ticket']['infant'] ?? '') }}</td>
                             </tr>
                             <tr>
                                 <td class="border px-2 py-1">Visa</td>
                                 <td class="border px-2 py-1">{{ safe($item['visa']['adult'] ?? '') }}</td>
-                                <td colspan="2" class="border px-2 py-1">
-                                    {{ safe($item['visa']['child'] ?? '') }}</td>
+                                <td colspan="2" class="border px-2 py-1">{{ safe($item['visa']['child'] ?? '') }}
+                                </td>
                                 <td class="border px-2 py-1">{{ safe($item['visa']['infant'] ?? '') }}</td>
                             </tr>
                             <tr class="bg-gray-100 font-semibold">
                                 <td class="border px-2 py-1">Total</td>
                                 <td class="border px-2 py-1">{{ safe($item['total']['adult'] ?? '') }}</td>
-                                <td class="border px-2 py-1">{{ safe($item['total']['child_bed'] ?? '') }}
-                                </td>
-                                <td class="border px-2 py-1">
-                                    {{ safe($item['total']['child_no_bed'] ?? '') }}</td>
-                                <td class="border px-2 py-1">{{ safe($item['total']['infant'] ?? '') }}
-                                </td>
+                                <td class="border px-2 py-1">{{ safe($item['total']['child_bed'] ?? '') }}</td>
+                                <td class="border px-2 py-1">{{ safe($item['total']['child_no_bed'] ?? '') }}</td>
+                                <td class="border px-2 py-1">{{ safe($item['total']['infant'] ?? '') }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -284,14 +271,11 @@
                             <tbody>
                                 @foreach ($prices['format3']['hotels'] as $hotel)
                                     <tr>
-                                        <td class="border px-2 py-1">{{ safe($hotel['location'] ?? '') }}
-                                        </td>
+                                        <td class="border px-2 py-1">{{ safe($hotel['location'] ?? '') }}</td>
                                         <td class="border px-2 py-1">{{ safe($hotel['name'] ?? '') }}</td>
                                         <td class="border px-2 py-1">{{ safe($hotel['room'] ?? '') }}</td>
-                                        <td class="border px-2 py-1">{{ safe($hotel['price'] ?? '') }}
-                                        </td>
-                                        <td class="border px-2 py-1">{{ safe($hotel['extra_bed'] ?? '') }}
-                                        </td>
+                                        <td class="border px-2 py-1">{{ safe($hotel['price'] ?? '') }}</td>
+                                        <td class="border px-2 py-1">{{ safe($hotel['extra_bed'] ?? '') }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -300,6 +284,7 @@
                 @endif
             </div>
         @endif
+
 
         {{-- ---------- AIR TICKET DETAILS ---------- --}}
         <div class="mt-4">
@@ -314,7 +299,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Itineraries</h2>
-            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
+            <a href="{{ route('backend.packages.step.show', ['uuid' => $uuid, 'step' => '5']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
         @foreach ($packItenaries as $itenary)
@@ -400,7 +385,7 @@
     <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Inclusions</h2>
-            <a href="{{ route('backend.packages.step', ['uuid' => $uuid, 'step' => '5']) }}"
+            <a href="{{ route('backend.packages.step.show', ['uuid' => $uuid, 'step' => '5']) }}"
                 class="text-blue-600 hover:underline text-sm">Edit</a>
         </div>
 

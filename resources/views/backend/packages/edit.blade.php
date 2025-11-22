@@ -31,6 +31,28 @@
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
+            {{-- Description --}}
+            <div class="mb-4">
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea name="description" id="description" rows="4"
+                    class="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ $package->description }}</textarea>
+            </div>
+
+            {{-- Rating --}}
+            <div class="mb-4">
+                <label for="rating" class="block text-sm font-medium text-gray-700">Rating</label>
+                <select name="rating" id="rating"
+                    class="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Select Rating</option>
+                    <option value="1" {{ $package->rating == 1 ? 'selected' : '' }}>1 Star</option>
+                    <option value="2" {{ $package->rating == 2 ? 'selected' : '' }}>2 Stars</option>
+                    <option value="3" {{ $package->rating == 3 ? 'selected' : '' }}>3 Stars</option>
+                    <option value="4" {{ $package->rating == 4 ? 'selected' : '' }}>4 Stars</option>
+                    <option value="5" {{ $package->rating == 5 ? 'selected' : '' }}>5 Stars</option>
+                </select>
+            </div>
+
+
             {{-- Image Upload --}}
             <div class="mb-4">
                 <label for="image" class="block text-sm font-medium text-gray-700">Package Image</label>

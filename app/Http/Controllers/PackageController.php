@@ -60,7 +60,7 @@ class PackageController extends Controller
     {
         $pkg = Package::where('uuid', $uuid)->first();
         // dd($pkg);
-        return view('backend.packages.edit',([
+        return view('backend.packages.edit', ([
             'package' => $pkg
         ]));
     }
@@ -68,16 +68,21 @@ class PackageController extends Controller
     public function store(Request $request)
     {
         try {
+            // dd($request->all());
             // Validation
             $request->validate([
                 'title' => 'required|string',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'description' => 'nullable',
+                'rating' => 'required'
             ]);
 
             // Package creation
             $pkg = Package::create([
                 'uuid' => (string) \Str::uuid(),
                 'title' => $request->title,
+                'description' => $request->description,
+                'rating' => $request->rating,
                 'created_by' => Auth::user()->id,
             ]);
 
@@ -91,7 +96,7 @@ class PackageController extends Controller
                 ]);
             }
 
-            return redirect()->route('backend.packages.step', ['uuid' => $pkg->uuid, 'step' => 1])
+            return redirect()->route('backend.packages.step.show', ['uuid' => $pkg->uuid, 'step' => 1])
                 ->with('success', 'Package creation started successfully!');
         } catch (\Throwable $e) {
             dd($e->getMessage());
@@ -548,7 +553,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('backend.packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('backend.packages.step.show', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -587,7 +592,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('backend.packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('backend.packages.step.show', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -653,7 +658,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('backend.packages.step', [
+            return redirect()->route('backend.packages.step.show', [
                 'uuid' => $uuid,
                 'step' => $step + 1
             ])->with('success', 'Step ' . $step . ' saved successfully.');
@@ -665,50 +670,64 @@ class PackageController extends Controller
     public function stepFourStore($request, $uuid, $step)
     {
         try {
-
+            // ✔ Validation
             $validated = $request->validate([
-                'currency_id' => 'required|exists:currencies,id',
-                'air_ticket_details' => 'nullable|string',
-                'format_data' => 'nullable|string'
+                'currency_id'        => 'required|exists:currencies,id',
+                'overall_price'        => 'required',
+                'air_ticket_details' => 'nullable',   // no string forcing
+                'format_data'        => 'nullable'    // no string forcing
             ]);
 
+            // ✔ Fetch package
             $pkg = Package::where('uuid', $uuid)->firstOrFail();
 
+            // ✔ Generate formatted title
             $formatted_title = str_replace(' ', '_', $pkg->title) . '+' . substr($uuid, -4);
 
-            $airTicket = $validated['air_ticket_details']
-                ? json_decode($validated['air_ticket_details'], true)
-                : null;
+            // -----------------------------
+            //  FIX: air_ticket_details
+            // -----------------------------
+            // air_ticket_details is a normal HTML string (not JSON)
+            $airTicket = $validated['air_ticket_details'] ?? null;
 
-            $packPriceData = $validated['format_data']
-                ? json_decode($validated['format_data'], true)
-                : null;
+            // -----------------------------
+            //  FIX: format_data (JSON string)
+            // -----------------------------
+            $packPriceData = $validated['format_data'] ?? null;
 
+            // if JSON string → decode
+            if (is_string($packPriceData)) {
+                $packPriceData = json_decode($packPriceData, true);
+            }
+
+            // ✔ Save or update PackPrice
             $packPrice = PackPrice::updateOrCreate(
                 ['package_uuid' => $pkg->uuid],
                 [
-                    'uuid' => Str::uuid(),
-                    'title' => $formatted_title,
-                    'package_id' => $pkg->id,
-                    'package_uuid' => $pkg->uuid,
-                    'package_title' => $pkg->title,
+                    'uuid'           => Str::uuid(),
+                    'title'          => $formatted_title,
+                    'package_id'     => $pkg->id,
+                    'package_uuid'   => $pkg->uuid,
+                    'package_title'  => $pkg->title,
+                    'overall_price'  => $request->overall_price,
 
-                    'currency_id' => $validated['currency_id'],
-                    'currency_uuid' => optional(Currency::find($validated['currency_id']))->uuid,
+                    'currency_id'    => $validated['currency_id'],
+                    'currency_uuid'  => optional(Currency::find($validated['currency_id']))->uuid,
                     'currency_title' => optional(Currency::find($validated['currency_id']))->title,
 
-                    // ✔ real JSON (PHP array)
+                    // ✔ JSON columns accept arrays / strings correctly
                     'air_ticket_details' => $airTicket,
-                    'pack_price' => $packPriceData,
+                    'pack_price'         => $packPriceData,
 
-                    'status' => 'active',
-                    'created_by' => Auth::id(),
+                    'status'      => 'active',
+                    'created_by'  => Auth::id(),
                 ]
             );
 
+            // ✔ Update step
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('backend.packages.step', [
+            return redirect()->route('backend.packages.step.show', [
                 'uuid' => $uuid,
                 'step' => $step + 1,
             ])->with('success', 'Step ' . $step . ' saved.');
@@ -775,7 +794,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('backend.packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('backend.packages.step.show', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
@@ -817,7 +836,7 @@ class PackageController extends Controller
 
             $pkg->update(['progress_step' => $step]);
 
-            return redirect()->route('backend.packages.step', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
+            return redirect()->route('backend.packages.step.show', ['uuid' => $uuid, 'step' => $step + 1])->with('success', 'Step ' . $step . ' saved.');
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }

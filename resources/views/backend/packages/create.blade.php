@@ -29,6 +29,27 @@
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
+            {{-- Description --}}
+            <div class="mb-4">
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea name="description" id="description" rows="4" required
+                    class="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+
+            {{-- Rating --}}
+            <div class="mb-4">
+                <label for="rating" class="block text-sm font-medium text-gray-700">Rating</label>
+                <select name="rating" id="rating" required
+                    class="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Select Rating</option>
+                    <option value="1">1 Star</option>
+                    <option value="2">2 Stars</option>
+                    <option value="3">3 Stars</option>
+                    <option value="4">4 Stars</option>
+                    <option value="5">5 Stars</option>
+                </select>
+            </div>
+
             {{-- Image Upload --}}
             <div class="mb-4">
                 <label for="image" class="block text-sm font-medium text-gray-700">Package Image</label>

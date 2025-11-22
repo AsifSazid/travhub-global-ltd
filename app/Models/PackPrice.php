@@ -11,6 +11,11 @@ class PackPrice extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'air_ticket_details' => 'array',
+        'pack_price' => 'array',
+    ];
+
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');

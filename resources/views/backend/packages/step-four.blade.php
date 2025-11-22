@@ -1,4 +1,4 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div>
         <label>Currency</label>
         <select name="currency_id" class="mt-1 w-full border rounded px-3 py-2">
@@ -15,6 +15,15 @@
     </div>
 
     <div class="md:col-span-2">
+        <label>Overall Price (This price is show in the Frontend)</label>
+        <input id="overall_price_id" name="overall_price" class="mt-1 w-full border rounded px-3 py-2"
+            value="{{ $pkgPrice->overall_price ?? '' }}">
+        @error('overall_price_id')
+            <p class="text-red-500 text-sm">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div class="md:col-span-2">
         <label>Price Options</label>
         <select id="formatSelect" class="mt-1 w-full border rounded px-3 py-2">
             <option value="">-- Select Format --</option>
@@ -24,6 +33,9 @@
         </select>
 
     </div>
+
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
     <div class="col-span-2">
         <!-- ---------------- FORMAT ONE ---------------- -->

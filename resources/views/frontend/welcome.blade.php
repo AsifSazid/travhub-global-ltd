@@ -113,8 +113,8 @@
                                     {{ $package->packDestinationInfos->country_title ?? "" }}</span>
                                 <span><i class="fas fa-star"></i> {{ $package->rating ?? "" }}</span>
                             </div>
-                            <p>Experience the perfect blend of vibrant city life and tropical paradise on this romantic
-                                Thailand honeymoon.</p>
+                            <p>{{ $package->description ?? 'the perfect blend of vibrant city life and tropical paradise on this romantic
+                                Thailand honeymoon.'}}</p>
                             <a href="#" class="package-btn view-details">View Details</a>
                         </div>
                     </div>
