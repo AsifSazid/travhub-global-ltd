@@ -110,6 +110,8 @@ class PackageController extends Controller
             $request->validate([
                 'title' => 'required|string',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'description' => 'nullable',
+                'rating' => 'required'
             ]);
 
             // Package find
@@ -118,6 +120,8 @@ class PackageController extends Controller
             // Update title
             $pkg->update([
                 'title' => $request->title,
+                                'description' => $request->description,
+                'rating' => $request->rating,
             ]);
 
             // If new image uploaded
@@ -916,5 +920,21 @@ class PackageController extends Controller
         $trashedCollection = Package::onlyTrashed()->latest();
         $trashed = $trashedCollection->paginate(10);
         return view('backend.packages.trash', compact('trashed'));
+    }
+
+    public function restore($uuid)
+    {
+        $package = Package::onlyTrashed()->where('uuid', $uuid);
+        $package->restore();
+
+        return redirect()->route('backend.packages.trash')->with('success', 'package restored successfully.');
+    }
+
+    public function forceDelete($uuid)
+    {
+        $package = Package::onlyTrashed()->where('uuid', $uuid);
+        $package->forceDelete();
+
+        return redirect()->route('backend.packages.trash')->with('success', 'package permanently deleted.');
     }
 }
