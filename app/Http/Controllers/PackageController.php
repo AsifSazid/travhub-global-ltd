@@ -159,33 +159,33 @@ class PackageController extends Controller
     }
 
     // local
-    private function uploadFile($file, $name)
-    {
-        $folder = storage_path('app/public/images/packages');
-
-        if (!File::exists($folder)) {
-            File::makeDirectory($folder, 0775, true, true);
-        }
-
-        $timestamp = str_replace([' ', ':', '-'], '', now());
-        $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
-        $file->move($folder, $file_name);
-
-        return $file_name;
-    }
-
-    // cPanel
     // private function uploadFile($file, $name)
     // {
-    // $timestamp = str_replace([' ', ':', '-'], '', now());
-    // $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+    //     $folder = storage_path('app/public/images/packages');
 
-    // // Save to 'public' disk defined in filesystems.php
-    // $path = $file->storeAs('images/packages', $file_name, 'public');
+    //     if (!File::exists($folder)) {
+    //         File::makeDirectory($folder, 0775, true, true);
+    //     }
 
-    // return $file_name; // just return file name, path is images/packages/...
+    //     $timestamp = str_replace([' ', ':', '-'], '', now());
+    //     $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+    //     $file->move($folder, $file_name);
 
+    //     return $file_name;
     // }
+
+    // cPanel
+    private function uploadFile($file, $name)
+    {
+    $timestamp = str_replace([' ', ':', '-'], '', now());
+    $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+
+    // Save to 'public' disk defined in filesystems.php
+    $path = $file->storeAs('images/packages', $file_name, 'public');
+
+    return $file_name; // just return file name, path is images/packages/...
+
+    }
 
     public function step($uuid, $step)
     {
