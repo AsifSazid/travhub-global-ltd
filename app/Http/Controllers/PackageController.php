@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage; // <- Make sure this is at the top
 use App\Models\{
     Activity,
     Package,
@@ -157,19 +158,31 @@ class PackageController extends Controller
         }
     }
 
+    // private function uploadFile($file, $name)
+    // {
+    //     $folder = storage_path('app/public/images/packages');
+
+    //     if (!File::exists($folder)) {
+    //         File::makeDirectory($folder, 0775, true, true);
+    //     }
+
+    //     $timestamp = str_replace([' ', ':', '-'], '', now());
+    //     $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+    //     $file->move($folder, $file_name);
+
+    //     return $file_name;
+    // }
+    
     private function uploadFile($file, $name)
     {
-        $folder = storage_path('app/public/images/packages');
-
-        if (!File::exists($folder)) {
-            File::makeDirectory($folder, 0775, true, true);
-        }
-
-        $timestamp = str_replace([' ', ':', '-'], '', now());
-        $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
-        $file->move($folder, $file_name);
-
-        return $file_name;
+    $timestamp = str_replace([' ', ':', '-'], '', now());
+    $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+    
+    // Save to 'public' disk defined in filesystems.php
+    $path = $file->storeAs('images/packages', $file_name, 'public');
+    
+    return $file_name; // just return file name, path is images/packages/...
+    
     }
 
     public function step($uuid, $step)

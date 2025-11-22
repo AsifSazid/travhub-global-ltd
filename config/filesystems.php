@@ -49,7 +49,7 @@ return [
         
         'public' => [
             'driver' => 'local',
-            'root' => base_path('../travhub.sazumme.com/storage'),
+            'root' => storage_path('app/public'),
             'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
         ],
