@@ -22,15 +22,11 @@ return new class extends Migration
             // Foreign key: package
             $table->unsignedBigInteger('package_id')->index();
             $table->foreign('package_id')->references('id')->on('packages')->cascadeOnDelete();
-            $table->unsignedBigInteger('activity_id')->index();
-            $table->foreign('activity_id')->references('id')->on('activities')->cascadeOnDelete();
-            $table->unsignedBigInteger('inclusion_id')->index();
-            $table->foreign('inclusion_id')->references('id')->on('inclusions')->cascadeOnDelete();
 
             // Reference fields
             $table->uuid('package_uuid')->nullable();
             $table->string('package_title', 255)->nullable();
-            
+
             $table->json('inclusions')->nullable();
 
             $table->string('created_by', 255)->nullable();
