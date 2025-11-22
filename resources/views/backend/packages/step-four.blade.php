@@ -22,14 +22,30 @@
             <p class="text-red-500 text-sm">{{ $message }}</p>
         @enderror
     </div>
+    
+    @php
+        $selectedKey = "";
+    
+        // 1. Check if the array exists and is actually an array
+        if (isset($pkgPrice['pack_price']) && is_array($pkgPrice['pack_price'])) {
+            
+            // 2. Get the keys
+            $keys = array_keys($pkgPrice['pack_price']);
+            
+            // 3. Check if the keys array is not empty
+            if (!empty($keys)) {
+                $selectedKey = $keys[0];
+            }
+        }
+    @endphp
 
     <div class="md:col-span-2">
         <label>Price Options</label>
         <select id="formatSelect" class="mt-1 w-full border rounded px-3 py-2">
             <option value="">-- Select Format --</option>
-            <option value="format1" {{array_keys($pkgPrice['pack_price'])[0] == "format1" ? "selected" : ""}}>Format 1 (Twin/Triple/Single)</option>
-            <option value="format2" {{array_keys($pkgPrice['pack_price'])[0] == "format2" ? "selected" : ""}}>Format 2 (Adult/Child/Infant)</option>
-            <option value="format3" {{array_keys($pkgPrice['pack_price'])[0] == "format3" ? "selected" : ""}}>Format 3 (Activities + Hotels)</option>
+            <option value="format1" {{$selectedKey == "format1" ? "selected" : ""}}>Format 1 (Twin/Triple/Single)</option>
+            <option value="format2" {{$selectedKey == "format2" ? "selected" : ""}}>Format 2 (Adult/Child/Infant)</option>
+            <option value="format3" {{$selectedKey == "format3" ? "selected" : ""}}>Format 3 (Activities + Hotels)</option>
         </select>
 
     </div>
