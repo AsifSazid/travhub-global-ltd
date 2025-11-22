@@ -121,7 +121,7 @@ class PackageController extends Controller
             // Update title
             $pkg->update([
                 'title' => $request->title,
-                                'description' => $request->description,
+                'description' => $request->description,
                 'rating' => $request->rating,
             ]);
 
@@ -158,32 +158,34 @@ class PackageController extends Controller
         }
     }
 
-    // private function uploadFile($file, $name)
-    // {
-    //     $folder = storage_path('app/public/images/packages');
-
-    //     if (!File::exists($folder)) {
-    //         File::makeDirectory($folder, 0775, true, true);
-    //     }
-
-    //     $timestamp = str_replace([' ', ':', '-'], '', now());
-    //     $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
-    //     $file->move($folder, $file_name);
-
-    //     return $file_name;
-    // }
-    
+    // local
     private function uploadFile($file, $name)
     {
-    $timestamp = str_replace([' ', ':', '-'], '', now());
-    $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
-    
-    // Save to 'public' disk defined in filesystems.php
-    $path = $file->storeAs('images/packages', $file_name, 'public');
-    
-    return $file_name; // just return file name, path is images/packages/...
-    
+        $folder = storage_path('app/public/images/packages');
+
+        if (!File::exists($folder)) {
+            File::makeDirectory($folder, 0775, true, true);
+        }
+
+        $timestamp = str_replace([' ', ':', '-'], '', now());
+        $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+        $file->move($folder, $file_name);
+
+        return $file_name;
     }
+
+    // cPanel
+    // private function uploadFile($file, $name)
+    // {
+    // $timestamp = str_replace([' ', ':', '-'], '', now());
+    // $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+
+    // // Save to 'public' disk defined in filesystems.php
+    // $path = $file->storeAs('images/packages', $file_name, 'public');
+
+    // return $file_name; // just return file name, path is images/packages/...
+
+    // }
 
     public function step($uuid, $step)
     {
@@ -310,30 +312,66 @@ class PackageController extends Controller
         );
     }
 
+    // public function stepFour($uuid, $step)
+    // {
+    //     $currencies = Currency::where('status', 'active')->get();
+
+    //     $pkgPrice = PackPrice::where('package_uuid', $uuid)->first();
+
+    //     // Decode old price data for Blade
+    //     $formatData = [];
+    //     if (!empty($pkgPrice->pack_price)) {
+    //         $formatData = json_decode($pkgPrice->pack_price, true);
+    //     }
+
+    //     // Accommodation
+    //     $packAccomoDetails = PackAccomoDetail::where('package_uuid', $uuid)->first();
+    //     $hotels = json_decode($packAccomoDetails->hotels) ?? [];
+
+    //     foreach ($hotels as $hotel) {
+    //         $city = City::find($hotel->city_id);
+    //         $hotel->city_title = $city ? $city->title : 'City Not Found';
+    //     }
+
+    //     $title = "Pricing Details";
+    //     $package = $this->getPackageInfo($uuid);
+    //     $completedStep = $package->progress_step ?? 4;
+
+    //     return view('backend.packages.create-multistep', [
+    //         'uuid' => $uuid,
+    //         'step' => $step,
+    //         'pkgPrice' => $pkgPrice,
+    //         'currencies' => $currencies,
+    //         'hotels' => $hotels,
+    //         'title' => $title,
+    //         'completedStep' => $completedStep,
+    //         'formatData' => $formatData, // ✅ pass old values
+    //     ]);
+    // }
+
     public function stepFour($uuid, $step)
     {
         $currencies = Currency::where('status', 'active')->get();
 
         $pkgPrice = PackPrice::where('package_uuid', $uuid)->first();
 
-        // Decode old price data for Blade
-        $formatData = [];
-        if (!empty($pkgPrice->pack_price)) {
-            $formatData = json_decode($pkgPrice->pack_price, true);
-        }
+        // Now $pkgPrice->pack_price is already an array
+        $formatData = $pkgPrice->pack_price ?? [];
 
         // Accommodation
         $packAccomoDetails = PackAccomoDetail::where('package_uuid', $uuid)->first();
         $hotels = json_decode($packAccomoDetails->hotels) ?? [];
 
-        foreach ($hotels as $hotel) {
-            $city = City::find($hotel->city_id);
+        // Add city title
+        foreach ($hotels as &$hotel) {
+            $city = City::find($hotel->city_id ?? null);
             $hotel->city_title = $city ? $city->title : 'City Not Found';
         }
 
         $title = "Pricing Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 4;
+
 
         return view('backend.packages.create-multistep', [
             'uuid' => $uuid,
@@ -343,9 +381,10 @@ class PackageController extends Controller
             'hotels' => $hotels,
             'title' => $title,
             'completedStep' => $completedStep,
-            'formatData' => $formatData, // ✅ pass old values
+            'formatData' => $formatData, // ✅ already array
         ]);
     }
+
 
     public function stepFive($uuid, $step)
     {

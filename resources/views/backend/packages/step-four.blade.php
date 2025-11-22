@@ -27,9 +27,9 @@
         <label>Price Options</label>
         <select id="formatSelect" class="mt-1 w-full border rounded px-3 py-2">
             <option value="">-- Select Format --</option>
-            <option value="format1">Format 1 (Twin/Triple/Single)</option>
-            <option value="format2">Format 2 (Adult/Child/Infant)</option>
-            <option value="format3">Format 3 (Activities + Hotels)</option>
+            <option value="format1" {{array_keys($pkgPrice['pack_price'])[0] == "format1" ? "selected" : ""}}>Format 1 (Twin/Triple/Single)</option>
+            <option value="format2" {{array_keys($pkgPrice['pack_price'])[0] == "format2" ? "selected" : ""}}>Format 2 (Adult/Child/Infant)</option>
+            <option value="format3" {{array_keys($pkgPrice['pack_price'])[0] == "format3" ? "selected" : ""}}>Format 3 (Activities + Hotels)</option>
         </select>
 
     </div>
@@ -291,11 +291,11 @@
 @push('js')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ---------- Quill Editor (unchanged) ----------
             document.querySelectorAll('.quill-editor').forEach(editorDiv => {
                 const targetTextareaId = editorDiv.dataset.targetTextarea;
                 const hiddenTextarea = document.getElementById(targetTextareaId);
 
-                // Initialize Quill
                 const quill = new Quill(editorDiv, {
                     theme: 'snow',
                     modules: {
@@ -316,12 +316,10 @@
                     }
                 });
 
-                // Set initial content from hidden textarea if available
                 if (hiddenTextarea.value) {
                     quill.root.innerHTML = hiddenTextarea.value;
                 }
 
-                // On form submit: copy Quill content to hidden textarea
                 const form = editorDiv.closest('form');
                 if (form) {
                     form.addEventListener('submit', () => {
@@ -329,127 +327,204 @@
                     });
                 }
             });
-        });
 
-        document.addEventListener('DOMContentLoaded', function() {
             // ---------- Elements ----------
             const formatSelect = document.getElementById("formatSelect");
             const format1 = document.getElementById("formatOneTable");
             const format2 = document.getElementById("formatTwoTable");
             const format3 = document.getElementById("formatThreeTable");
             const priceFormatInput = document.getElementById("price_format");
-            const formatDataInput = document.getElementById("format_data"); // ✅ fixed integration
+            const formatDataInput = document.getElementById("format_data");
 
-            // ---------- Helper: Hide all formats ----------
             function hideAll() {
                 [format1, format2, format3].forEach(el => el.classList.add("hidden"));
             }
 
-            // ---------- Helper: Disable all inputs/selects ----------
             function disableAllInputs() {
                 document.querySelectorAll(
                     '#formatOneTable input, #formatTwoTable input, #formatThreeTable input, #formatOneTable select, #formatTwoTable select, #formatThreeTable select'
                 ).forEach(el => el.disabled = true);
             }
 
-            // ---------- Handle Format Switch ----------
-            formatSelect.addEventListener("change", () => {
+            function showFormat(format) {
                 hideAll();
                 disableAllInputs();
-                priceFormatInput.value = formatSelect.value;
+                priceFormatInput.value = format;
 
-                switch (formatSelect.value) {
-                    case "format1":
-                        format1.classList.remove("hidden");
-                        format1.querySelectorAll("input, select").forEach(el => el.disabled = false);
-                        break;
-                    case "format2":
-                        format2.classList.remove("hidden");
-                        format2.querySelectorAll("input, select").forEach(el => el.disabled = false);
-                        break;
-                    case "format3":
-                        format3.classList.remove("hidden");
-                        format3.querySelectorAll("input, select").forEach(el => el.disabled = false);
-                        break;
+                if (format === "format1") {
+                    format1.classList.remove("hidden");
+                    format1.querySelectorAll("input, select").forEach(el => el.disabled = false);
+                } else if (format === "format2") {
+                    format2.classList.remove("hidden");
+                    format2.querySelectorAll("input, select").forEach(el => el.disabled = false);
+                } else if (format === "format3") {
+                    format3.classList.remove("hidden");
+                    format3.querySelectorAll("input, select").forEach(el => el.disabled = false);
                 }
-            });
-
-            document.addEventListener('change', function(e) {
-                if (e.target && e.target.classList.contains('hotel-select')) {
-                    console.log(e.target);
-                    const selectedOption = e.target.options[e.target.selectedIndex];
-                    const cityTitle = selectedOption.getAttribute('data-city') || '';
-                    const row = e.target.closest('tr');
-                    const locationInput = row.querySelector('input[name="hotel_location[]"]');
-                    if (locationInput) locationInput.value = cityTitle;
-                }
-            });
-
-            // ---------- Helper: Clone block ----------
-            function cloneBlock(wrapperId, boxClass, removeBtnClass) {
-                const wrapper = document.getElementById(wrapperId);
-                const original = wrapper.querySelector(`.${boxClass}`);
-                const clone = original.cloneNode(true);
-
-                clone.querySelectorAll("input, select").forEach(el => el.value = "");
-
-                const oldRemove = clone.querySelector(`.${removeBtnClass}`);
-                if (oldRemove) oldRemove.remove();
-
-                const removeBtn = document.createElement("button");
-                removeBtn.type = "button";
-                removeBtn.className = `${removeBtnClass} bg-red-600 text-white px-2 py-1 text-xs rounded mt-2`;
-                removeBtn.innerText = "Remove Option";
-                removeBtn.onclick = () => clone.remove();
-
-                clone.appendChild(removeBtn);
-                wrapper.appendChild(clone);
             }
 
-            // ---------- Format 1 ----------
-            document.getElementById("addFormat1Block").onclick = () => {
-                cloneBlock("formatOneWrapper", "format1-box", "remove-format1-block");
-            };
+            formatSelect.addEventListener("change", () => {
+                showFormat(formatSelect.value);
+            });
 
-            // ---------- Format 2 ----------
-            document.getElementById("addFormat2Block").onclick = () => {
-                cloneBlock("formatTwoWrapper", "format2-box", "remove-format2-block");
-            };
+            // ---------- Prefill formats from formatData ----------
+            const formatData = JSON.parse(formatDataInput.value || '{}');
 
-            // ---------- Format 3: Add Activity ----------
-            document.getElementById("addActivityRow").onclick = () => {
-                const tbody = document.getElementById("activitiesBody");
-                const row = tbody.querySelector(".activity-row");
-                const clone = row.cloneNode(true);
+            if (formatData.format1) {
+                showFormat("format1");
+                const wrapper = document.getElementById("formatOneWrapper");
+                wrapper.innerHTML = "";
+                formatData.format1.forEach(item => {
+                    const box = document.createElement("div");
+                    box.className = "format1-box mb-6 p-4 border rounded-lg bg-gray-50";
+                    box.innerHTML = `
+                <table class="w-full border border-gray-300 text-sm format1-table">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="border p-2 w-1/4">Title</th>
+                            <th colspan="3" class="border p-2">
+                                <input type="text" name="format1_title[]" class="w-full border rounded p-1" value="${item.title || ''}">
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="border p-2">Particulars</th>
+                            <th class="border p-2">Twin/Double</th>
+                            <th class="border p-2">Triple</th>
+                            <th class="border p-2">Single</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border p-2">Land Package</td>
+                            <td class="border p-2"><input type="text" name="land_double[]" value="${item.land_double || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="land_triple[]" value="${item.land_triple || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="land_single[]" value="${item.land_single || ''}" class="w-full border rounded p-1"></td>
+                        </tr>
+                        <tr>
+                            <td class="border p-2">Air Ticket</td>
+                            <td colspan="3" class="border p-2"><input type="text" name="ticket_fare[]" value="${item.ticket_fare || ''}" class="w-full border rounded p-1"></td>
+                        </tr>
+                        <tr>
+                            <td class="border p-2">Visa</td>
+                            <td colspan="3" class="border p-2"><input type="text" name="visa[]" value="${item.visa || ''}" class="w-full border rounded p-1"></td>
+                        </tr>
+                        <tr class="bg-gray-100 font-semibold">
+                            <td class="border p-2">Total</td>
+                            <td class="border p-2"><input type="text" name="total_double[]" value="${item.total_double || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="total_triple[]" value="${item.total_triple || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="total_single[]" value="${item.total_single || ''}" class="w-full border rounded p-1"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+                    wrapper.appendChild(box);
+                });
+            }
 
-                clone.querySelectorAll("input").forEach(i => i.value = "");
-                clone.lastElementChild.innerHTML =
-                    `<button type="button" onclick="this.closest('tr').remove()" class="bg-red-500 text-white px-2 py-1 rounded text-xs">x</button>`;
+            if (formatData.format2) {
+                showFormat("format2");
+                const wrapper = document.getElementById("formatTwoWrapper");
+                wrapper.innerHTML = "";
+                formatData.format2.forEach(item => {
+                    const box = document.createElement("div");
+                    box.className = "format2-box mb-6 p-4 border rounded-lg bg-gray-50";
+                    box.innerHTML = `
+                <table class="w-full border border-gray-300 text-sm format2-table">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="border p-2 w-1/4">Title</th>
+                            <th colspan="4" class="border p-2">
+                                <input type="text" name="format2_title[]" class="w-full border rounded p-1" value="${item.title || ''}">
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="border p-2">Particulars</th>
+                            <th class="border p-2">Adult</th>
+                            <th class="border p-2">Child With Bed</th>
+                            <th class="border p-2">Child No Bed</th>
+                            <th class="border p-2">Infant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border p-2">Land Package</td>
+                            <td class="border p-2"><input type="text" name="f2_adult[]" value="${item.land.adult || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="f2_child_bed[]" value="${item.land.child_bed || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="f2_child_no_bed[]" value="${item.land.child_no_bed || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="f2_infant[]" value="${item.land.infant || ''}" class="w-full border rounded p-1"></td>
+                        </tr>
+                        <tr>
+                            <td class="border p-2">Air Ticket</td>
+                            <td class="border p-2"><input type="text" name="f2_air_adult[]" value="${item.air_ticket.adult || ''}" class="w-full border rounded p-1"></td>
+                            <td colspan="2" class="border p-2"><input type="text" name="f2_air_child[]" value="${item.air_ticket.child || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="f2_air_infant[]" value="${item.air_ticket.infant || ''}" class="w-full border rounded p-1"></td>
+                        </tr>
+                        <tr>
+                            <td class="border p-2">Visa</td>
+                            <td class="border p-2"><input type="text" name="f2_visa_adult[]" value="${item.visa.adult || ''}" class="w-full border rounded p-1"></td>
+                            <td colspan="2" class="border p-2"><input type="text" name="f2_visa_child[]" value="${item.visa.child || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="f2_visa_infant[]" value="${item.visa.infant || ''}" class="w-full border rounded p-1"></td>
+                        </tr>
+                        <tr class="bg-gray-100 font-semibold">
+                            <td class="border p-2">Total</td>
+                            <td class="border p-2"><input type="text" name="f2_total_adult[]" value="${item.total.adult || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="f2_total_child_bed[]" value="${item.total.child_bed || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="f2_total_child_no_bed[]" value="${item.total.child_no_bed || ''}" class="w-full border rounded p-1"></td>
+                            <td class="border p-2"><input type="text" name="f2_total_infant[]" value="${item.total.infant || ''}" class="w-full border rounded p-1"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+                    wrapper.appendChild(box);
+                });
+            }
 
-                tbody.appendChild(clone);
-            };
+            if (formatData.format3) {
+                showFormat("format3");
+                // Prefill Activities
+                const activitiesBody = document.getElementById("activitiesBody");
+                activitiesBody.innerHTML = "";
+                formatData.format3.activities.forEach(act => {
+                    const tr = document.createElement("tr");
+                    tr.className = "activity-row";
+                    tr.innerHTML = `
+                <td class="border p-2"><input name="act_name[]" class="w-full border rounded p-1" value="${act.name || ''}"></td>
+                <td class="border p-2"><input name="act_adult[]" class="w-full border rounded p-1" value="${act.adult || ''}"></td>
+                <td class="border p-2"><input name="act_child[]" class="w-full border rounded p-1" value="${act.child || ''}"></td>
+                <td class="border p-2"><input name="act_infant[]" class="w-full border rounded p-1" value="${act.infant || ''}"></td>
+                <td class="border p-2 text-center"><button type="button" onclick="this.closest('tr').remove()" class="bg-red-500 text-white px-2 py-1 rounded text-xs">x</button></td>
+            `;
+                    activitiesBody.appendChild(tr);
+                });
 
-            // ---------- Format 3: Add Hotel ----------
-            document.getElementById("addHotelRow").onclick = () => {
-                const tbody = document.getElementById("hotelsBody");
-                const row = tbody.querySelector(".hotel-row");
-                const clone = row.cloneNode(true);
+                // Prefill Hotels
+                const hotelsBody = document.getElementById("hotelsBody");
+                hotelsBody.innerHTML = "";
+                formatData.format3.hotels.forEach(hotel => {
+                    const tr = document.createElement("tr");
+                    tr.className = "hotel-row";
+                    tr.innerHTML = `
+                <td class="border p-2"><input name="hotel_location[]" class="w-full border rounded p-1" value="${hotel.location || ''}" readonly></td>
+                <td class="border p-2">
+                    <select name="hotel_name[]" class="hotel-select w-full border rounded p-1">
+                        <option value="${hotel.name || ''}">${hotel.name || '--Select--'}</option>
+                    </select>
+                </td>
+                <td class="border p-2"><input name="hotel_room[]" class="w-full border rounded p-1" value="${hotel.room || ''}"></td>
+                <td class="border p-2"><input name="hotel_price[]" class="w-full border rounded p-1" value="${hotel.price || ''}"></td>
+                <td class="border p-2"><input name="hotel_extra[]" class="w-full border rounded p-1" value="${hotel.extra_bed || ''}"></td>
+                <td class="border p-2 text-center"><button type="button" onclick="this.closest('tr').remove()" class="bg-red-500 text-white px-2 py-1 rounded text-xs">x</button></td>
+            `;
+                    hotelsBody.appendChild(tr);
+                });
+            }
 
-                clone.querySelectorAll("input, select").forEach(e => e.value = "");
-                clone.lastElementChild.innerHTML =
-                    `<button type="button" onclick="this.closest('tr').remove()" class="bg-red-500 text-white px-2 py-1 rounded text-xs">x</button>`;
-
-                tbody.appendChild(clone);
-            };
-
-            // ---------- Collect all price data before form submit ----------
-            // document.querySelector('form').addEventListener('submit', function(e) {
+            // ---------- Collect price data before form submit (unchanged) ----------
             const submitButton = document.querySelector('button[type="submit"]');
             submitButton.addEventListener('click', function(e) {
                 const selectedFormat = formatSelect.value;
                 const data = {};
 
-                // ===== FORMAT 1 =====
                 if (selectedFormat === 'format1') {
                     data.format1 = Array.from(document.querySelectorAll('#formatOneWrapper .format1-box'))
                         .map(box => ({
@@ -465,7 +540,6 @@
                         }));
                 }
 
-                // ===== FORMAT 2 =====
                 if (selectedFormat === 'format2') {
                     data.format2 = Array.from(document.querySelectorAll('#formatTwoWrapper .format2-box'))
                         .map(box => ({
@@ -498,7 +572,6 @@
                         }));
                 }
 
-                // ===== FORMAT 3 =====
                 if (selectedFormat === 'format3') {
                     data.format3 = {
                         activities: Array.from(document.querySelectorAll(
@@ -521,9 +594,7 @@
                     };
                 }
 
-                // ✅ Convert and assign
                 formatDataInput.value = JSON.stringify(data);
-                // console.log("Submitting Data:", formatDataInput.value);
             });
         });
     </script>

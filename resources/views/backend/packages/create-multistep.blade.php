@@ -7,7 +7,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
             <h2 class="text-2xl font-semibold">
-                {{ __('Package Details: ') }} {{ $stepTitles[$step - 1] ?? '' }}{{__(' Section')}}
+                {{ __('Package Details: ') }} {{ $stepTitles[$step - 1] ?? '' }}{{ __(' Section') }}
             </h2>
         </div>
     </x-slot>
@@ -111,7 +111,7 @@
 
             {{-- Navigation --}}
             <div class="mt-6 flex justify-between">
-                @if ($step == 7)
+                @if ($step == 7 && $package->status === 'incomplete')
                     <label class="flex items-center space-x-2">
                         <input type="checkbox" id="confirm" class="form-checkbox h-5 w-5 text-primary" />
                         <span class="text-gray-700 text-sm">I confirm everything is correct</span>
@@ -123,9 +123,18 @@
                 @endif
 
                 <button type="submit" id="submitBtn"
-                    class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md border border-gray-300 dark:bg-white dark:border-gray-200 focus:outline-none focus:ring focus:ring-primary-dark focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark {{ $step == 7 ? 'bg-gray-600 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark' }}"
-                    {{ $step == 7 ? 'disabled' : '' }}>
-                    {{ $step < 7 ? 'Save & Next' : 'Finish' }}
+                    class="flex items-center justify-center px-4 py-2 text-sm text-white rounded-md border border-gray-300 dark:bg-white dark:border-gray-200 focus:outline-none focus:ring focus:ring-primary-dark focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark {{ $step == 7 && $package->status === 'incomplete' ? 'bg-gray-600 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark' }}"
+                    {{ $step == 7 && $package->status === 'incomplete' ? 'disabled' : '' }}>
+
+                    {{-- NEW LOGIC HERE --}}
+                    @if ($step < 7)
+                        Save & Next
+                    @elseif ($step == 7 && $package->status === 'incomplete')
+                        Finish
+                    @else
+                        Update
+                    @endif
+
                 </button>
             </div>
         </form>
@@ -152,4 +161,3 @@
         </script>
     @endpush
 </x-backend.layouts.master>
-
