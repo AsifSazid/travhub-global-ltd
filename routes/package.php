@@ -6,9 +6,7 @@ use App\Http\Controllers\PackageController;
 use Illuminate\Support\Facades\Route;
 
 // FRONTEND
-Route::get('/package-details', function () {
-    return view('frontend.package-details');
-})->name('package.details');
+Route::get('/package-details/{uuid}', [PackageController::class, 'fnPackageDetails'])->name('package.details');
 Route::get('/packages', [HomeController::class, 'packages'])->name('fn.packages');
 
 //BACKEND

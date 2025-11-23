@@ -39,22 +39,22 @@ return [
         ],
 
         // Local
-        // 'public' => [
-        //     'driver' => 'local',
-        //     'root' => storage_path('app/public'),
-        //     'url' => env('APP_URL').'/storage',
-        //     'visibility' => 'public',
-        //     'throw' => false,
-        //     'report' => false,
-        // ],
-
-        // cPanel
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL') . '/storage',
+            'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
         ],
+
+        // cPanel
+        // 'public' => [
+        //     'driver' => 'local',
+        //     'root' => storage_path('app/public'),
+        //     'url' => env('APP_URL') . '/storage',
+        //     'visibility' => 'public',
+        // ],
 
         's3' => [
             'driver' => 's3',
@@ -83,13 +83,13 @@ return [
     */
 
     //For Local
-    // 'links' => [
-    //     public_path('storage') => storage_path('app/public'),
-    // ],
+    'links' => [
+        public_path('storage') => storage_path('app/public'),
+    ],
 
     // For cPanel
-    'links' => [
-        base_path('../travhub.sazumme.com/storage') => storage_path('app/public'),
-    ],
+    // 'links' => [
+    //     base_path('../travhub.sazumme.com/storage') => storage_path('app/public'),
+    // ],
 
 ];

@@ -42,7 +42,7 @@
                 <img id="image-preview" src="{{ asset('storage/images/packages') . '/' . $imageUrl }}"
                     alt="Image Preview {{ $imageUrl }}" class="rounded-md shadow-md" width="360">
 
-                {{-- @include('backend.packages.pkg-details') --}}
+                @include('backend.packages.pkg-details')
 
                 @if ($package->status === 'active' && $package->completion_status === 'completed')
                     <p class="text-red-500">This package is ACTIVE and COMPLETED.</p>

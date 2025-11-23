@@ -159,33 +159,33 @@ class PackageController extends Controller
     }
 
     // local
-    // private function uploadFile($file, $name)
-    // {
-    //     $folder = storage_path('app/public/images/packages');
-
-    //     if (!File::exists($folder)) {
-    //         File::makeDirectory($folder, 0775, true, true);
-    //     }
-
-    //     $timestamp = str_replace([' ', ':', '-'], '', now());
-    //     $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
-    //     $file->move($folder, $file_name);
-
-    //     return $file_name;
-    // }
-
-    // cPanel
     private function uploadFile($file, $name)
     {
-    $timestamp = str_replace([' ', ':', '-'], '', now());
-    $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+        $folder = storage_path('app/public/images/packages');
 
-    // Save to 'public' disk defined in filesystems.php
-    $path = $file->storeAs('images/packages', $file_name, 'public');
+        if (!File::exists($folder)) {
+            File::makeDirectory($folder, 0775, true, true);
+        }
 
-    return $file_name; // just return file name, path is images/packages/...
+        $timestamp = str_replace([' ', ':', '-'], '', now());
+        $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+        $file->move($folder, $file_name);
 
+        return $file_name;
     }
+
+    // cPanel
+    // private function uploadFile($file, $name)
+    // {
+    // $timestamp = str_replace([' ', ':', '-'], '', now());
+    // $file_name = $timestamp . '_' . $name . '.' . $file->getClientOriginalExtension();
+
+    // // Save to 'public' disk defined in filesystems.php
+    // $path = $file->storeAs('images/packages', $file_name, 'public');
+
+    // return $file_name; // just return file name, path is images/packages/...
+
+    // }
 
     public function step($uuid, $step)
     {
@@ -312,43 +312,6 @@ class PackageController extends Controller
         );
     }
 
-    // public function stepFour($uuid, $step)
-    // {
-    //     $currencies = Currency::where('status', 'active')->get();
-
-    //     $pkgPrice = PackPrice::where('package_uuid', $uuid)->first();
-
-    //     // Decode old price data for Blade
-    //     $formatData = [];
-    //     if (!empty($pkgPrice->pack_price)) {
-    //         $formatData = json_decode($pkgPrice->pack_price, true);
-    //     }
-
-    //     // Accommodation
-    //     $packAccomoDetails = PackAccomoDetail::where('package_uuid', $uuid)->first();
-    //     $hotels = json_decode($packAccomoDetails->hotels) ?? [];
-
-    //     foreach ($hotels as $hotel) {
-    //         $city = City::find($hotel->city_id);
-    //         $hotel->city_title = $city ? $city->title : 'City Not Found';
-    //     }
-
-    //     $title = "Pricing Details";
-    //     $package = $this->getPackageInfo($uuid);
-    //     $completedStep = $package->progress_step ?? 4;
-
-    //     return view('backend.packages.create-multistep', [
-    //         'uuid' => $uuid,
-    //         'step' => $step,
-    //         'pkgPrice' => $pkgPrice,
-    //         'currencies' => $currencies,
-    //         'hotels' => $hotels,
-    //         'title' => $title,
-    //         'completedStep' => $completedStep,
-    //         'formatData' => $formatData, // ✅ pass old values
-    //     ]);
-    // }
-
     public function stepFour($uuid, $step)
     {
         $currencies = Currency::where('status', 'active')->get();
@@ -384,7 +347,6 @@ class PackageController extends Controller
             'formatData' => $formatData, // ✅ already array
         ]);
     }
-
 
     public function stepFive($uuid, $step)
     {
@@ -988,5 +950,28 @@ class PackageController extends Controller
         $package->forceDelete();
 
         return redirect()->route('backend.packages.trash')->with('success', 'package permanently deleted.');
+    }
+
+    public function fnPackageDetails($uuid)
+    {
+        $pkg = Package::where('uuid', $uuid)->firstOrFail();
+
+        $pkgDesInfo = PackDestinationInfo::where('package_uuid', $uuid)->first();
+        $pkgQuatDetail = PackQuatDetail::where('package_uuid', $uuid)->first();
+        $pkgAccomoDetail = PackAccomoDetail::where('package_uuid', $uuid)->first();
+        $pkgPrice = PackPrice::where('package_uuid', $uuid)->first();
+        $pkgItenaries = PackItenaries::where('package_uuid', $uuid)->get();
+        $pkgInclusions =  PackInclusion::where('package_uuid', $uuid)->first();
+
+        return view('frontend.package-details', [
+            'package' => $pkg,
+            'packDestinationInfo' => $pkgDesInfo ?? 'No Data Found',
+            'packQuatDetail' => $pkgQuatDetail ?? 'No Data Found',
+            'packAccomoDetail' => $pkgAccomoDetail ?? 'No Data Found',
+            'packPrice' => $pkgPrice ?? 'No Data Found',
+            'packItenaries' => $pkgItenaries ?? [],
+            'packInclusion' => $pkgInclusions ?? 'No Data Found',
+            'uuid' => $uuid
+        ]);
     }
 }

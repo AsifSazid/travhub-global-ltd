@@ -1,23 +1,19 @@
-@php
-    use App\Models\City;
-    use App\Models\Country;
-    $imageUrl = $package->images->first()?->url ?? 'default_image_url.jpg';
-@endphp
 <x-frontend.layouts.master>
+
     <!-- Package Hero Section -->
     <section class="package-hero-section">
         <div class="package-hero-image"
-            style="background-image: url('{{ asset('storage/images/packages') . '/' . $imageUrl }}');">
+            style="background-image: url('https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
             <div class="container">
                 <div class="package-hero-content">
                     <div class="breadcrumb">
-                        <a href="{{ route('home') }}">Home</a> / <a href="{{ route('fn.packages') }}">Packages</a> /
-                        <span>{{ $packDestinationInfo->country->title }} Honeymoon</span>
+                        <a href="index.html">Home</a> / <a href="packages.html">Packages</a> / <span>Thailand
+                            Honeymoon</span>
                     </div>
-                    <h1>{{ $package->title }}</h1>
+                    <h1>5 Nights 6 Days Bangkok & Phuket Honeymoon Tour</h1>
                     <div class="package-location">
                         <i class="fas fa-map-marker-alt"></i>
-                        <span>{{ $packDestinationInfo->country->title }}</span>
+                        <span>Thailand</span>
                     </div>
                     <div class="package-rating">
                         <div class="stars">
@@ -27,7 +23,7 @@
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star-half-alt"></i>
                         </div>
-                        <span>{{ $package->rating }}</span>
+                        <span>4.8 (128 Reviews)</span>
                     </div>
                 </div>
             </div>
@@ -52,7 +48,9 @@
                     <!-- Tab Contents -->
                     <div class="tab-content active" id="overview">
                         <h2>About This Tour</h2>
-                        <p>{!! $package->description ?? ' ' !!}</p>
+                        <p>This 5 nights 6 days Thailand honeymoon package offers the perfect blend of vibrant city
+                            life and tropical paradise. Experience the bustling streets of Bangkok and the serene
+                            beaches of Phuket on this romantic journey designed for newlyweds.</p>
 
                         <h2>Tour Highlights</h2>
                         <div class="highlights">
@@ -100,20 +98,14 @@
                                 <i class="fas fa-clock"></i>
                                 <div>
                                     <h4>Duration</h4>
-                                    <p>{{ $packQuatDetail->duration - 1 }} Nights / {{ $packQuatDetail->duration }}
-                                        Days
-                                    </p>
+                                    <p>5 Nights / 6 Days</p>
                                 </div>
                             </div>
-                            @php
-                                $pax = json_decode(json_decode($packQuatDetail->no_of_pax), true);
-                                $adult = collect($pax)->firstWhere('type', 'adult')['count'] ?? 0;
-                            @endphp
                             <div class="fact-item">
                                 <i class="fas fa-users"></i>
                                 <div>
                                     <h4>Group Size</h4>
-                                    <p>Adult: {{ $adult }} People (Customizable)</p>
+                                    <p>2 People (Customizable)</p>
                                 </div>
                             </div>
                             <div class="fact-item">
@@ -154,152 +146,105 @@
                     </div>
 
                     <div class="tab-content" id="itinerary">
-                        <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
-                            <div class="flex justify-between items-center mb-6">
-                                <h2 class="text-xl font-semibold">Itineraries</h2>
+                        <h2>Detailed Itinerary</h2>
+                        <div class="itinerary-day">
+                            <h3>Day 1: Arrival in Bangkok</h3>
+                            <p>Arrive at Bangkok airport, meet our representative and transfer to your hotel.
+                                Check-in and relax. In the evening, enjoy a romantic dinner cruise along the Chao
+                                Phraya River with stunning views of Bangkok's illuminated temples and skyline.</p>
+                            <div class="itinerary-highlights">
+                                <span><i class="fas fa-utensils"></i> Dinner Included</span>
+                                <span><i class="fas fa-hotel"></i> Overnight in Bangkok</span>
                             </div>
-
-                            @foreach ($packItenaries as $dayIndex => $itenary)
-                                @php
-                                    $dayNumber = $dayIndex + 1;
-
-                                    // Activities decode
-                                    $acts = [];
-                                    if (!empty($itenary['activities'])) {
-                                        $acts = json_decode($itenary['activities'], true);
-                                        if (is_string($acts)) {
-                                            $acts = json_decode($acts, true);
-                                        }
-                                    }
-
-                                    // Meal
-                                    $meal = !empty($itenary['meals']) ? ucfirst($itenary['meals']) : null;
-                                @endphp
-
-                                <div class="itinerary-day mb-10 border-b border-gray-200 pb-8">
-
-                                    {{-- Day title --}}
-                                    <h3 class="text-lg font-semibold mb-3">
-                                        Day {{ $dayNumber }}: {{ $itenary['title'] ?? 'Untitled' }}
-                                    </h3>
-
-                                    {{-- Main description --}}
-                                    @if (!empty($itenary['description']))
-                                        <p class="text-gray-700 leading-relaxed mb-4">
-                                            {!! $itenary['description'] !!}
-                                        </p>
-                                    @endif
-
-                                    {{-- Activities --}}
-                                    @if (!empty($acts))
-                                        <div class="space-y-4">
-
-                                            @foreach ($acts as $a)
-                                                <div class="ml-1">
-
-                                                    <p class="font-semibold text-gray-800">
-                                                        {{ $a['title'] ?? '' }}
-                                                        @if (!empty($a['time']))
-                                                            <span class="text-gray-600">({{ $a['time'] }})</span>
-                                                        @endif
-                                                    </p>
-
-                                                    @if (!empty($a['description']))
-                                                        <p class="text-sm text-gray-600 mt-1 ml-4">
-                                                            {!! $a['description'] !!}
-                                                        </p>
-                                                    @endif
-
-                                                    {{-- Activity data --}}
-                                                    @if (!empty($a['data']))
-                                                        <div class="ml-4 mt-2 space-y-1 text-sm text-gray-700">
-                                                            @foreach ($a['data'] as $key => $aData)
-                                                                @if ($key == 'city_id')
-                                                                    @php
-                                                                        $cityModel = City::find($aData);
-                                                                        $aData = $cityModel?->title ?? '-';
-                                                                        $key = 'City';
-                                                                    @endphp
-                                                                @elseif ($key == 'country_id')
-                                                                    @php
-                                                                        $countryModel = Country::find($aData);
-                                                                        $aData = $countryModel?->title ?? '-';
-                                                                        $key = 'Country';
-                                                                    @endphp
-                                                                @endif
-
-                                                                <div>
-                                                                    <strong>{{ ucfirst($key) }}:</strong>
-                                                                    {{ $aData }}
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
-                                                    @endif
-
-                                                </div>
-                                            @endforeach
-
-                                        </div>
-                                    @endif
-
-                                    {{-- Meal section --}}
-                                    @if ($meal)
-                                        <div
-                                            class="itinerary-highlights mt-5 flex flex-wrap gap-6 text-sm text-gray-800">
-                                            <span><i class="fas fa-utensils"></i> {{ $meal }} Included</span>
-                                            <span><i class="fas fa-hotel"></i> Overnight Stay</span>
-                                        </div>
-                                    @endif
-
-                                </div>
-                            @endforeach
+                        </div>
+                        <div class="itinerary-day">
+                            <h3>Day 2: Bangkok City Tour</h3>
+                            <p>After breakfast, visit the Grand Palace and Wat Phra Kaew (Temple of the Emerald
+                                Buddha). Continue to Wat Arun (Temple of Dawn) and enjoy a traditional Thai lunch.
+                                In the evening, explore the vibrant Khao San Road or enjoy a couple's spa treatment.
+                            </p>
+                            <div class="itinerary-highlights">
+                                <span><i class="fas fa-utensils"></i> Breakfast & Lunch Included</span>
+                                <span><i class="fas fa-hotel"></i> Overnight in Bangkok</span>
+                            </div>
+                        </div>
+                        <div class="itinerary-day">
+                            <h3>Day 3: Flight to Phuket</h3>
+                            <p>After breakfast, transfer to the airport for your flight to Phuket. Upon arrival,
+                                check into your beachfront resort. Spend the rest of the day relaxing on the beach
+                                or by the pool. Enjoy a romantic seaside dinner in the evening.</p>
+                            <div class="itinerary-highlights">
+                                <span><i class="fas fa-utensils"></i> Breakfast & Dinner Included</span>
+                                <span><i class="fas fa-hotel"></i> Overnight in Phuket</span>
+                            </div>
+                        </div>
+                        <div class="itinerary-day">
+                            <h3>Day 4: Phi Phi Island Tour</h3>
+                            <p>Embark on a full-day speedboat tour to the stunning Phi Phi Islands. Visit Maya Bay
+                                (featured in the movie "The Beach"), go snorkeling in crystal-clear waters, and
+                                enjoy a beachside lunch. Return to Phuket in the evening.</p>
+                            <div class="itinerary-highlights">
+                                <span><i class="fas fa-utensils"></i> Breakfast & Lunch Included</span>
+                                <span><i class="fas fa-hotel"></i> Overnight in Phuket</span>
+                            </div>
+                        </div>
+                        <div class="itinerary-day">
+                            <h3>Day 5: James Bond Island & Phang Nga Bay</h3>
+                            <p>Take a canoe tour through the limestone caves and mangroves of Phang Nga Bay. Visit
+                                James Bond Island, famous for its appearance in "The Man with the Golden Gun." Enjoy
+                                a sunset view from Promthep Cape in the evening.</p>
+                            <div class="itinerary-highlights">
+                                <span><i class="fas fa-utensils"></i> Breakfast & Lunch Included</span>
+                                <span><i class="fas fa-hotel"></i> Overnight in Phuket</span>
+                            </div>
+                        </div>
+                        <div class="itinerary-day">
+                            <h3>Day 6: Departure</h3>
+                            <p>After breakfast, check out from your hotel. Depending on your flight schedule, you
+                                may have time for some last-minute shopping or beach time. Transfer to Phuket
+                                International Airport for your departure flight.</p>
+                            <div class="itinerary-highlights">
+                                <span><i class="fas fa-utensils"></i> Breakfast Included</span>
+                            </div>
                         </div>
                     </div>
-
 
                     <div class="tab-content" id="inclusions">
                         <div class="inclusions-exclusions">
                             <div class="inclusions">
                                 <h2>Inclusions</h2>
-                                @php
-                                    $inclusions = [];
-
-                                    if ($packInclusion && !empty($packInclusion->inclusions)) {
-                                        $inclusions = json_decode($packInclusion->inclusions, true);
-
-                                        // Handle double-encoded JSON
-                                        if (is_string($inclusions)) {
-                                            $inclusions = json_decode($inclusions, true);
-                                        }
-
-                                        if (!is_array($inclusions)) {
-                                            $inclusions = [];
-                                        }
-                                    }
-                                @endphp
-
-                                @if (!empty($inclusions))
-                                    @foreach ($inclusions as $category)
-                                        @if (isset($category['sub_title']) && is_array($category['sub_title']))
-                                            @foreach ($category['sub_title'] as $sub)
-                                                @if (isset($sub['selected']) && $sub['selected'] == '1')
-                                                    <div class="inclusion-item">
-                                                        <i class="fas fa-check"></i>
-                                                        <span>
-                                                            {{ $sub['text'] ?? 'No text' }}
-                                                            @if (isset($sub['type']) && $sub['type'] === 'custom')
-                                                                <span class="text-sm text-green-600">(Custom)</span>
-                                                            @endif
-                                                        </span>
-                                                    </div>
-                                                @endif
-                                            @endforeach
-                                        @endif
-                                    @endforeach
-                                @else
-                                    <p class="text-gray-500">No inclusions found.</p>
-                                @endif
-
+                                <div class="inclusion-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Accommodation in 4-star hotels</span>
+                                </div>
+                                <div class="inclusion-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Daily breakfast at the hotel</span>
+                                </div>
+                                <div class="inclusion-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>All airport and inter-city transfers</span>
+                                </div>
+                                <div class="inclusion-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Sightseeing tours as per itinerary</span>
+                                </div>
+                                <div class="inclusion-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>English speaking guide</span>
+                                </div>
+                                <div class="inclusion-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Entrance fees to monuments</span>
+                                </div>
+                                <div class="inclusion-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Bangkok to Phuket flight</span>
+                                </div>
+                                <div class="inclusion-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>All taxes and service charges</span>
+                                </div>
                             </div>
                             <div class="exclusions">
                                 <h2>Exclusions</h2>
@@ -478,42 +423,22 @@
                 <div class="booking-sidebar">
                     <div class="booking-card">
                         <div class="booking-price">
-                            <div class="price">{{ $packPrice->currency->currency_code }}
-                                {{ $packPrice->overall_price }}</div>
+                            <div class="price">BDT 44,999</div>
                             <div class="per-person">per person</div>
                         </div>
                         <div class="booking-details">
                             <div class="detail-item">
                                 <i class="fas fa-clock"></i>
-                                <span>{{ $packQuatDetail->duration - 1 }} Nights / {{ $packQuatDetail->duration }}
-                                    Days</span>
+                                <span>5 Nights / 6 Days</span>
                             </div>
                             <div class="detail-item">
                                 <i class="fas fa-users"></i>
-                                <span>{{ $adult }} Travelers</span>
+                                <span>2 Travelers</span>
                             </div>
-                            @php
-                                $cities = json_decode($packDestinationInfo['cities'], true);
-                                if (is_string($cities)) {
-                                    $cities = json_decode($cities, true);
-                                }
-                            @endphp
-
                             <div class="detail-item">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <span>
-                                    @foreach ($cities as $index => $city)
-                                        {{ $city['title'] }}
-
-                                        @if ($index < count($cities) - 2)
-                                            ,
-                                        @elseif ($index == count($cities) - 2)
-                                            &
-                                        @endif
-                                    @endforeach
-                                </span>
+                                <span>Bangkok & Phuket</span>
                             </div>
-
                         </div>
                         <form class="booking-form">
                             <div class="form-group">
@@ -654,7 +579,7 @@
                     e.preventDefault();
                     alert(
                         'Thank you for your booking! Our travel consultant will contact you shortly to confirm your reservation.'
-                    );
+                        );
                 });
 
                 // Newsletter form submission
@@ -663,7 +588,7 @@
                     const email = this.querySelector('input[type="email"]').value;
                     alert(
                         `Thank you for subscribing with ${email}! You'll receive our latest travel updates soon.`
-                    );
+                        );
                     this.reset();
                 });
 

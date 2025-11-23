@@ -115,7 +115,7 @@
                             </div>
                             <p>{{ $package->description ?? 'the perfect blend of vibrant city life and tropical paradise on this romantic
                                 Thailand honeymoon.'}}</p>
-                            <a href="#" class="package-btn view-details">View Details</a>
+                            <a href="{{route('package.details', ['uuid' => $package->uuid])}}" class="package-btn">View Details</a>
                         </div>
                     </div>
                 @empty
