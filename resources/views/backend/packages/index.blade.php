@@ -80,7 +80,7 @@
 
                     packages.forEach((package, index) => {
                     console.log(package);
-                        const stepToGo = package.status ? package.status + 1 : 1
+                        const stepToGo = package.progress_step ? package.progress_step + 1 : 1;
                         const row = `
                                 <tr>
                                     <td class="px-6 py-4">${index + 1}</td>
