@@ -91,7 +91,7 @@
                                         <div class="flex justify-center">
                                             <a href="/admin/packages/${package.uuid}/show" class="px-1 text-blue-500 hover:text-blue-700" title="View"><i class="fas fa-eye"></i></a>
                                                 ${(package.status === 'inactive' && package.completion_status === 'incomplete')
-                                                    ? `<a href="/admin/packages/${package.uuid}/step/${package.progress_step ? package.progress_step + 1 : 1}" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
+                                                    ? `<a href="/admin/packages/${package.uuid}/step/${package.progress_step ? (package.progress_step + 1) : 1}" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>`
                                                     : `<a href="/admin/packages/${package.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
