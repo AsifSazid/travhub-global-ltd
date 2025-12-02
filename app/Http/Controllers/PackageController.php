@@ -454,7 +454,7 @@ class PackageController extends Controller
     {
         $inclusions = [
             [
-                'title' => 'Airport Transfers',
+                'title' => 'Transfers',
                 'icons' => 'fa-solid fa-plane-arrival',
                 'sub_title' => ['1' => 'Airport transfers on arrival and departure', '2' => 'All inter-city transfers'],
             ],

@@ -127,7 +127,7 @@
                 if (startDate && duration > 0) {
                     const start = new Date(startDate);
                     const end = new Date(start);
-                    end.setDate(start.getDate() + duration);
+                    end.setDate(start.getDate() + (duration - 1));
                     endDateInput.value = end.toISOString().split('T')[0];
                 } else {
                     endDateInput.value = '';

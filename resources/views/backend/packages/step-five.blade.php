@@ -4,10 +4,6 @@
     <header class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-semibold text-gray-800"></h1>
         <div class="flex items-center gap-3">
-            <button id="add-day-btn" type="button"
-                class="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700">
-                + Add Day
-            </button>
             <button id="export-json-btn" type="button"
                 class="px-4 py-2 text-white rounded bg-green-500 hover:scale-110 hover:brightness-110">
                 <i class="fa-solid fa-download"></i>
@@ -17,6 +13,13 @@
     </header>
 
     <div id="days-container" class="space-y-6"></div>
+
+    <div class="flex items-center justify-end gap-3">
+        <button id="add-day-btn" type="button"
+            class="px-4 py-2 mt-4 bg-blue-600 text-white rounded shadow hover:bg-blue-700">
+            + Add Day
+        </button>
+    </div>
 
     <div class="mt-8">
         <h2 class="text-lg font-medium text-gray-700 mb-2">JSON Preview</h2>

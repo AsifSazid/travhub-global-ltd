@@ -22,16 +22,16 @@
             <p class="text-red-500 text-sm">{{ $message }}</p>
         @enderror
     </div>
-    
+
     @php
         $selectedKey = "";
-    
+
         // 1. Check if the array exists and is actually an array
         if (isset($pkgPrice['pack_price']) && is_array($pkgPrice['pack_price'])) {
-            
+
             // 2. Get the keys
             $keys = array_keys($pkgPrice['pack_price']);
-            
+
             // 3. Check if the keys array is not empty
             if (!empty($keys)) {
                 $selectedKey = $keys[0];
@@ -611,6 +611,153 @@
                 }
 
                 formatDataInput.value = JSON.stringify(data);
+            });
+
+            // ---------- Format 1 ----------
+            const addFormat1Btn = document.getElementById('addFormat1Block');
+            const format1Wrapper = document.getElementById('formatOneWrapper');
+
+            function createFormat1Block(data = {}) {
+                const box = document.createElement('div');
+                box.className = "format1-box mb-6 p-4 border rounded-lg bg-gray-50 relative";
+
+                box.innerHTML = `
+                    <button type="button" class="remove-block absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">x</button>
+                    <table class="w-full border border-gray-300 text-sm format1-table">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border p-2 w-1/4">Title</th>
+                                <th colspan="3" class="border p-2">
+                                    <input type="text" name="format1_title[]" class="w-full border rounded p-1" value="${data.title || ''}">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th class="border p-2">Particulars</th>
+                                <th class="border p-2">Twin/Double</th>
+                                <th class="border p-2">Triple</th>
+                                <th class="border p-2">Single</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border p-2">Land Package</td>
+                                <td class="border p-2"><input type="text" name="land_double[]" value="${data.land_double || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="land_triple[]" value="${data.land_triple || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="land_single[]" value="${data.land_single || ''}" class="w-full border rounded p-1"></td>
+                            </tr>
+                            <tr>
+                                <td class="border p-2">Air Ticket</td>
+                                <td colspan="3" class="border p-2"><input type="text" name="ticket_fare[]" value="${data.ticket_fare || ''}" class="w-full border rounded p-1"></td>
+                            </tr>
+                            <tr>
+                                <td class="border p-2">Visa</td>
+                                <td colspan="3" class="border p-2"><input type="text" name="visa[]" value="${data.visa || ''}" class="w-full border rounded p-1"></td>
+                            </tr>
+                            <tr class="bg-gray-100 font-semibold">
+                                <td class="border p-2">Total</td>
+                                <td class="border p-2"><input type="text" name="total_double[]" value="${data.total_double || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="total_triple[]" value="${data.total_triple || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="total_single[]" value="${data.total_single || ''}" class="w-full border rounded p-1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+
+                // Remove button
+                box.querySelector('.remove-block').addEventListener('click', () => box.remove());
+
+                return box;
+            }
+
+            addFormat1Btn.addEventListener('click', () => {
+                format1Wrapper.appendChild(createFormat1Block());
+            });
+
+            // ---------- Format 2 ----------
+            const addFormat2Btn = document.getElementById('addFormat2Block');
+            const format2Wrapper = document.getElementById('formatTwoWrapper');
+
+            function createFormat2Block(data = {}) {
+                const box = document.createElement('div');
+                box.className = "format2-box mb-6 p-4 border rounded-lg bg-gray-50 relative";
+
+                box.innerHTML = `
+                    <button type="button" class="remove-block absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">x</button>
+                    <table class="w-full border border-gray-300 text-sm format2-table">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border p-2 w-1/4">Title</th>
+                                <th colspan="4" class="border p-2">
+                                    <input type="text" name="format2_title[]" class="w-full border rounded p-1" value="${data.title || ''}">
+                                </th>
+                            </tr>
+                            <tr>
+                                <th class="border p-2">Particulars</th>
+                                <th class="border p-2">Adult</th>
+                                <th class="border p-2">Child With Bed</th>
+                                <th class="border p-2">Child No Bed</th>
+                                <th class="border p-2">Infant</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border p-2">Land Package</td>
+                                <td class="border p-2"><input type="text" name="f2_adult[]" value="${data.land?.adult || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="f2_child_bed[]" value="${data.land?.child_bed || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="f2_child_no_bed[]" value="${data.land?.child_no_bed || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="f2_infant[]" value="${data.land?.infant || ''}" class="w-full border rounded p-1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+
+                box.querySelector('.remove-block').addEventListener('click', () => box.remove());
+                return box;
+            }
+
+            addFormat2Btn.addEventListener('click', () => {
+                format2Wrapper.appendChild(createFormat2Block());
+            });
+
+            // ---------- Activities ----------
+            const addActivityBtn = document.getElementById('addActivityRow');
+            const activitiesBody = document.getElementById('activitiesBody');
+
+            addActivityBtn.addEventListener('click', () => {
+                const tr = document.createElement('tr');
+                tr.className = 'activity-row';
+                tr.innerHTML = `
+                    <td class="border p-2"><input name="act_name[]" class="w-full border rounded p-1"></td>
+                    <td class="border p-2"><input name="act_adult[]" class="w-full border rounded p-1"></td>
+                    <td class="border p-2"><input name="act_child[]" class="w-full border rounded p-1"></td>
+                    <td class="border p-2"><input name="act_infant[]" class="w-full border rounded p-1"></td>
+                    <td class="border p-2 text-center"><button type="button" class="remove-row bg-red-500 text-white px-2 py-1 rounded text-xs">x</button></td>
+                `;
+                tr.querySelector('.remove-row').addEventListener('click', () => tr.remove());
+                activitiesBody.appendChild(tr);
+            });
+
+            // ---------- Hotels ----------
+            const addHotelBtn = document.getElementById('addHotelRow');
+            const hotelsBody = document.getElementById('hotelsBody');
+
+            addHotelBtn.addEventListener('click', () => {
+                const tr = document.createElement('tr');
+                tr.className = 'hotel-row';
+                tr.innerHTML = `
+                    <td class="border p-2"><input name="hotel_location[]" class="w-full border rounded p-1" readonly></td>
+                    <td class="border p-2">
+                        <select name="hotel_name[]" class="hotel-select w-full border rounded p-1">
+                            <option value="">--Select--</option>
+                        </select>
+                    </td>
+                    <td class="border p-2"><input name="hotel_room[]" class="w-full border rounded p-1"></td>
+                    <td class="border p-2"><input name="hotel_price[]" class="w-full border rounded p-1"></td>
+                    <td class="border p-2"><input name="hotel_extra[]" class="w-full border rounded p-1"></td>
+                    <td class="border p-2 text-center"><button type="button" class="remove-row bg-red-500 text-white px-2 py-1 rounded text-xs">x</button></td>
+                `;
+                tr.querySelector('.remove-row').addEventListener('click', () => tr.remove());
+                hotelsBody.appendChild(tr);
             });
         });
     </script>
