@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 // FRONTEND
 Route::get('/package-details/{uuid}', [PackageController::class, 'fnPackageDetails'])->name('package.details');
+Route::get('/admin/package-download/{uuid}', [PackageController::class, 'packPdf'])->name('package.download');
 Route::get('/packages', [HomeController::class, 'packages'])->name('fn.packages');
 
 //BACKEND

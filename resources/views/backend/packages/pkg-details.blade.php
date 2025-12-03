@@ -105,10 +105,6 @@
                 $prices = json_decode($prices, true);
             }
 
-            function safe($val)
-            {
-                return !empty($val) ? $val : ' - ';
-            }
         @endphp
 
         {{-- ---------- FORMAT 1 ---------- --}}
