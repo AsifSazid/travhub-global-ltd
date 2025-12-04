@@ -325,16 +325,21 @@ class PackageController extends Controller
         $packAccomoDetails = PackAccomoDetail::where('package_uuid', $uuid)->first();
         $hotels = json_decode($packAccomoDetails->hotels) ?? [];
 
+        $cities = [];
+
         // Add city title
-        foreach ($hotels as &$hotel) {
+        $cities = []; // initialize
+
+        foreach ($hotels as $hotel) {
             $city = City::find($hotel->city_id ?? null);
             $hotel->city_title = $city ? $city->title : 'City Not Found';
         }
 
+        $cities = array_values($cities);
+
         $title = "Pricing Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 4;
-
 
         return view('backend.packages.create-multistep', [
             'uuid' => $uuid,

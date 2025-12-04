@@ -24,11 +24,10 @@
     </div>
 
     @php
-        $selectedKey = "";
+        $selectedKey = '';
 
         // 1. Check if the array exists and is actually an array
         if (isset($pkgPrice['pack_price']) && is_array($pkgPrice['pack_price'])) {
-
             // 2. Get the keys
             $keys = array_keys($pkgPrice['pack_price']);
 
@@ -43,9 +42,12 @@
         <label>Price Options</label>
         <select id="formatSelect" class="mt-1 w-full border rounded px-3 py-2">
             <option value="">-- Select Format --</option>
-            <option value="format1" {{$selectedKey == "format1" ? "selected" : ""}}>Format 1 (Twin/Triple/Single)</option>
-            <option value="format2" {{$selectedKey == "format2" ? "selected" : ""}}>Format 2 (Adult/Child/Infant)</option>
-            <option value="format3" {{$selectedKey == "format3" ? "selected" : ""}}>Format 3 (Activities + Hotels)</option>
+            <option value="format1" {{ $selectedKey == 'format1' ? 'selected' : '' }}>Format 1 (Twin/Triple/Single)
+            </option>
+            <option value="format2" {{ $selectedKey == 'format2' ? 'selected' : '' }}>Format 2 (Adult/Child/Infant)
+            </option>
+            <option value="format3" {{ $selectedKey == 'format3' ? 'selected' : '' }}>Format 3 (Activities + Hotels)
+            </option>
         </select>
 
     </div>
@@ -622,7 +624,7 @@
                 box.className = "format1-box mb-6 p-4 border rounded-lg bg-gray-50 relative";
 
                 box.innerHTML = `
-                    <button type="button" class="remove-block absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">x</button>
+
                     <table class="w-full border border-gray-300 text-sm format1-table">
                         <thead class="bg-gray-200">
                             <tr>
@@ -661,6 +663,8 @@
                             </tr>
                         </tbody>
                     </table>
+
+                    <button type="button" class="remove-block mt-4 bg-red-500 text-white px-2 py-1 rounded text-xs">Remove</button>
                 `;
 
                 // Remove button
@@ -682,7 +686,6 @@
                 box.className = "format2-box mb-6 p-4 border rounded-lg bg-gray-50 relative";
 
                 box.innerHTML = `
-                    <button type="button" class="remove-block absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">x</button>
                     <table class="w-full border border-gray-300 text-sm format2-table">
                         <thead class="bg-gray-200">
                             <tr>
@@ -707,8 +710,29 @@
                                 <td class="border p-2"><input type="text" name="f2_child_no_bed[]" value="${data.land?.child_no_bed || ''}" class="w-full border rounded p-1"></td>
                                 <td class="border p-2"><input type="text" name="f2_infant[]" value="${data.land?.infant || ''}" class="w-full border rounded p-1"></td>
                             </tr>
+                            <tr>
+                                <td class="border p-2">Air Ticket</td>
+                                <td class="border p-2"><input type="text" name="f2_adult[]" value="${data.air_ticket?.adult || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2" colspan="2"><input type="text" name="f2_air_child[]" value="${data.air_ticket?.child || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="f2_infant[]" value="${data.air_ticket?.infant || ''}" class="w-full border rounded p-1"></td>
+                            </tr>
+                            <tr>
+                                <td class="border p-2">Visa</td>
+                                <td class="border p-2"><input type="text" name="f2_adult[]" value="${data.visa?.adult || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2" colspan="2"><input type="text" name="f2_visa_child[]" value="${data.visa?.child || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="f2_infant[]" value="${data.visa?.infant || ''}" class="w-full border rounded p-1"></td>
+                            </tr>
+                            <tr class="bg-gray-100 font-semibold">
+                                <td class="border p-2">Total</td>
+                                <td class="border p-2"><input type="text" name="f2_total_adult[]" value="${data.total?.adult || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="f2_total_child_bed[]" value="${data.total?.child_bed || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="f2_total_child_no_bed[]" value="${data.total?.child_no_bed || ''}" class="w-full border rounded p-1"></td>
+                                <td class="border p-2"><input type="text" name="f2_total_infant[]" value="${data.total?.infant || ''}" class="w-full border rounded p-1"></td>
+                            </tr>
                         </tbody>
                     </table>
+                    <button type="button" class="remove-block mt-4 bg-red-500 text-white px-2 py-1 rounded text-xs">Remove</button>
+
                 `;
 
                 box.querySelector('.remove-block').addEventListener('click', () => box.remove());
