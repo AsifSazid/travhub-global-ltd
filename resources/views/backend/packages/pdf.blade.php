@@ -362,16 +362,11 @@
                             <li>{{ $a['title'] ?? ' - ' }} @if (!empty($a['time']))
                                     ({{ $a['time'] }})
                                 @endif
-                                @if (!empty($a['description']))
-                                    <div>
-                                        {!! $a['description'] !!}
-                                    </div>
-                                @endif
                                 @if (!empty($a['data']))
                                     <ul>
                                         @foreach ($a['data'] as $key => $aData)
                                             @if ($key == 'city_id')
-                                                @php
+                                                {{-- @php
                                                     $cityModel = City::find($aData);
                                                     $aData = $cityModel ? $cityModel->title : ' - ';
                                                     $key = 'City';
@@ -380,9 +375,9 @@
                                                     <strong>{{ $key }}:</strong>
 
                                                     {{ !empty($aData) ? $aData : ' - ' }}
-                                                </li>
+                                                </li> --}}
                                             @elseif($key == 'country_id')
-                                                @php
+                                                {{-- @php
                                                     $countryModel = Country::find($aData);
                                                     $aData = $countryModel ? $countryModel->title : ' - ';
                                                     $key = 'Country';
@@ -391,7 +386,7 @@
                                                     <strong>{{ $key }}:</strong>
 
                                                     {{ !empty($aData) ? $aData : ' - ' }}
-                                                </li>
+                                                </li> --}}
                                             @else
                                                 <li>
                                                     {{-- প্রথমে কী (key) দেখান --}}
@@ -403,6 +398,11 @@
                                             @endif
                                         @endforeach
                                     </ul>
+                                @endif
+                                @if (!empty($a['description']))
+                                    <div>
+                                        {!! $a['description'] !!}
+                                    </div>
                                 @endif
                             </li>
                         @endforeach
