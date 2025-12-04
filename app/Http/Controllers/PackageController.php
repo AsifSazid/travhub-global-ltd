@@ -351,7 +351,7 @@ class PackageController extends Controller
     public function stepFive($uuid, $step)
     {
         $packDesDetails = PackDestinationInfo::where('package_uuid', $uuid)->first();
-        $cities = json_decode($packDesDetails->cities) ?? [];
+        $cities = $packDesDetails->cities ? json_decode($packDesDetails->cities, true) : [];
         if (is_string($cities)) {
             $decoded = json_decode($cities, true);
             if (is_string($decoded)) {
@@ -360,16 +360,11 @@ class PackageController extends Controller
                 $cities = $decoded;
             }
         }
-        $activities = json_decode($packDesDetails->activities, true) ?? [];
-
-        // Decode JSON activities if needed
-        $activities = json_decode($packDesDetails->activities, true) ?? [];
-
+        $activities = $packDesDetails->activities ? json_decode($packDesDetails->activities, true) : [];
         if (is_string($activities)) {
             $activities = json_decode($activities, true) ?? [];
         }
 
-        // Static activities (predefined)
         $staticActivities = [
             [
                 'id' => null,
@@ -410,8 +405,6 @@ class PackageController extends Controller
             ],
         ];
 
-
-        // ✅ Extract all activity IDs from dynamic ones
         $activityIds = collect($activities)
             ->pluck('id')
             ->filter()
@@ -419,13 +412,11 @@ class PackageController extends Controller
             ->values()
             ->toArray();
 
-        // ✅ Fetch details for only DB-based activities
         $activitiesWithDetails = Activity::whereIn('id', $activityIds)
             ->select('id', 'description')
             ->get()
             ->keyBy('id');
 
-        // ✅ Merge fetched descriptions into activities
         $activities = collect($activities)->map(function ($item) use ($activitiesWithDetails) {
             if (isset($item['id']) && $activitiesWithDetails->has($item['id'])) {
                 $item['description'] = $activitiesWithDetails[$item['id']]->description;
@@ -433,22 +424,73 @@ class PackageController extends Controller
             return $item;
         })->toArray();
 
-        // ✅ Finally merge static + dynamic activities
         $activities = array_merge($staticActivities, $activities);
-
-
-        // dd($activities);
-
-
-        // dd($activities);
 
         $packQuatDetails = PackQuatDetail::where('package_uuid', $uuid)->first();
         $title = "Itinerary Details";
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 5;
-        // dd($packQuatDetails, $package);
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'activities', 'cities', 'packDesDetails', 'packQuatDetails', 'title', 'completedStep'));
+        $savedRows = PackItenaries::where('package_uuid', $uuid)
+            ->orderBy('day_number')
+            ->get();
+
+        $savedItineraryDays = [];
+
+        foreach ($savedRows as $row) {
+            // activities
+            $savedActivities = json_decode($row->activities, true) ?? [];
+            if (is_string($savedActivities)) {
+                $savedActivities = json_decode($savedActivities, true) ?? [];
+            }
+
+            // meals
+            $savedMeals = [];
+            if ($row->meals) {
+                $decodedMeals = @json_decode($row->meals, true);
+                if (is_array($decodedMeals)) {
+                    $savedMeals = $decodedMeals;
+                } else {
+                    // maybe CSV string
+                    $savedMeals = array_filter(array_map('trim', explode(',', $row->meals)));
+                }
+            }
+
+            // cities
+            $savedCities = [];
+            if ($row->cities) {
+                $decodedCities = @json_decode($row->cities, true);
+                if (is_array($decodedCities)) {
+                    $savedCities = $decodedCities;
+                } else {
+                    $savedCities = [$row->cities];
+                }
+            }
+
+            $savedItineraryDays[] = [
+                "id" => $row->id,
+                "dayNumber" => (int)($row->day_number ?? 1),
+                "title" => $row->title ?? ("Day " . ($row->day_number ?? 1)),
+                "date" => $row->date ?? ($packQuatDetails->start_date ?? null),
+                "overnightStay" => $savedCities[0] ?? ($cities[0]['id'] ?? null),
+                "meals" => $savedMeals,
+                "activities" => $savedActivities
+            ];
+        }
+
+
+        return view('backend.packages.create-multistep', compact(
+            'uuid',
+            'step',
+            'activities',
+            'cities',
+            'packDesDetails',
+            'packQuatDetails',
+            'title',
+            'completedStep',
+            'savedItineraryDays'
+        ));
     }
+
 
     public function stepSix($uuid, $step)
     {
