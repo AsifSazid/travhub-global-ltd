@@ -68,6 +68,22 @@
                     <table class="w-full border border-gray-300 text-sm format1-table">
                         <thead class="bg-gray-200">
                             <tr>
+                                <th colspan="5">
+                                    @foreach ($cities as $city)
+                                        <div class="mb-2">
+                                            <strong>{{ $city['title'] }}</strong><br>
+                                            @foreach (collect($hotels)->where('city_id', $city['id']) as $hotel)
+                                                <label class="inline-flex items-center mr-2">
+                                                    <input type="radio" name="format1_hotel_{{ $city['id'] }}"
+                                                        value="{{ $hotel->id }}">
+                                                    <span class="ml-1">{{ $hotel->title }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                </th>
+                            </tr>
+                            <tr>
                                 <th class="border p-2 w-1/4">Title</th>
                                 <th colspan="3" class="border p-2">
                                     <input type="text" name="format1_title[]" class="w-full border rounded p-1"
@@ -138,6 +154,22 @@
 
                     <table class="w-full border border-gray-300 text-sm format2-table">
                         <thead class="bg-gray-200">
+                            <tr>
+                                <th colspan="5">
+                                    @foreach ($cities as $city)
+                                        <div class="mb-2">
+                                            <strong>{{ $city['title'] }}</strong><br>
+                                            @foreach (collect($hotels)->where('city_id', $city['id']) as $hotel)
+                                                <label class="inline-flex items-center mr-2">
+                                                    <input type="radio" name="format2_hotel_{{ $city['id'] }}"
+                                                        value="{{ $hotel->id }}">
+                                                    <span class="ml-1">{{ $hotel->title }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                </th>
+                            </tr>
                             <tr>
                                 <th class="border p-2 w-1/4">Title</th>
                                 <th colspan="4" class="border p-2">
@@ -399,6 +431,22 @@
                 <table class="w-full border border-gray-300 text-sm format1-table">
                     <thead class="bg-gray-200">
                         <tr>
+                            <th colspan="5">
+                                @foreach ($cities as $city)
+                                    <div class="mb-2">
+                                        <strong>{{ $city['title'] }}</strong><br>
+                                        @foreach (collect($hotels)->where('city_id', $city['id']) as $hotel)
+                                            <label class="inline-flex items-center mr-2">
+                                                <input type="radio" name="format1_hotel_{{ $city['id'] }}"
+                                                    value="{{ $hotel->id }}">
+                                                <span class="ml-1">{{ $hotel->title }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                @endforeach
+                            </th>
+                        </tr>
+                        <tr>
                             <th class="border p-2 w-1/4">Title</th>
                             <th colspan="3" class="border p-2">
                                 <input type="text" name="format1_title[]" class="w-full border rounded p-1" value="${item.title || ''}">
@@ -449,6 +497,22 @@
                     box.innerHTML = `
                 <table class="w-full border border-gray-300 text-sm format2-table">
                     <thead class="bg-gray-200">
+                        <tr>
+                            <th colspan="5">
+                                @foreach ($cities as $city)
+                                    <div class="mb-2">
+                                        <strong>{{ $city['title'] }}</strong><br>
+                                        @foreach (collect($hotels)->where('city_id', $city['id']) as $hotel)
+                                            <label class="inline-flex items-center mr-2">
+                                                <input type="radio" name="format2_hotel_{{ $city['id'] }}"
+                                                    value="{{ $hotel->id }}">
+                                                <span class="ml-1">{{ $hotel->title }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                @endforeach
+                            </th>
+                        </tr>
                         <tr>
                             <th class="border p-2 w-1/4">Title</th>
                             <th colspan="4" class="border p-2">
@@ -628,6 +692,22 @@
                     <table class="w-full border border-gray-300 text-sm format1-table">
                         <thead class="bg-gray-200">
                             <tr>
+                                <th colspan="5">
+                                    @foreach ($cities as $city)
+                                        <div class="mb-2">
+                                            <strong>{{ $city['title'] }}</strong><br>
+                                            @foreach (collect($hotels)->where('city_id', $city['id']) as $hotel)
+                                                <label class="inline-flex items-center mr-2">
+                                                    <input type="radio" name="format1_hotel_{{ $city['id'] }}"
+                                                        value="{{ $hotel->id }}">
+                                                    <span class="ml-1">{{ $hotel->title }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                </th>
+                            </tr>
+                            <tr>
                                 <th class="border p-2 w-1/4">Title</th>
                                 <th colspan="3" class="border p-2">
                                     <input type="text" name="format1_title[]" class="w-full border rounded p-1" value="${data.title || ''}">
@@ -688,6 +768,22 @@
                 box.innerHTML = `
                     <table class="w-full border border-gray-300 text-sm format2-table">
                         <thead class="bg-gray-200">
+                            <tr>
+                                <th colspan="5">
+                                    @foreach ($cities as $city)
+                                        <div class="mb-2">
+                                            <strong>{{ $city['title'] }}</strong><br>
+                                            @foreach (collect($hotels)->where('city_id', $city['id']) as $hotel)
+                                                <label class="inline-flex items-center mr-2">
+                                                    <input type="radio" name="format2_hotel_{{ $city['id'] }}"
+                                                        value="{{ $hotel->id }}">
+                                                    <span class="ml-1">{{ $hotel->title }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                </th>
+                            </tr>
                             <tr>
                                 <th class="border p-2 w-1/4">Title</th>
                                 <th colspan="4" class="border p-2">

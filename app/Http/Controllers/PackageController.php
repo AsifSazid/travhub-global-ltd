@@ -333,6 +333,13 @@ class PackageController extends Controller
         foreach ($hotels as $hotel) {
             $city = City::find($hotel->city_id ?? null);
             $hotel->city_title = $city ? $city->title : 'City Not Found';
+
+            if ($city && !isset($cities[$city->id])) { // use city id as index
+                $cities[$city->id] = [
+                    'id' => $city->id,
+                    'title' => $city->title
+                ];
+            }
         }
 
         $cities = array_values($cities);
@@ -341,12 +348,15 @@ class PackageController extends Controller
         $package = $this->getPackageInfo($uuid);
         $completedStep = $package->progress_step ?? 4;
 
+        // dd($packAccomoDetails, $hotels, $cities);
+
         return view('backend.packages.create-multistep', [
             'uuid' => $uuid,
             'step' => $step,
             'pkgPrice' => $pkgPrice,
             'currencies' => $currencies,
             'hotels' => $hotels,
+            'cities' => $cities,
             'title' => $title,
             'completedStep' => $completedStep,
             'formatData' => $formatData, // ✅ already array
@@ -752,6 +762,7 @@ class PackageController extends Controller
     public function stepFourStore($request, $uuid, $step)
     {
         try {
+            dd($request->all());
             // ✔ Validation
             $validated = $request->validate([
                 'currency_id'        => 'required|exists:currencies,id',
