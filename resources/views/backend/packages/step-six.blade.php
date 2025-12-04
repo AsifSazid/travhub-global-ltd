@@ -14,25 +14,33 @@
 
             <!-- Inclusion Checkboxes -->
             <div class="grid md:grid-cols-3 sm:grid-cols-2 gap-3 mb-4" id="inclusion-list-{{ $index }}">
-                @foreach ($inclusion['sub_title'] as $number => $sub)
+                @foreach ($inclusion['sub_title'] as $loopIndex => $sub)
+                    @php
+                        $isChecked = isset($sub['selected']) && $sub['selected'] == '1';
+                    @endphp
+
                     <label class="flex items-center space-x-2 border rounded-md p-3 hover:bg-blue-50">
                         <input type="checkbox"
-                            name="inclusions[{{ $index }}][sub_title][{{ $loop->index }}][selected]"
-                            value="1" class="text-blue-600 rounded"
-                            {{ in_array($sub, old('inclusions.' . $index . '.sub_title', [])) ? 'checked' : '' }}>
+                            name="inclusions[{{ $index }}][sub_title][{{ $loopIndex }}][selected]"
+                            value="1" class="text-blue-600 rounded ms-2" {{ $isChecked ? 'checked' : '' }}>
+
                         <input type="hidden"
-                            name="inclusions[{{ $index }}][sub_title][{{ $loop->index }}][text]"
-                            value="{{ $sub }}">
+                            name="inclusions[{{ $index }}][sub_title][{{ $loopIndex }}][text]"
+                            value="{{ $sub['text'] }}">
+
                         <input type="hidden"
-                            name="inclusions[{{ $index }}][sub_title][{{ $loop->index }}][number]"
-                            value="{{ $number }}">
+                            name="inclusions[{{ $index }}][sub_title][{{ $loopIndex }}][number]"
+                            value="{{ $sub['number'] }}">
+
                         <input type="hidden"
-                            name="inclusions[{{ $index }}][sub_title][{{ $loop->index }}][type]"
-                            value="system">
-                        <span class="text-gray-700">{{ $sub }}</span>
+                            name="inclusions[{{ $index }}][sub_title][{{ $loopIndex }}][type]"
+                            value="{{ $sub['type'] ?? 'system' }}">
+
+                        <span class="text-gray-700">{{ $sub['text'] }}</span>
                     </label>
                 @endforeach
             </div>
+
 
             <!-- Add New Inclusion -->
             <div class="flex gap-2">

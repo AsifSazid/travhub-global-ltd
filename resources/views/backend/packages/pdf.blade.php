@@ -10,7 +10,7 @@
     <title>Package Lists</title>
     <style>
         body {
-            font-size: 14px;
+            font-size: 12px;
         }
 
         table {
@@ -359,9 +359,9 @@
                 @if (is_array($acts))
                     <ul>
                         @foreach ($acts as $a)
-                            <li>{{ $a['title'] ?? ' - ' }} @if (!empty($a['time']))
+                            <li><strong>{{ $a['title'] ?? ' - ' }} @if (!empty($a['time']))
                                     ({{ $a['time'] }})
-                                @endif
+                                @endif</strong>
                                 @if (!empty($a['data']))
                                     <ul>
                                         @foreach ($a['data'] as $key => $aData)

@@ -481,8 +481,25 @@ class PackageController extends Controller
         ];
         $title = "Inclusion Details";
         $package = $this->getPackageInfo($uuid);
+        $savedInclusions = PackInclusion::where('package_uuid', $uuid)->first();
         $completedStep = $package->progress_step ?? 6;
-        return view('backend.packages.create-multistep', compact('uuid', 'step', 'inclusions', 'title', 'completedStep'));
+        if ($savedInclusions && $savedInclusions->inclusions) {
+            $saved = json_decode($savedInclusions->inclusions, true);
+
+            // override default with saved values
+            foreach ($saved as $i => $savedInc) {
+                // যদি saved inclusion থাকে তাহলে default inclusion replace করবে।
+                if (isset($inclusions[$i])) {
+
+                    $inclusions[$i]['title'] = $savedInc['title'];
+                    $inclusions[$i]['icons'] = $savedInc['icons'];
+
+                    // system + custom সব sub_title inject করা
+                    $inclusions[$i]['sub_title'] = $savedInc['sub_title'];
+                }
+            }
+        }
+        return view('backend.packages.create-multistep', compact('uuid', 'step', 'inclusions', 'title', 'completedStep', 'savedInclusions'));
     }
 
     protected function stepSeven($uuid, $step)
