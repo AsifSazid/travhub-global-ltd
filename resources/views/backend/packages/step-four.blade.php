@@ -450,7 +450,7 @@
                         <table class="w-full border border-gray-300 text-sm format1-table">
                             <thead class="bg-gray-200">
                                 <tr>
-                                    <th colspan="5">
+                                    <th colspan="5" style="text-align: left !important; padding: 10px 0px 0px 10px;">
                                         ${hotelSelectionHTML}
                                     </th>
                                 </tr>

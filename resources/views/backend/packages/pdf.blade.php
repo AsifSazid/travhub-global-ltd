@@ -298,6 +298,11 @@
             @endif
         </div>
     @endif
+    <h3>Note:</h3>
+    <ul>
+        <li>Ticket is confirmed. Ticket price may vary.</li>
+        <li>Though airticket price may change, Land Package price will remain same.</li>
+    </ul>
 
     <!-- Inclusions -->
     <h2><i>Inclusions</i></h2>
@@ -343,6 +348,7 @@
         <div>No inclusions added.</div>
     @endif
 
+    <div style="page-break-after: always"></div>
 
     <!-- Itineraries -->
     <h2>Itineraries</h2>
