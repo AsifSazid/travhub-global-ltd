@@ -762,7 +762,7 @@ class PackageController extends Controller
     public function stepFourStore($request, $uuid, $step)
     {
         try {
-            dd($request->all());
+            // dd($request->all());
             // ✔ Validation
             $validated = $request->validate([
                 'currency_id'        => 'required|exists:currencies,id',
@@ -1060,9 +1060,37 @@ class PackageController extends Controller
         $pkgItenaries = PackItenaries::where('package_uuid', $uuid)->get();
         $pkgInclusions = PackInclusion::where('package_uuid', $uuid)->first();
 
-        $title = "Itinerary Details";
-        $package = $this->getPackageInfo($uuid);
-        $completedStep = $package->progress_step ?? 7;
+        $formats = $pkgPrice->pack_price['format1'] ?? $pkgPrice->pack_price['format2'] ?? [];
+
+        // Get city & hotel title maps
+        $cities = City::pluck('title', 'id')->toArray();
+        $hotels = Hotel::pluck('title', 'id')->toArray();
+
+        // Prepare data
+        $hotelOptions = [];
+        $allOptions = [];
+
+        foreach ($formats as $index => $format) {
+            foreach ($format['hotels'] as $cityKey => $hotelId) {
+                $cityId = intval(str_replace('city_', '', $cityKey));
+                $cityName = $cities[$cityId] ?? 'Unknown City';
+                $hotelName = $hotels[$hotelId] ?? 'Unknown Hotel';
+
+                $optionName = 'Option-' . ($index + 1);
+
+                // Collect all unique option names
+                if (!in_array($optionName, $allOptions)) {
+                    $allOptions[] = $optionName;
+                }
+
+                // Store with city as key for grouping
+                if (!isset($hotelOptions[$cityName])) {
+                    $hotelOptions[$cityName] = [];
+                }
+
+                $hotelOptions[$cityName][$optionName] = $hotelName;
+            }
+        }
 
         $fontDirs = (new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'];
         $fontDirs[] = realpath(public_path('fonts/Poppins'));
@@ -1140,9 +1168,9 @@ class PackageController extends Controller
             'packPrice' => $pkgPrice ?? 'No Data Found',
             'packItenaries' => $pkgItenaries ?? [],
             'packInclusion' => $pkgInclusions ?? 'No Data Found',
-            'title' => $title,
-            'completedStep' => $completedStep,
-            'uuid' => $uuid
+            'uuid' => $uuid,
+            'hotelOptions' => $hotelOptions,
+            'allOptions'=> $allOptions
         ])->render();
 
         $mpdf->WriteHTML($html);

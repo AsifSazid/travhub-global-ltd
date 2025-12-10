@@ -103,32 +103,38 @@
 
     <h2><i>Hotel Information</i></h2>
     <hr style="margin: 0px">
-    <table style="width: 100%; text-align: center;">
-        <thead>
-            <tr>
-                <th>
-                    <h3>Location</h3>
-                </th>
-                <th>
-                    <h3>Option 1</h3>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @php
-                $hotels = json_decode($packAccomoDetail['hotels'], true);
-            @endphp
-            @foreach ($hotels as $hotel)
-                @php
-                    $city = \App\Models\City::findOrFail($hotel['city_id']);
-                @endphp
+    @if (!empty($hotelOptions) && !empty($allOptions))
+        <table style="width: 100%; text-align: center; border-collapse: collapse;">
+            <thead>
                 <tr>
-                    <td>{{ $city->title }}</td>
-                    <td>{{ $hotel['title'] }}</td>
+                    <th style="border: 1px solid #ddd; padding: 8px;">
+                        <h3>Location</h3>
+                    </th>
+                    @foreach ($allOptions as $option)
+                        <th style="border: 1px solid #ddd; padding: 8px;">
+                            <h3>{{ $option }}</h3>
+                        </th>
+                    @endforeach
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach ($hotelOptions as $city => $options)
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">
+                            {{ $city }}
+                        </td>
+                        @foreach ($allOptions as $option)
+                            <td style="border: 1px solid #ddd; padding: 8px;">
+                                {{ $options[$option] ?? '-' }}
+                            </td>
+                        @endforeach
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @else
+        <p>No hotel options available.</p>
+    @endif
     <h3>Note:</h3>
     <ul>
         <li>Check-in time: 13:00 or 14:00 | Check-out time: 11:00 or 12:00</li>
@@ -360,8 +366,9 @@
                     <ul>
                         @foreach ($acts as $a)
                             <li><strong>{{ $a['title'] ?? ' - ' }} @if (!empty($a['time']))
-                                    ({{ $a['time'] }})
-                                @endif</strong>
+                                        ({{ $a['time'] }})
+                                    @endif
+                                </strong>
                                 @if (!empty($a['data']))
                                     <ul>
                                         @foreach ($a['data'] as $key => $aData)
