@@ -16,6 +16,15 @@
             <div class="grid md:grid-cols-3 sm:grid-cols-2 gap-3 mb-4" id="inclusion-list-{{ $index }}">
                 @foreach ($inclusion['sub_title'] as $loopIndex => $sub)
                     @php
+                        // If sub is string, convert to array with default values
+                        if (is_string($sub)) {
+                            $sub = [
+                                'text' => $sub,
+                                'number' => $loopIndex + 1,
+                                'type' => 'system',
+                                'selected' => '0',
+                            ];
+                        }
                         $isChecked = isset($sub['selected']) && $sub['selected'] == '1';
                     @endphp
 
