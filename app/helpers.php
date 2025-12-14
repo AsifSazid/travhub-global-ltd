@@ -27,6 +27,12 @@ if (!function_exists('format_ddmmyyyy')) {
     }
 }
 
+if (!function_exists('format_ddMMyyyy')) {
+    function format_ddMMyyyy($date) {
+        return date('d-M-Y', strtotime($date));
+    }
+}
+
 if (!function_exists('format_mmddyyyy')) {
     function format_mmddyyyy($date) {
         return date('d-m-Y', strtotime($date));

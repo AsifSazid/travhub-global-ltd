@@ -1076,7 +1076,8 @@ class PackageController extends Controller
                 $cityName = $cities[$cityId] ?? 'Unknown City';
                 $hotelName = $hotels[$hotelId] ?? 'Unknown Hotel';
 
-                $optionName = 'Option-' . ($index + 1);
+                // $optionName = 'Option-' . ($index + 1);
+                $optionName = $format['title'];
 
                 // Collect all unique option names
                 if (!in_array($optionName, $allOptions)) {

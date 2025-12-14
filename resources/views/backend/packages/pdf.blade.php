@@ -76,8 +76,8 @@
     </div>
     <div>
         <strong>Travel Date:</strong>
-        {{ format_ddmmyyyy($packQuatDetail['start_date']) }} -
-        {{ format_ddmmyyyy($packQuatDetail['end_date']) }}
+        {{ format_ddMMyyyy($packQuatDetail['start_date']) }} -
+        {{ format_ddMMyyyy($packQuatDetail['end_date']) }}
     </div>
     <div>
         <strong>No of Pax:</strong>
@@ -86,19 +86,30 @@
             if (is_string($pax)) {
                 $pax = json_decode($pax, true);
             }
+    
             $totalPax = 0;
+            $breakdown = [];
             foreach ($pax as $p) {
-                $totalPax = $totalPax + $p['count'];
+                $totalPax += $p['count'];
+                $type = $p['type'] ?? 'Unknown'; // e.g., Adult, Child, Infant
+                $breakdown[$type] = ($breakdown[$type] ?? 0) + $p['count'];
+            }
+    
+            $breakdownText = [];
+            foreach ($breakdown as $type => $count) {
+                $breakdownText[] = ucfirst($type).": $count";
             }
         @endphp
-        {{ $totalPax }}
+        {{ $totalPax }} ({{ implode(', ', $breakdownText) }})
     </div>
+
+    <!--Need to change-->
     <div>
-        <strong>No of Rooms:</strong>
+        <strong>No of Rooms: 1</strong>
     </div>
     <div>
         <strong>Prepared For:</strong>
-        Bangladesh Bank.
+        Rinto Aaugustin Gomes
     </div>
 
     <h2><i>Hotel Information</i></h2>
@@ -202,45 +213,63 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="border px-2 py-1">Particular</th>
-                        <th class="border px-2 py-1">Adult</th>
-                        <th class="border px-2 py-1">Child (Bed)</th>
-                        <th class="border px-2 py-1">Child (No Bed)</th>
-                        <th class="border px-2 py-1">Infant</th>
+                        @if(!empty($item['land']['adult'] ?? '') || !empty($item['air_ticket']['adult'] ?? '') || !empty($item['visa']['adult'] ?? '') || !empty($item['total']['adult'] ?? ''))
+                            <th class="border px-2 py-1">Adult</th>
+                        @endif
+                        @if(!empty($item['land']['child_bed'] ?? '') || !empty($item['total']['child_bed'] ?? ''))
+                            <th class="border px-2 py-1">Child (Bed)</th>
+                        @endif
+                        @if(!empty($item['land']['child_no_bed'] ?? '') || !empty($item['total']['child_no_bed'] ?? ''))
+                            <th class="border px-2 py-1">Child (No Bed)</th>
+                        @endif
+                        @if(!empty($item['land']['infant'] ?? '') || !empty($item['air_ticket']['infant'] ?? '') || !empty($item['visa']['infant'] ?? '') || !empty($item['total']['infant'] ?? ''))
+                            <th class="border px-2 py-1">Infant</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="border px-2 py-1">Land Package</td>
-                        <td class="border px-2 py-1">{{ safe($item['land']['adult'] ?? '') }}</td>
-                        <td class="border px-2 py-1">{{ safe($item['land']['child_bed'] ?? '') }}</td>
-                        <td class="border px-2 py-1">{{ safe($item['land']['child_no_bed'] ?? '') }}</td>
-                        <td class="border px-2 py-1">{{ safe($item['land']['infant'] ?? '') }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border px-2 py-1">Air Ticket</td>
-                        <td class="border px-2 py-1">{{ safe($item['air_ticket']['adult'] ?? '') }}</td>
-                        <td colspan="2" class="border px-2 py-1">
-                            {{ safe($item['air_ticket']['child'] ?? '') }}</td>
-                        <td class="border px-2 py-1">{{ safe($item['air_ticket']['infant'] ?? '') }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border px-2 py-1">Visa</td>
-                        <td class="border px-2 py-1">{{ safe($item['visa']['adult'] ?? '') }}</td>
-                        <td colspan="2" class="border px-2 py-1">{{ safe($item['visa']['child'] ?? '') }}
-                        </td>
-                        <td class="border px-2 py-1">{{ safe($item['visa']['infant'] ?? '') }}</td>
-                    </tr>
-                    <tr class="bg-gray-100 font-semibold">
-                        <td class="border px-2 py-1">Total</td>
-                        <td class="border px-2 py-1">{{ safe($item['total']['adult'] ?? '') }}</td>
-                        <td class="border px-2 py-1">{{ safe($item['total']['child_bed'] ?? '') }}</td>
-                        <td class="border px-2 py-1">{{ safe($item['total']['child_no_bed'] ?? '') }}</td>
-                        <td class="border px-2 py-1">{{ safe($item['total']['infant'] ?? '') }}</td>
-                    </tr>
+                    @php
+                        $rows = [
+                            'Land Package' => $item['land'] ?? [],
+                            'Air Ticket' => $item['air_ticket'] ?? [],
+                            'Visa' => $item['visa'] ?? [],
+                            'Total' => $item['total'] ?? [],
+                        ];
+                    @endphp
+    
+                    @foreach($rows as $label => $data)
+                        @php
+                            $hasData = false;
+                            foreach($data as $value){
+                                if(!empty($value)){
+                                    $hasData = true;
+                                    break;
+                                }
+                            }
+                        @endphp
+                        @if($hasData)
+                            <tr @if($label === 'Total') class="bg-gray-100 font-semibold" @endif>
+                                <td class="border px-2 py-1">{{ $label }}</td>
+                                @if(!empty($item['land']['adult'] ?? '') || !empty($item['air_ticket']['adult'] ?? '') || !empty($item['visa']['adult'] ?? '') || !empty($item['total']['adult'] ?? ''))
+                                    <td class="border px-2 py-1">{{ safe($data['adult'] ?? '') }}</td>
+                                @endif
+                                @if(!empty($item['land']['child_bed'] ?? '') || !empty($item['total']['child_bed'] ?? ''))
+                                    <td class="border px-2 py-1">{{ safe($data['child_bed'] ?? '') }}</td>
+                                @endif
+                                @if(!empty($item['land']['child_no_bed'] ?? '') || !empty($item['total']['child_no_bed'] ?? ''))
+                                    <td class="border px-2 py-1">{{ safe($data['child_no_bed'] ?? '') }}</td>
+                                @endif
+                                @if(!empty($item['land']['infant'] ?? '') || !empty($item['air_ticket']['infant'] ?? '') || !empty($item['visa']['infant'] ?? '') || !empty($item['total']['infant'] ?? ''))
+                                    <td class="border px-2 py-1">{{ safe($data['infant'] ?? '') }}</td>
+                                @endif
+                            </tr>
+                        @endif
+                    @endforeach
                 </tbody>
             </table>
         @endforeach
     @endif
+
 
     {{-- ---------- FORMAT 3 ---------- --}}
     @if (isset($prices['format3']) && is_array($prices['format3']))
@@ -303,6 +332,8 @@
         <li>Ticket is confirmed. Ticket price may vary.</li>
         <li>Though airticket price may change, Land Package price will remain same.</li>
     </ul>
+    
+    <div style="page-break-after: always"></div>
 
     <!-- Inclusions -->
     <h2><i>Inclusions</i></h2>
@@ -375,6 +406,11 @@
                                         ({{ $a['time'] }})
                                     @endif
                                 </strong>
+                                @if (!empty($a['description']))
+                                    <div>
+                                        {!! $a['description'] !!}
+                                    </div>
+                                @endif
                                 @if (!empty($a['data']))
                                     <ul>
                                         @foreach ($a['data'] as $key => $aData)
@@ -412,11 +448,6 @@
                                         @endforeach
                                     </ul>
                                 @endif
-                                @if (!empty($a['description']))
-                                    <div>
-                                        {!! $a['description'] !!}
-                                    </div>
-                                @endif
                             </li>
                         @endforeach
                     </ul>
@@ -429,7 +460,26 @@
         @endif
     @endforeach
 
-
+    <!-- Term and Condtions -->
+    <h2>Terms and Condtions</h2>
+    <hr style="margin: 0px">
+    <ul>
+        <li>All bookings are confirmed only after receipt of the required advance payment and written confirmation from TravHub Global Limited.</li>
+        <li>Prices are subject to change due to exchange rate fluctuation, taxes, or supplier revisions until full payment is received.</li>
+        <li>Full payment must be completed before travel; failure to pay on time may result in cancellation without notice.</li>
+        <li>Cancellation, amendment, and refund policies are strictly subject to airline, hotel, and supplier rules; some services may be non-refundable.</li>
+        <li>Refunds, if applicable, will be processed only after funds are received from suppliers and may take time.</li>
+        <li>No refund will be provided for no-shows, unused services, early departures, or voluntary trip curtailment.</li>
+        <li>Hotel check-in/check-out times, room type, and facilities are subject to hotel policy and availability.</li>
+        <li>Flight schedules, baggage rules, and seat allocation are governed by airlines; TravHub Global Limited is not responsible for delays or cancellations.</li>
+        <li>Sightseeing and transfers are provided on private or shared (SIC) basis as mentioned and may be rescheduled due to operational or weather conditions.</li>
+        <li>Visa approval is solely at the discretion of the respective embassy or immigration authority; TravHub Global Limited acts only as a facilitator.</li>
+        <li>Travelers are responsible for passport validity, visas, travel documents, and compliance with immigration rules.</li>
+        <li>Travel insurance is strongly recommended; TravHub Global Limited is not liable for medical issues, accidents, loss, or theft.</li>
+        <li>The Agency is not responsible for disruptions caused by force majeure events such as natural disasters, strikes, or political situations.</li>
+        <li>TravHub Global Limited acts as an intermediary; liability is limited to the Agency service charges only.</li>
+        <li>Confirmation of booking and/or payment implies full acceptance of these Terms & Conditions.</li>
+    </ul>
 </body>
 
 </html>
