@@ -221,6 +221,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700">Overnight Stay</label>
                 <select data-day-id="${day.id}" class="overnight-select mt-1 block w-full border rounded px-3 py-2">
+                    <option value="n/a">N/A</option>
                     ${cities.map(c=>`<option value="${c.id}" ${String(day.overnightStay) == String(c.id) ? 'selected' : ''}>${escapeHtml(c.title)}</option>`).join('')}
                 </select>
             </div>
