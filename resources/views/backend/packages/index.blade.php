@@ -126,16 +126,7 @@
                         return;
                     }
 
-
-                                                //                 <a href="/admin/package-download/${package.uuid}" class="px-1 text-blue-500 hover:text-blue-700" title="Download"><i class="fa-solid fa-download PDF"></i></a>
-                                                // ${(package.status === 'inactive' && package.completion_status === 'incomplete')
-                                                //     ? `<a href="/admin/packages/${package.uuid}/step/${stepToGo}" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
-                                                //                         <i class="fas fa-edit"></i>
-                                                //                     </a>`
-                                                //     : `<a href="/admin/packages/${package.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
-                                                //                         <i class="fas fa-edit"></i>
-                                                //                     </a>`
-                                                // }
+                    // <a href="/admin/package-download/${package.uuid}" class="px-1 text-blue-500 hover:text-blue-700" title="Download"><i class="fa-solid fa-download PDF"></i></a>
 
 
                     packages.forEach((package, index) => {
@@ -151,6 +142,14 @@
                                     <td class="px-6 py-4">
                                         <div class="flex justify-center">
                                                 <a href="/admin/packages/${package.uuid}/show" class="px-1 text-blue-500 hover:text-blue-700" title="View"><i class="fas fa-eye"></i></a>
+                                                ${(package.status === 'inactive' && package.completion_status === 'incomplete')
+                                                    ? `<a href="/admin/packages/${package.uuid}/step/${stepToGo}" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
+                                                                                <i class="fas fa-edit"></i>
+                                                                            </a>`
+                                                    : `<a href="/admin/packages/${package.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
+                                                                                <i class="fas fa-edit"></i>
+                                                                            </a>`
+                                                }
                                                 <button
                                                     class="px-1 text-blue-500 hover:text-blue-700"
                                                     title="Download"
