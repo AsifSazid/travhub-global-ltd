@@ -86,7 +86,7 @@
             if (is_string($pax)) {
                 $pax = json_decode($pax, true);
             }
-    
+
             $totalPax = 0;
             $breakdown = [];
             foreach ($pax as $p) {
@@ -94,7 +94,7 @@
                 $type = $p['type'] ?? 'Unknown'; // e.g., Adult, Child, Infant
                 $breakdown[$type] = ($breakdown[$type] ?? 0) + $p['count'];
             }
-    
+
             $breakdownText = [];
             foreach ($breakdown as $type => $count) {
                 $breakdownText[] = ucfirst($type).": $count";
@@ -105,11 +105,11 @@
 
     <!--Need to change-->
     <div>
-        <strong>No of Rooms: 1</strong>
+        <strong>No of Rooms: {{$room_no}}</strong>
     </div>
     <div>
         <strong>Prepared For:</strong>
-        Rinto Aaugustin Gomes
+        {{$prepared_for}}
     </div>
 
     <h2><i>Hotel Information</i></h2>
@@ -236,7 +236,7 @@
                             'Total' => $item['total'] ?? [],
                         ];
                     @endphp
-    
+
                     @foreach($rows as $label => $data)
                         @php
                             $hasData = false;
@@ -332,7 +332,7 @@
         <li>Ticket is confirmed. Ticket price may vary.</li>
         <li>Though airticket price may change, Land Package price will remain same.</li>
     </ul>
-    
+
     <div style="page-break-after: always"></div>
 
     <!-- Inclusions -->

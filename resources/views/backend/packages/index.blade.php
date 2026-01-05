@@ -2,7 +2,8 @@
     <x-slot name="header">
         <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
             <h2 class="text-2xl font-semibold">{{ __('Packages') }}</h2>
-            <a href="{{ route('backend.packages.create') }}" class="text-green-500 hover:text-green-700 mx-1" title="Create">
+            <a href="{{ route('backend.packages.create') }}" class="text-green-500 hover:text-green-700 mx-1"
+                title="Create">
                 <i class="fas fa-plus"></i> Create New
             </a>
         </div>
@@ -49,8 +50,55 @@
 
     </div>
 
+    <div id="downloadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg w-full max-w-md p-6">
+            <h2 class="text-lg font-semibold mb-4">Download Package</h2>
+
+            <form id="downloadForm" method="GET">
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">Room No</label>
+                    <input type="text" name="room_no" required class="w-full border rounded px-3 py-2">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-1">Prepared For</label>
+                    <input type="text" name="prepared_for" required class="w-full border rounded px-3 py-2">
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closeDownloadModal()" class="px-4 py-2 bg-gray-300 rounded">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">
+                        Download
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     @push('js')
         <script>
+            let currentPackageUUID = null;
+
+            function openDownloadModal(uuid) {
+                currentPackageUUID = uuid;
+
+                const form = document.getElementById('downloadForm');
+                form.action = `/admin/package-download/${uuid}`;
+
+                document.getElementById('downloadModal').classList.remove('hidden');
+                document.getElementById('downloadModal').classList.add('flex');
+            }
+
+            function closeDownloadModal() {
+                document.getElementById('downloadModal').classList.add('hidden');
+                document.getElementById('downloadModal').classList.remove('flex');
+            }
+
+
             document.addEventListener("DOMContentLoaded", () => {
                 const input = document.getElementById("searchInput");
                 const tableBody = document.getElementById("roleTableBody");
@@ -78,8 +126,20 @@
                         return;
                     }
 
+
+                                                //                 <a href="/admin/package-download/${package.uuid}" class="px-1 text-blue-500 hover:text-blue-700" title="Download"><i class="fa-solid fa-download PDF"></i></a>
+                                                // ${(package.status === 'inactive' && package.completion_status === 'incomplete')
+                                                //     ? `<a href="/admin/packages/${package.uuid}/step/${stepToGo}" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
+                                                //                         <i class="fas fa-edit"></i>
+                                                //                     </a>`
+                                                //     : `<a href="/admin/packages/${package.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
+                                                //                         <i class="fas fa-edit"></i>
+                                                //                     </a>`
+                                                // }
+
+
                     packages.forEach((package, index) => {
-                    console.log(package);
+                        console.log(package);
                         const stepToGo = package.progress_step ? Number(package.progress_step) + 1 : 1;
                         const row = `
                                 <tr>
@@ -90,16 +150,14 @@
                                     <td class="px-6 py-4">${package.createdBy?.title ?? 'N/A'}</td>
                                     <td class="px-6 py-4">
                                         <div class="flex justify-center">
-                                            <a href="/admin/packages/${package.uuid}/show" class="px-1 text-blue-500 hover:text-blue-700" title="View"><i class="fas fa-eye"></i></a>
-                                            <a href="/admin/package-download/${package.uuid}" class="px-1 text-blue-500 hover:text-blue-700" title="Download"><i class="fa-solid fa-download PDF"></i></a>
-                                                ${(package.status === 'inactive' && package.completion_status === 'incomplete')
-                                                    ? `<a href="/admin/packages/${package.uuid}/step/${stepToGo}" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>`
-                                                    : `<a href="/admin/packages/${package.uuid}/edit" class="px-1 text-yellow-500 hover:text-yellow-700" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>`
-                                                }
+                                                <a href="/admin/packages/${package.uuid}/show" class="px-1 text-blue-500 hover:text-blue-700" title="View"><i class="fas fa-eye"></i></a>
+                                                <button
+                                                    class="px-1 text-blue-500 hover:text-blue-700"
+                                                    title="Download"
+                                                    onclick="openDownloadModal('${package.uuid}')"
+                                                >
+                                                    <i class="fa-solid fa-download"></i>
+                                                </button>
                                                 <form action="/admin/packages/${package.uuid}" method="POST" onsubmit="return confirm('Move to trash?')">
                                                 <input type="hidden" name="_token" value="${csrfToken}">
                                                 <input type="hidden" name="_method" value="DELETE">

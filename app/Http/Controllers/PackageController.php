@@ -1050,8 +1050,10 @@ class PackageController extends Controller
         ]);
     }
 
-    public function packPdf($uuid)
+    public function packPdf(Request $request, $uuid)
     {
+        $roomNo = $request->room_no;
+        $preparedFor = $request->prepared_for;
         $pkg = Package::where('uuid', $uuid)->firstOrFail();
         $pkgDesInfo = PackDestinationInfo::where('package_uuid', $uuid)->first();
         $pkgQuatDetail = PackQuatDetail::where('package_uuid', $uuid)->first();
@@ -1159,7 +1161,9 @@ class PackageController extends Controller
             'packInclusion' => $pkgInclusions ?? 'No Data Found',
             'uuid' => $uuid,
             'hotelOptions' => $hotelOptions,
-            'allOptions' => $allOptions
+            'allOptions' => $allOptions,
+            'room_no' => $roomNo,
+            'prepared_for' => $preparedFor
         ])->render();
 
         $mpdf->WriteHTML($html);
